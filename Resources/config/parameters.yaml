@@ -1,0 +1,20 @@
+parameters:
+
+##### Entities Class
+  austral.entity.config.class:                                              App\Entity\Austral\WebsiteBundle\Config
+  austral.entity.config_translate.class:                                    App\Entity\Austral\WebsiteBundle\ConfigTranslate
+  austral.entity.page.class:                                                App\Entity\Austral\WebsiteBundle\Page
+  austral.entity.page_translate.class:                                      App\Entity\Austral\WebsiteBundle\PageTranslate
+  austral.entity.tracking.class:                                            App\Entity\Austral\WebsiteBundle\Tracking
+  austral.entity.tracking_translate.class:                                  App\Entity\Austral\WebsiteBundle\TrackingTranslate
+  austral.entity.domain.class:                                              App\Entity\Austral\WebsiteBundle\Domain
+
+##### Doctrine Resolve target Entities
+  austral.resolve_target_entities.website:
+    Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface:                "%austral.entity.config.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface:       "%austral.entity.config_translate.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\PageInterface:                  "%austral.entity.page.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface:         "%austral.entity.page_translate.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface:              "%austral.entity.tracking.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\TrackingTranslateInterface:     "%austral.entity.tracking_translate.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\DomainInterface:                "%austral.entity.domain.class%"

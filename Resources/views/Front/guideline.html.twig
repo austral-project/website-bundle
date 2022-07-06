@@ -1,0 +1,13 @@
+{% for containerComponent in components %}
+  <div class="container theme-{{ containerComponent.keyname }}">
+    {% for component in containerComponent.children %}
+      {% if component.type == "library" %}
+        {% if libraries[component.keyname] is defined %}
+          {%  include libraries[component.keyname].templatePath ?? "Front/Libraries/default.html.twig" with {library: libraries[component.keyname]} %}
+        {% endif %}
+      {% else %}
+        {% include [component.templatePath, "Dev/componentsNotFound.html.twig"] %}
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endfor %}

@@ -1,0 +1,72 @@
+services:
+  _defaults:
+    autowire:      true
+    autoconfigure: true
+    public:        true
+
+  austral.website.dashboard.listener:
+    class: Austral\WebsiteBundle\Listener\DashboardListener
+    arguments: [ "@service_container", "@request_stack", "@austral.website.config_variable" ]
+    tags:
+      - { name: kernel.event_listener, event: "austral.event.admin.dashboard", method: dashboard }
+
+parameters:
+
+  austral.admin.class.page.class:                                  Austral\WebsiteBundle\Admin\PageAdmin
+  austral.admin.class.config.class:                                Austral\WebsiteBundle\Admin\ConfigAdmin
+  austral.admin.class.tracking.class:                              Austral\WebsiteBundle\Admin\TrackingAdmin
+  austral.admin.class.domain.class:                                Austral\WebsiteBundle\Admin\DomainAdmin
+
+  austral.admin.modules.website_bundle.page.enabled:                  true
+  austral.admin.modules.website_bundle.config.enabled:                true
+  austral.admin.modules.website_bundle.config.tracking.enabled:       true
+  austral.admin.modules.website_bundle.config.config.enabled:         true
+  austral.admin.modules.website_bundle.config.domain.enabled:         true
+
+  austral_admin.modules.website_bundle:
+    page:
+      enabled:                    "%austral.admin.modules.website_bundle.page.enabled%"
+      navigation:
+        position:                 10
+      name:                       "Pages"
+      picto:                      "austral-picto-file-text"
+      route:                      "pages-manage"
+      class:                      "%austral.admin.class.page.class%"
+      entity_manager:             "austral.entity_manager.page"
+      translate:                  "female_c"
+      sortable:                   true
+    config:
+      enabled:                    "%austral.admin.modules.website_bundle.config.enabled%"
+      navigation:
+        position:                 500
+      name:                       "Configuration"
+      picto:                      "austral-picto-cog"
+      route:                      "config"
+      translate:                  "female_c"
+      actions:
+        index:                    "listChildrenModules"
+      children:
+        domain:
+          enabled:                "%austral.admin.modules.website_bundle.config.domain.enabled%"
+          name:                   "Domain"
+          picto:                  "austral-picto-globe"
+          pictoTile:              "parameters"
+          route:                  "domain"
+          class:                  "%austral.admin.class.domain.class%"
+          translate:              "male_c"
+        tracking:
+          enabled:                "%austral.admin.modules.website_bundle.config.tracking.enabled%"
+          name:                   "Tracking"
+          picto:                  "austral-picto-activity"
+          pictoTile:              "parameters"
+          route:                  "tracking"
+          class:                  "%austral.admin.class.tracking.class%"
+          translate:              "female_c"
+        config:
+          enabled:                "%austral.admin.modules.website_bundle.config.config.enabled%"
+          name:                   "Config"
+          picto:                  "austral-picto-cog"
+          pictoTile:              "gear"
+          route:                  "config"
+          class:                  "%austral.admin.class.config.class%"
+          translate:              "female_c"

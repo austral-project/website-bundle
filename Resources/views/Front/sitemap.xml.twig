@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {%- for url, object in urls -%}
+    {%- if object.inSitemap is defined and object.isPublished is defined and object.isIndex is defined -%}
+      {%- if object.inSitemap and object.isPublished and object.isIndex -%}
+        <url>
+          <loc>{{- (url("austral_website_page", {slug: url })) -}}</loc>
+        </url>
+      {%- endif -%}
+    {%- else -%}
+      <url>
+        <loc>{{- (url("austral_website_page", {slug: url })) -}}</loc>
+      </url>
+    {%- endif -%}
+  {%- endfor -%}
+</urlset>

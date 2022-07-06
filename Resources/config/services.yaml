@@ -1,0 +1,103 @@
+services:
+  _defaults:
+    autowire:      true
+    autoconfigure: true
+    public:        true
+
+##### Website Event Subscriber Kernel
+  austral.website.redirect.event_subscriber:
+    class:        Austral\WebsiteBundle\EventSubscriber\WebsiteRedirectSubscriber
+    arguments:    ["@austral.website.handler"]
+    tags:
+      - { name: kernel.event_subscriber }
+
+  austral.website.http.event_subscriber:
+    class:        Austral\WebsiteBundle\EventSubscriber\HttpWebsiteEventSubscriber
+    arguments:    [ "@service_container", "@austral.website.config", "@austral.tools.debug" ]
+    tags:
+      - { name: kernel.event_subscriber }
+
+
+##### Website Listener Kernel
+
+  austral.website.doctrine.listener:
+    class:        Austral\WebsiteBundle\Listener\DoctrineListener
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+
+  austral.website.pages.listener:
+    class:        Austral\WebsiteBundle\Listener\PagesListener
+    arguments:    [ "@request_stack", "@security.authorization_checker", "@austral.entity_manager.domain"]
+    tags:
+      - { name: kernel.event_listener, event: "austral.entity_seo.select_objects", method: selectObjects }
+
+  austral.website.entity_manager.listener:
+    class:        Austral\WebsiteBundle\Listener\EntityManagerListener
+    arguments:    ["@event_dispatcher"]
+    tags:
+      - { name: kernel.event_listener, event: "austral.entity_manager.create", method: create }
+
+
+##### Website Handler
+  austral.website.handler:
+    class:        App\Handler\WebsiteHandler
+    arguments:
+      - "@service_container"
+      - "@request_stack"
+      - "@event_dispatcher"
+      - "@austral.tools.debug"
+    calls:
+      - [ setMercure, [ "@?austral.notify.mercure" ] ]
+      - [ setConfigVariable, [ "@austral.website.config_variable" ] ]
+
+##### Website Template
+  austral.website.template:
+    class:        Austral\WebsiteBundle\Template\TemplateParameters
+
+##### Website Services
+  austral.website.config_variable:
+    class:          Austral\WebsiteBundle\Services\ConfigVariable
+    arguments:      ["@request_stack", "@doctrine.orm.entity_manager", "@austral.entity_file.link.generator"]
+
+  austral.website.config_replace_dom:
+    class:          Austral\WebsiteBundle\Services\ConfigReplaceDom
+    arguments:      ["@austral.website.config_variable", "@austral.entity_seo.pages", "@router"]
+
+  austral.website.domain:
+    class:          Austral\WebsiteBundle\Services\Domain
+    arguments:      ["@request_stack", "@austral.entity_manager.domain"]
+
+##### Entities Manager #####
+
+  ##### Config Entity Manager
+  austral.entity_manager.config:
+    class:          Austral\WebsiteBundle\EntityManager\ConfigEntityManager
+    arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.config.class%" ]
+
+  ##### Page Entity Manager
+  austral.entity_manager.page:
+    class:          Austral\WebsiteBundle\EntityManager\PageEntityManager
+    arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.page.class%" ]
+
+  ##### Tracking Entity Manager
+  austral.entity_manager.tracking:
+    class:          Austral\WebsiteBundle\EntityManager\TrackingEntityManager
+    arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.tracking.class%" ]
+
+  ##### Domain Entity Manager
+  austral.entity_manager.domain:
+    class:          Austral\WebsiteBundle\EntityManager\DomainEntityManager
+    arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.domain.class%" ]
+
+
+##### Form Type
+  austral.website.subDomain_form_type:
+    class:          Austral\WebsiteBundle\Form\Type\SubDomainFormType
+    arguments:      [ "@security.authorization_checker" ]
+    tags:
+      - { name: form.type , alias: austral_subDomain_form_type}
+
+##### Parameters #####
+  austral.website.config:
+    class:          Austral\WebsiteBundle\Configuration\WebsiteConfiguration
+    arguments:      ["%austral_website_config%"]

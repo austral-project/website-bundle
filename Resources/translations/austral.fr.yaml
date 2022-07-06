@@ -1,0 +1,95 @@
+pages:
+  names:
+    pagesManage:
+      singular:                                 Page
+      plural:                                   Pages
+    config:
+      singular:                                 Configuration
+      plural:                                   Configuration
+    configConfig:
+      singular:                                 Configuration
+      plural:                                   Configuration
+    configSeo:
+      singular:                                 SEO
+      plural:                                   SEO
+    configTracking:
+      singular:                                 Tracking
+      plural:                                   Tracking
+    configDomain:
+      singular:                                 Domaine
+      plural:                                   Domaines
+    area:
+      singular:                                 Zone
+      plural:                                   Zones
+
+  list:
+    page:
+      homepage:                                 Page d'accueil
+
+dashboard:
+  tiles:
+    pages:
+      published:
+        entitled:                               Pages publiées
+      draft:
+        entitled:                               Pages privées
+
+fieldset:
+  socialNetwork:                                Partage réseau social
+
+button:
+  new:
+    subDomain:                                  Ajouter un sous domaine
+
+fields:
+  australPictoClass:
+    entitled:                                   Picto Austral
+  parent:
+    entitled:                                   Parent
+  summary:
+    entitled:                                   Résumé
+  socialTitle:
+    entitled:                                   Titre du partage
+  socialDescription:
+    entitled:                                   Description du partage
+  socialImage:
+    entitled:                                   Image du partage
+  isHomepage:
+    entitled:                                   Est une homepage
+  contentText:
+    entitled:                                   Contenu texte
+  contentBoolean:
+    entitled:                                   Valeur booléenne
+  domain:
+    entitled:                                   Domaine
+  homepage:
+    entitled:                                   Page d'accueil
+  subDomain:
+    entitled:                                   Sous domaine
+  subDomains:
+    entitled:                                   Sous domaines
+  entityExtends:
+    entitled:                                   Liaison d'entité
+  titleNavigation:
+    entitled:                                   Titre dans la navigation
+    placeholder:                                Saisir le titre pour la navigation ...
+  template:
+    entitled:                                   Template
+  isMaster:
+    entitled:                                   Est le domaine principal ?
+  onePage:
+    entitled:                                   N'a qu'une seule page ?
+
+choices:
+  config:
+    type:
+      all:                                      Tout
+      text:                                     Texte
+      image:                                    Image
+      imageText:                                Image & Text
+      file:                                     Fichier
+      fileText:                                 Fichier & Text
+      checkbox:                                 Case à cocher
+
+  templates:
+    default:                                    Défaut

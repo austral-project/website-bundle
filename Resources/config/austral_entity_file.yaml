@@ -1,0 +1,29 @@
+parameters:
+
+  austral_entity_file.cropper.website_bundle:
+    social:
+      name:   Social
+      ratio:  1 / 1
+      picto:  "austral-picto-facebook-2"
+
+  austral_entity_file.uploads.website_bundle:
+    page_image:
+      size:
+        max: "10M"
+      mimeTypes:
+        - 'image/jpg'
+        - 'image/jpeg'
+        - 'image/png'
+        - 'image/gif'
+        - 'image/svg'
+        - 'image/svg+xml'
+    social_image:
+      size:
+        max: "10M"
+      mimeTypes:
+        - 'image/jpg'
+        - 'image/jpeg'
+        - 'image/png'
+        - 'image/gif'
+        - 'image/svg'
+        - 'image/svg+xml'

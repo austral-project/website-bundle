@@ -1,0 +1,16 @@
+parameters:
+
+  austral.website.form.listener.class:                                      Austral\WebsiteBundle\Listener\FormListener
+
+services:
+  _defaults:
+    autowire:       false
+    autoconfigure:  false
+    public:         true
+
+##### Listener
+  austral.website.form.listener:
+    class:          "%austral.website.form.listener.class%"
+    arguments:      ["@austral.website.config"]
+    tags:
+      - { name: kernel.event_listener, event: "austral.event.form.add_auto_fields_after", method: formAddAutoFields }

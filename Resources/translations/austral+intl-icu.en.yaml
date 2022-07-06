@@ -1,0 +1,9 @@
+fields:
+  page:
+    children:
+      entitled: >-
+        {nbPages, plural,
+            =0    {}
+            one   { 1 sub page }
+            other { # sub pages }
+        }

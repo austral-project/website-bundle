@@ -1,0 +1,18 @@
+austral_website:
+  form:
+    socialNetworkEnabled:   true
+  protocol:                 https
+
+  templates:
+    sitemap:
+      isChoice:             false
+      path:                 "Front/sitemap.xml.twig"
+    guideline:
+      isChoice:             false
+      path:                 "Front/guideline.html.twig"
+    robots:
+      isChoice:             false
+      path:                 "Front/robots.txt.twig"
+    default:
+      isChoice:             true
+      path:                 "Front/page.html.twig"

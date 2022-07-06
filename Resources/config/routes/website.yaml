@@ -1,0 +1,50 @@
+##### Translation
+austral_website_translation_json:
+  path: /translation.js
+  controller: App\Controller\MainController::translationJson
+  defaults:
+    _austral_website:   true
+
+##### Homepage
+austral_website_homepage:
+  path:     /
+  controller: App\Controller\MainController::homepage
+  defaults:
+    _austral_website:   true
+    _austral_page:      true
+
+##### Guidelines
+austral_website_guideline:
+  path:     /_guideline
+  controller: App\Controller\MainController::guideline
+  defaults:
+    _austral_website:   true
+    _handler_method:    guideline
+
+##### Sitemap
+austral_website_sitemap:
+  path:     /sitemap.xml
+  controller: App\Controller\MainController::sitemap
+  defaults:
+    _format:            xml
+    _austral_website:   true
+    _handler_method:    sitemap
+
+##### Robots
+front_robots:
+  path:     /robots.txt
+  controller: App\Controller\MainController::robots
+  defaults:
+    _format: txt
+    _austral_website:   true
+    _handler_method:    robots
+
+##### Page By Slug
+austral_website_page:
+  path:     /{slug}
+  controller: App\Controller\MainController::pageBySlug
+  requirements:
+    slug: "^((?!_).)*"
+  defaults:
+    _austral_website:   true
+    _austral_page:      true
