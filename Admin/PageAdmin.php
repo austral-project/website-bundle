@@ -353,10 +353,6 @@ class PageAdmin extends Admin implements AdminModuleInterface
 
       ->addFieldset("fieldset.contentBlock")
         ->add(new ContentBlockField())
-      ->end()
-
-      ->addFieldset("fieldset.contentBlock2")
-        ->add(new ContentBlockField("test"))
       ->end();
   }
 
