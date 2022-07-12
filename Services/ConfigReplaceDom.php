@@ -213,7 +213,7 @@ Class ConfigReplaceDom
       }
       if(count($replaceValues))
       {
-        $dom = str_replace($values, $replaceValues, $dom);
+        $dom = str_replace(array_keys($replaceValues), array_values($replaceValues), $dom);
       }
     }
     return $dom;
