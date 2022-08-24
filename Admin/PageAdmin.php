@@ -302,12 +302,14 @@ class PageAdmin extends Admin implements AdminModuleInterface
       ->end()
 
       ->addFieldset("fieldset.generalInformation")
-        ->add(Field\TextField::create("refH1", array(
-            "placeholder" => "fields.refH1.placeholder",
+  
+        ->add(Field\TextField::create("name", array(
+            "entitled"    => "fields.mainTitle.entitled",
+            "placeholder" => "fields.mainTitle.placeholder"
           )
         ))
-        ->add(Field\TextField::create("name", array(
-            "placeholder" => "fields.titleNavigation.placeholder"
+        ->add(Field\TextField::create("refH1", array(
+            "placeholder" => "fields.refH1.placeholder",
           )
         ))
         ->addGroup("generalInformations")
