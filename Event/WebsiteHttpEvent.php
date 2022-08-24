@@ -24,5 +24,6 @@ class WebsiteHttpEvent extends HttpEvent
   const EVENT_AUSTRAL_HTTP_REQUEST = "austral.event.http.website.request";
   const EVENT_AUSTRAL_HTTP_CONTROLLER = "austral.event.http.website.controller";
   const EVENT_AUSTRAL_HTTP_RESPONSE = "austral.event.http.website.response";
+  const EVENT_AUSTRAL_HTTP_EXCEPTION = "austral.event.http.website.exception";
 
 }

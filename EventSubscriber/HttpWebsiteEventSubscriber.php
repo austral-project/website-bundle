@@ -22,7 +22,9 @@ use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
 use Austral\WebsiteBundle\Template\TemplateParameters;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
  * Austral Http EventSubscriber.
@@ -46,6 +48,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_REQUEST     =>  ["onRequest", 1024],
       WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_CONTROLLER  =>  ["onController", 1024],
       WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_RESPONSE    =>  ["onResponse", 1024],
+      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_EXCEPTION   =>  ["onException", 1024],
     ];
   }
 
@@ -98,7 +101,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     {
       if(!$currentPage = $servicePages->retreiveByRefUrl($requestAttributes->get('slug', null)))
       {
-        if(!$domain->getOnePage())
+        if(!$domain || !$domain->getOnePage())
         {
           $websiteHandler->pageNotFound();
         }
@@ -161,6 +164,70 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $responseContent = $this->container->get('austral.website.config_replace_dom')->replaceDom($response->getContent());
     $response->setContent($responseContent);
     $httpEvent->getKernelEvent()->setResponse($response);
+  }
+
+  /**
+   * @param HttpEventInterface $httpEvent
+   *
+   * @return void
+   */
+  public function onException(HttpEventInterface $httpEvent)
+  {
+    // You get the exception object from the received event
+    $exception = $httpEvent->getKernelEvent()->getThrowable();
+    // Customize your response object to display the exception details
+    $response = new Response();
+    if ($exception instanceof HttpExceptionInterface) {
+      $response->setStatusCode($exception->getStatusCode());
+      $response->headers->replace($exception->getHeaders());
+    } else {
+      $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    /** @var Pages servicePages */
+    $servicePages = $this->container->get("austral.entity_seo.pages");
+    if($currentPage = $servicePages->retreiveByCode("Page_error-{$response->getStatusCode()}"))
+    {
+      try {
+        /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
+        $templateParameters = $this->container->get("austral.website.template");
+
+        /** @var HttpHandlerInterface|WebsiteHandlerInterface $websiteHandler */
+        $websiteHandler = $this->container->get("austral.website.handler");
+
+        $websiteHandler->setTemplateParameters($templateParameters);
+
+        $websiteHandler->setPage($currentPage);
+        $templateName = "default";
+        if(method_exists($currentPage, "getTemplate"))
+        {
+          $templateName = $currentPage->getTemplate();
+        }
+        $templateParameters->addParameters("currentPage", $currentPage);
+        $websiteHandler->setHandlerMethod("page");
+        if(!$templatePath = $this->configuration->get("templates.{$templateName}.path"))
+        {
+          $templatePath = $this->configuration->get("templates.default.path");
+        }
+        $templateParameters->setPath($templatePath);
+        $websiteHandler->initHandler();
+
+        $twigParameters = $websiteHandler->getTemplateParameters()->__serialize();
+        if($session = $httpEvent->getKernelEvent()->getRequest()->getSession())
+        {
+          if($flashMessages = $session->getFlashBag()->all())
+          {
+            $twigParameters['flashMessages'] = $flashMessages;
+            $session->getFlashBag()->clear();
+          }
+        }
+        $twigTemplate = $this->container->get('twig')->render($websiteHandler->getTemplateParameters()->getPath(), $twigParameters);
+        $response->setContent($twigTemplate);
+        $httpEvent->getKernelEvent()->setResponse($response);
+      } catch(\Exception $e) {
+
+      }
+    }
   }
 
 
