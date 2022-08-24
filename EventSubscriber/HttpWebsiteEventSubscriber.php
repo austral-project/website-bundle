@@ -15,6 +15,7 @@ use Austral\EntitySeoBundle\Services\Pages;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\DomainInterface;
+use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
 use Austral\HttpBundle\Event\Interfaces\HttpEventInterface;
 use Austral\HttpBundle\EventSubscriber\HttpEventSubscriber;
@@ -80,7 +81,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         ->setParameter("isEnabled", true);
     });
 
-    /** @var Pages servicePages */
+    /** @var Pages $servicePages */
     $servicePages = $this->container->get("austral.entity_seo.pages");
 
     if($domain && $domain->getHomepage())
@@ -173,6 +174,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    */
   public function onException(HttpEventInterface $httpEvent)
   {
+    if($this->container->getParameter("kernel.environment"))
+    {
+      return;
+    }
     // You get the exception object from the received event
     $exception = $httpEvent->getKernelEvent()->getThrowable();
     // Customize your response object to display the exception details
@@ -184,8 +189,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
-    /** @var Pages servicePages */
+    /** @var Pages $servicePages */
     $servicePages = $this->container->get("austral.entity_seo.pages");
+
+    /** @var PageInterface $currentPage */
     if($currentPage = $servicePages->retreiveByCode("Page_error-{$response->getStatusCode()}"))
     {
       try {
