@@ -174,7 +174,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    */
   public function onException(HttpEventInterface $httpEvent)
   {
-    if($this->container->getParameter("kernel.environment"))
+    if($this->container->getParameter("kernel.environment") === "dev")
     {
       return;
     }
