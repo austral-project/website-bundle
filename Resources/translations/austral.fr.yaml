@@ -79,6 +79,10 @@ fields:
     entitled:                                   Est le domaine principal ?
   onePage:
     entitled:                                   N'a qu'une seule page ?
+  scheme:
+    entitled:                                   Scheme
+  redirectUrl:
+    entitled:                                   Url de redirection
 
 choices:
   config:

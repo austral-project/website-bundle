@@ -32,6 +32,9 @@ use Exception;
 abstract class Domain extends Entity implements DomainInterface, EntityInterface
 {
 
+  const SCHEME_HTTPS = "https";
+  const SCHEME_HTTP = "http";
+
   use EntityTimestampableTrait;
 
   /**
@@ -56,6 +59,12 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   protected ?string $domain = null;
 
   /**
+   * @var string|null
+   * @ORM\Column(name="scheme", type="string", length=255, nullable=true )
+   */
+  protected ?string $scheme = null;
+
+  /**
    * @var array
    * @ORM\Column(name="sub_domains", type="json", nullable=true )
    */
@@ -72,6 +81,12 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
    * @ORM\Column(name="is_enabled", type="boolean", nullable=true)
    */
   protected bool $isEnabled = false;
+
+  /**
+   * @var string|null
+   * @ORM\Column(name="redirect_url", type="string", length=255, nullable=true )
+   */
+  protected ?string $redirectUrl = null;
 
   /**
    * @var boolean
@@ -138,6 +153,25 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   public function setDomain(?string $domain): Domain
   {
     $this->domain = $domain;
+    return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getScheme(): string
+  {
+    return $this->scheme ?: self::SCHEME_HTTPS;
+  }
+
+  /**
+   * @param string $scheme
+   *
+   * @return Domain
+   */
+  public function setScheme(string $scheme): Domain
+  {
+    $this->scheme = $scheme;
     return $this;
   }
 
@@ -210,6 +244,25 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   public function setIsEnabled(bool $isEnabled): Domain
   {
     $this->isEnabled = $isEnabled;
+    return $this;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getRedirectUrl(): ?string
+  {
+    return $this->redirectUrl;
+  }
+
+  /**
+   * @param string|null $redirectUrl
+   *
+   * @return Domain
+   */
+  public function setRedirectUrl(?string $redirectUrl): Domain
+  {
+    $this->redirectUrl = $redirectUrl;
     return $this;
   }
 

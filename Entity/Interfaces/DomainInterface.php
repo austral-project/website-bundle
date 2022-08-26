@@ -10,6 +10,8 @@
 
 namespace Austral\WebsiteBundle\Entity\Interfaces;
 
+use Austral\WebsiteBundle\Entity\Domain;
+
 /**
  * Austral Domain Interface.
  * @author Matthieu Beurel <matthieu@austral.dev>
@@ -40,6 +42,18 @@ interface DomainInterface
    * @return DomainInterface
    */
   public function setDomain(?string $domain): DomainInterface;
+
+  /**
+   * @return string
+   */
+  public function getScheme(): string;
+
+  /**
+   * @param string $scheme
+   *
+   * @return DomainInterface
+   */
+  public function setScheme(string $scheme): DomainInterface;
 
   /**
    * Get themes
@@ -77,6 +91,18 @@ interface DomainInterface
    * @return DomainInterface
    */
   public function setIsEnabled(bool $isEnabled): DomainInterface;
+
+  /**
+   * @return string|null
+   */
+  public function getRedirectUrl(): ?string;
+
+  /**
+   * @param string|null $redirectUrl
+   *
+   * @return DomainInterface
+   */
+  public function setRedirectUrl(?string $redirectUrl): DomainInterface;
 
   /**
    * @return bool

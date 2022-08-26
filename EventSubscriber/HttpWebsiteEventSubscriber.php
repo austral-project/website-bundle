@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Austral Http EventSubscriber.
@@ -75,18 +76,48 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     }
 
     $host = $httpEvent->getKernelEvent()->getRequest()->headers->get('host');
+    $isAuthenticated = $this->container->get('security.authorization_checker')->isGranted("IS_AUTHENTICATED_FULLY");
+
     /** @var DomainInterface $domain */
-    $domain = $this->container->get("austral.entity_manager.domain")->getRepository()->retreiveByKey("domain", $host, function(QueryBuilder $queryBuilder) {
-      $queryBuilder->andWhere("root.isEnabled = :isEnabled")
-        ->setParameter("isEnabled", true);
+    $domain = $this->container->get("austral.entity_manager.domain")->getRepository()->retreiveByKey("domain", $host, function(QueryBuilder $queryBuilder)  use ($isAuthenticated) {
+      if(!$isAuthenticated) {
+        $queryBuilder->andWhere("root.isEnabled = :isEnabled")->setParameter("isEnabled", true);
+      }
     });
 
     /** @var Pages $servicePages */
     $servicePages = $this->container->get("austral.entity_seo.pages");
 
-    if($domain && $domain->getHomepage())
+    if(!$domain)
     {
-      $servicePages->setHomepageId($domain->getHomepage()->getId());
+      /** @var DomainInterface $domainMaster */
+      $domainMaster = $this->container->get("austral.entity_manager.domain")->getRepository()->retreiveByKey("isMaster", true, function(QueryBuilder $queryBuilder) {
+        $queryBuilder->andWhere("root.isEnabled = :isEnabled")
+          ->setParameter("isEnabled", true)
+          ->setMaxResults(1);
+      });
+      if($domainMaster)
+      {
+        $response = new RedirectResponse("{$domainMaster->getScheme()}://{$domainMaster->getDomain()}", 301);
+        $httpEvent->getKernelEvent()->setResponse($response);
+        return;
+      }
+      else
+      {
+        throw new NotFoundHttpException("Domain {$host} not found !");
+      }
+    }
+    else {
+      if($domain->getRedirectUrl())
+      {
+        $response = new RedirectResponse($domain->getRedirectUrl(), 301);
+        $httpEvent->getKernelEvent()->setResponse($response);
+        return;
+      }
+      elseif($domain->getHomepage())
+      {
+        $servicePages->setHomepageId($domain->getHomepage()->getId());
+      }
     }
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */

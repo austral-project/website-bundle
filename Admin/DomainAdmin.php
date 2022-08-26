@@ -11,6 +11,8 @@
 namespace Austral\WebsiteBundle\Admin;
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\FormBundle\Mapper\Fieldset;
+use Austral\FormBundle\Mapper\GroupFields;
+use Austral\WebsiteBundle\Entity\Domain;
 use Austral\WebsiteBundle\Form\Type\SubDomainFormType;
 use Austral\WebsiteBundle\Model\SubDomain;
 
@@ -41,6 +43,21 @@ class DomainAdmin extends Admin implements AdminModuleInterface
   {
     $listAdminEvent->getListMapper()
       ->addColumn(new Column\Value("domain"))
+      ->addColumn(new Column\SwitchValue("isEnabled", null, 0, 1,
+          $listAdminEvent->getCurrentModule()->generateUrl("change"),
+          $listAdminEvent->getCurrentModule()->isGranted("edit")
+        )
+      )
+      ->addColumn(new Column\SwitchValue("isMaster", null, 0, 1,
+          $listAdminEvent->getCurrentModule()->generateUrl("change"),
+          $listAdminEvent->getCurrentModule()->isGranted("edit")
+        )
+      )
+      ->addColumn(new Column\SwitchValue("onePage", null, 0, 1,
+          $listAdminEvent->getCurrentModule()->generateUrl("change"),
+          $listAdminEvent->getCurrentModule()->isGranted("edit")
+        )
+      )
       ->addColumn(new Column\Date("updated", null, "d/m/Y"));
   }
 
@@ -75,15 +92,26 @@ class DomainAdmin extends Admin implements AdminModuleInterface
         )
       ->end()
       ->addFieldset("fieldset.generalInformation")
-        ->add(Field\TextField::create("domain"))
+        ->addGroup("domain")
+          ->add(Field\SelectField::create('scheme', array(
+                Domain::SCHEME_HTTPS => Domain::SCHEME_HTTPS,
+                Domain::SCHEME_HTTP => Domain::SCHEME_HTTP,
+              ), array(
+                'required' => true
+              )
+            )->setGroupSize(GroupFields::SIZE_COL_2)
+          )
+          ->add(Field\TextField::create("domain")->setGroupSize(GroupFields::SIZE_COL_10))
+        ->end()
         ->add(Field\TextField::create("language"))
+        ->add(Field\TextField::create("redirectUrl"))
         ->add(Field\EntityField::create("homepage", Page::class, array(
           'query_builder'     => function (EntityRepository $er) {
             return $er->createQueryBuilder('u')
               ->leftJoin("u.translates", "translates")->addSelect("translates")
               ->orderBy('u.position', 'ASC');
           },
-          "required"  =>  true
+          "required"  =>  false
         )))
         ->addGroup("subDomain", "fields.subDomains.entitled")
           ->add($this->createCollectionSubDomain($formAdminEvent))
