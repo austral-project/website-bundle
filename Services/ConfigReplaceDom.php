@@ -63,6 +63,7 @@ Class ConfigReplaceDom
    * @param int $referenceType
    *
    * @return string
+   * @throws \Exception
    */
   public function replaceDom(string $dom, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
   {
@@ -112,6 +113,7 @@ Class ConfigReplaceDom
    * @param string $dom
    *
    * @return string
+   * @throws \Exception
    */
   protected function replaceByConfig(string $dom): string
   {
