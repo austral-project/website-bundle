@@ -17,9 +17,7 @@ use Austral\WebsiteBundle\Repository\PageRepository;
 
 use Austral\EntityBundle\EntityManager\EntityManager;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * Austral Page EntityManager.
@@ -79,37 +77,6 @@ class PageEntityManager extends EntityManager
       $object->setParent($page);
     }
     return $object;
-  }
-
-  /**
-   * @param $parentCode
-   *
-   * @return ArrayCollection|mixed
-   */
-  public function selectByParentCodeForAdmin($parentCode)
-  {
-    return $this->repository->selectByParentCodeForAdmin($parentCode);
-  }
-
-  /**
-   * @param $parentId
-   * @param null $limit
-   *
-   * @return ArrayCollection|Paginator
-   */
-  public function selectChildren($parentId, $limit = null)
-  {
-    return $this->repository->selectChildren($parentId, $limit);
-  }
-
-  /**
-   * @param string $otherModule
-   *
-   * @return PageInterface|null
-   */
-  public function retreiveByOtherModule(string $otherModule): ?PageInterface
-  {
-    return $this->repository->retreiveByOtherModule($otherModule);
   }
 
   /**

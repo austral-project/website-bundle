@@ -13,6 +13,7 @@ use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\FormBundle\Mapper\Fieldset;
 use Austral\FormBundle\Mapper\GroupFields;
 use Austral\WebsiteBundle\Entity\Domain;
+use Austral\WebsiteBundle\Entity\Interfaces\DomainInterface;
 use Austral\WebsiteBundle\Form\Type\SubDomainFormType;
 use Austral\WebsiteBundle\Model\SubDomain;
 
@@ -49,6 +50,11 @@ class DomainAdmin extends Admin implements AdminModuleInterface
         )
       )
       ->addColumn(new Column\SwitchValue("isMaster", null, 0, 1,
+          $listAdminEvent->getCurrentModule()->generateUrl("change"),
+          $listAdminEvent->getCurrentModule()->isGranted("edit")
+        )
+      )
+      ->addColumn(new Column\SwitchValue("isVirtual", null, 0, 1,
           $listAdminEvent->getCurrentModule()->generateUrl("change"),
           $listAdminEvent->getCurrentModule()->isGranted("edit")
         )
@@ -90,12 +96,18 @@ class DomainAdmin extends Admin implements AdminModuleInterface
             "choices.status.yes"        =>  true,
           ))
         )
+        ->add(Field\ChoiceField::create("isVirtual",
+          array(
+            "choices.status.no"         =>  false,
+            "choices.status.yes"        =>  true,
+          ))
+        )
       ->end()
       ->addFieldset("fieldset.generalInformation")
         ->addGroup("domain")
           ->add(Field\SelectField::create('scheme', array(
-                Domain::SCHEME_HTTPS => Domain::SCHEME_HTTPS,
-                Domain::SCHEME_HTTP => Domain::SCHEME_HTTP,
+                DomainInterface::SCHEME_HTTPS => DomainInterface::SCHEME_HTTPS,
+                DomainInterface::SCHEME_HTTP  => DomainInterface::SCHEME_HTTP,
               ), array(
                 'required' => true
               )
@@ -103,8 +115,23 @@ class DomainAdmin extends Admin implements AdminModuleInterface
           )
           ->add(Field\TextField::create("domain")->setGroupSize(GroupFields::SIZE_COL_10))
         ->end()
+        ->add(Field\TextField::create("name", array("entitled"=>"fields.nameDomain.entitled")))
         ->add(Field\TextField::create("language"))
         ->add(Field\TextField::create("redirectUrl"))
+        ->add(Field\UploadField::create("favicon"))
+        ->addPopin("popup-editor-favicon", "favicon", array(
+            "button"  =>  array(
+              "entitled"            =>  "actions.picture.edit",
+              "picto"               =>  "",
+              "class"               =>  "button-action"
+            ),
+            "popin"  =>  array(
+              "id"            =>  "upload",
+              "template"      =>  "uploadEditor",
+            )
+          )
+        )
+        ->end()
         ->add(Field\EntityField::create("homepage", Page::class, array(
           'query_builder'     => function (EntityRepository $er) {
             return $er->createQueryBuilder('u')

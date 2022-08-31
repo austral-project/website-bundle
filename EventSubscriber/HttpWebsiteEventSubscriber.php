@@ -14,14 +14,19 @@ namespace Austral\WebsiteBundle\EventSubscriber;
 use Austral\EntitySeoBundle\Services\Pages;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
+use Austral\ToolsBundle\Configuration\ConfigurationInterface;
+use Austral\ToolsBundle\Services\Debug;
 use Austral\WebsiteBundle\Entity\Interfaces\DomainInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
 use Austral\HttpBundle\Event\Interfaces\HttpEventInterface;
 use Austral\HttpBundle\EventSubscriber\HttpEventSubscriber;
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
+use Austral\WebsiteBundle\Services\DomainRequest;
 use Austral\WebsiteBundle\Template\TemplateParameters;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -42,15 +47,35 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
   protected string $debugContainer = "http.website.event";
 
   /**
+   * @var DomainRequest
+   */
+  protected DomainRequest $domainRequest;
+
+  /**
+   * HttpSubscriber constructor.
+   *
+   * @param ContainerInterface $container
+   * @param ConfigurationInterface $configuration
+   * @param Debug $debug
+   * @param DomainRequest $domainRequest
+   */
+  public function __construct(ContainerInterface $container, ConfigurationInterface $configuration,  DomainRequest $domainRequest, Debug $debug)
+  {
+    parent::__construct($container, $configuration, $debug);
+    $this->domainRequest = $domainRequest;
+  }
+
+  /**
    * @return array[]
    */
   public static function getSubscribedEvents(): array
   {
     return [
-      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_REQUEST     =>  ["onRequest", 1024],
-      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_CONTROLLER  =>  ["onController", 1024],
-      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_RESPONSE    =>  ["onResponse", 1024],
-      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_EXCEPTION   =>  ["onException", 1024],
+      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_REQUEST_INITIALISE     =>  ["onRequestInitialise", 1024],
+      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_REQUEST                =>  ["onRequest", 1024],
+      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_CONTROLLER             =>  ["onController", 1024],
+      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_RESPONSE               =>  ["onResponse", 1024],
+      WebsiteHttpEvent::EVENT_AUSTRAL_HTTP_EXCEPTION              =>  ["onException", 1024],
     ];
   }
 
@@ -58,6 +83,34 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @param HttpEventInterface $httpEvent
    *
    * @return void
+   * @throws NonUniqueResultException
+   */
+  public function onRequestInitialise(HttpEventInterface $httpEvent)
+  {
+    $currentLocal = null;
+
+    /** @var DomainInterface $currentDomain */
+    $currentDomain = $this->domainRequest->getCurrentDomain();
+
+    if($currentDomain && $currentDomain->getLanguage()) {
+      $currentLocal = $currentDomain->getLanguage();
+    }
+    if($httpEvent->getKernelEvent()->getRequest()->attributes->has("_locale"))
+    {
+      $currentLocal = $httpEvent->getKernelEvent()->getRequest()->attributes->get("_locale");
+    }
+    if(!$httpEvent->getKernelEvent()->getRequest()->attributes->has("language"))
+    {
+      $httpEvent->getKernelEvent()->getRequest()->attributes->set("language", $currentLocal ? : $this->container->getParameter('locale'));
+    }
+    $httpEvent->getHttpRequest()->setLanguage($currentLocal);
+  }
+
+  /**
+   * @param HttpEventInterface $httpEvent
+   *
+   * @return void
+   * @throws NonUniqueResultException
    */
   public function onRequest(HttpEventInterface $httpEvent)
   {
@@ -76,29 +129,21 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     }
 
     $host = $httpEvent->getKernelEvent()->getRequest()->headers->get('host');
-    $isAuthenticated = $this->container->get('security.authorization_checker')->isGranted("IS_AUTHENTICATED_FULLY");
 
     /** @var DomainInterface $domain */
-    $domain = $this->container->get("austral.entity_manager.domain")->getRepository()->retreiveByKey("domain", $host, function(QueryBuilder $queryBuilder)  use ($isAuthenticated) {
-      if(!$isAuthenticated) {
-        $queryBuilder->andWhere("root.isEnabled = :isEnabled")->setParameter("isEnabled", true);
-      }
-    });
+    $domain = $this->domainRequest->retrieveCurrentDomain(!$this->container->get('security.authorization_checker')->isGranted("IS_AUTHENTICATED_FULLY"))->getCurrentDomain();
 
     /** @var Pages $servicePages */
     $servicePages = $this->container->get("austral.entity_seo.pages");
 
+    $slug = $requestAttributes->get('slug', null);
     if(!$domain)
     {
       /** @var DomainInterface $domainMaster */
-      $domainMaster = $this->container->get("austral.entity_manager.domain")->getRepository()->retreiveByKey("isMaster", true, function(QueryBuilder $queryBuilder) {
-        $queryBuilder->andWhere("root.isEnabled = :isEnabled")
-          ->setParameter("isEnabled", true)
-          ->setMaxResults(1);
-      });
+      $domainMaster = $this->domainRequest->getDomainMaster();
       if($domainMaster)
       {
-        $response = new RedirectResponse("{$domainMaster->getScheme()}://{$domainMaster->getDomain()}", 301);
+        $response = new RedirectResponse("{$domainMaster->getScheme()}://{$domainMaster->getDomain()}".($slug ? "/{$slug}" : ""), 301);
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }
@@ -131,7 +176,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $handlerMethod = $requestAttributes->get('_handler_method', null);
     if($requestAttributes->get('_austral_page', false))
     {
-      if(!$currentPage = $servicePages->retreiveByRefUrl($requestAttributes->get('slug', null)))
+      if(!$currentPage = $servicePages->retreiveByRefUrl($slug))
       {
         if(!$domain || !$domain->getOnePage())
         {

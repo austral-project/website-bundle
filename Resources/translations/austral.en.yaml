@@ -3,6 +3,9 @@ pages:
     pagesManage:
       singular:                                 Page
       plural:                                   Pages
+    pageByDomain:
+      singular:                                 "%domainName% Page"
+      plural:                                   "%domainName% Pages"
     config:
       singular:                                 Config
       plural:                                   Config
@@ -85,6 +88,12 @@ fields:
     entitled:                                   Scheme
   redirectUrl:
     entitled:                                   Redirect URL
+  isVirtual:
+    entitled:                                   Is virtual ?
+  favicon:
+    entitled:                                   Favicon
+  nameDomain:
+    entitled:                                   Name
 
 choices:
   config:

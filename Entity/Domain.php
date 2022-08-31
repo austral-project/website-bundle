@@ -10,9 +10,14 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
+use Austral\ContentBlockBundle\Entity\Traits\EntityComponentsTrait;
+use Austral\EntityFileBundle\Entity\Interfaces\EntityFileInterface;
+use Austral\EntityFileBundle\Entity\Traits\EntityFileCropperTrait;
+use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\DomainInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\Model\SubDomain;
+use Austral\EntityFileBundle\Annotation as AustralFile;
 
 use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
@@ -29,12 +34,11 @@ use Exception;
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class Domain extends Entity implements DomainInterface, EntityInterface
+abstract class Domain extends Entity implements DomainInterface, EntityInterface, EntityFileInterface
 {
 
-  const SCHEME_HTTPS = "https";
-  const SCHEME_HTTP = "http";
-
+  use EntityFileTrait;
+  use EntityFileCropperTrait;
   use EntityTimestampableTrait;
 
   /**
@@ -48,7 +52,7 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
    * @var PageInterface|null
    *
    * @ORM\ManyToOne(targetEntity="Austral\WebsiteBundle\Entity\Interfaces\PageInterface", inversedBy="domains")
-   * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
+   * @ORM\JoinColumn(name="homepage_id", referencedColumnName="id", onDelete="SET NULL")
    */
   protected ?PageInterface $homepage = null;
 
@@ -57,6 +61,23 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
    * @ORM\Column(name="domain", type="string", length=255, nullable=false )
    */
   protected ?string $domain = null;
+
+  /**
+   * @var string|null
+   * @ORM\Column(name="name", type="string", length=255, nullable=true )
+   */
+  protected ?string $name = null;
+
+  /**
+   * @var string|null
+   * @ORM\Column(name="favicon", type="string", length=255, nullable=true )
+   * @AustralFile\UploadParameters(configName="page_image")
+   * @AustralFile\ImageSize()
+   * @AustralFile\Croppers(croppers={
+   *   @AustralFile\Cropper(name="logo", ratio="1/1", picto="austral-picto-globe" )
+   * })
+   */
+  protected ?string $favicon = null;
 
   /**
    * @var string|null
@@ -81,6 +102,12 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
    * @ORM\Column(name="is_enabled", type="boolean", nullable=true)
    */
   protected bool $isEnabled = false;
+
+  /**
+   * @var boolean
+   * @ORM\Column(name="is_virtual", type="boolean", nullable=true, options={"default": false})
+   */
+  protected bool $isVirtual = false;
 
   /**
    * @var string|null
@@ -115,7 +142,7 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
    */
   public function __toString()
   {
-    return $this->domain;
+    return $this->name ?? $this->domain;
   }
 
   /**
@@ -153,6 +180,44 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   public function setDomain(?string $domain): Domain
   {
     $this->domain = $domain;
+    return $this;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getName(): ?string
+  {
+    return $this->name;
+  }
+
+  /**
+   * @param string|null $name
+   *
+   * @return $this
+   */
+  public function setName(?string $name): Domain
+  {
+    $this->name = $name;
+    return $this;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getFavicon(): ?string
+  {
+    return $this->favicon;
+  }
+
+  /**
+   * @param string|null $favicon
+   *
+   * @return $this
+   */
+  public function setFavicon(?string $favicon): Domain
+  {
+    $this->favicon = $favicon;
     return $this;
   }
 
@@ -212,7 +277,7 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   /**
    * @return bool
    */
-  public function isMaster(): bool
+  public function getIsMaster(): bool
   {
     return $this->isMaster;
   }
@@ -231,7 +296,7 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   /**
    * @return bool
    */
-  public function isEnabled(): bool
+  public function getIsEnabled(): bool
   {
     return $this->isEnabled;
   }
@@ -244,6 +309,25 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   public function setIsEnabled(bool $isEnabled): Domain
   {
     $this->isEnabled = $isEnabled;
+    return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function getIsVirtual(): bool
+  {
+    return $this->isVirtual;
+  }
+
+  /**
+   * @param bool $isVirtual
+   *
+   * @return $this
+   */
+  public function setIsVirtual(bool $isVirtual): Domain
+  {
+    $this->isVirtual = $isVirtual;
     return $this;
   }
 

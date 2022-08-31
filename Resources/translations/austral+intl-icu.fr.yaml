@@ -7,3 +7,13 @@ fields:
             one   { 1 sous page }
             other { # sous pages }
         }
+
+pages:
+  names:
+    pageByDomain:
+      countElement: >-
+                {count, plural,
+                    =0    {}
+                    one   { 1 page }
+                    other { # pages }
+                }

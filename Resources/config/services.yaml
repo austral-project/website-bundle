@@ -13,7 +13,7 @@ services:
 
   austral.website.http.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\HttpWebsiteEventSubscriber
-    arguments:    [ "@service_container", "@austral.website.config", "@austral.tools.debug" ]
+    arguments:    [ "@service_container", "@austral.website.config", "@austral.website.domain", "@austral.tools.debug" ]
     tags:
       - { name: kernel.event_subscriber }
 
@@ -64,7 +64,7 @@ services:
     arguments:      ["@austral.website.config_variable", "@austral.entity_seo.pages", "@router"]
 
   austral.website.domain:
-    class:          Austral\WebsiteBundle\Services\Domain
+    class:          Austral\WebsiteBundle\Services\DomainRequest
     arguments:      ["@request_stack", "@austral.entity_manager.domain"]
 
 ##### Entities Manager #####

@@ -21,6 +21,7 @@ use Austral\HttpBundle\Event\HttpEvent;
 class WebsiteHttpEvent extends HttpEvent
 {
 
+  const EVENT_AUSTRAL_HTTP_REQUEST_INITIALISE = "austral.event.http.website.request.initialise";
   const EVENT_AUSTRAL_HTTP_REQUEST = "austral.event.http.website.request";
   const EVENT_AUSTRAL_HTTP_CONTROLLER = "austral.event.http.website.controller";
   const EVENT_AUSTRAL_HTTP_RESPONSE = "austral.event.http.website.response";

@@ -12,6 +12,7 @@ namespace Austral\WebsiteBundle\Admin;
 
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
+use Austral\WebsiteBundle\Entity\Domain;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\ContentBlockBundle\Field\ContentBlockField;
@@ -48,8 +49,22 @@ class PageAdmin extends Admin implements AdminModuleInterface
   public function getEvents() : array
   {
     return array(
-      FormAdminEvent::EVENT_UPDATE_BEFORE =>  "formUpdateBefore"
+      FormAdminEvent::EVENT_UPDATE_BEFORE     =>  "formUpdateBefore",
+      ListAdminEvent::EVENT_END               =>  "listEnd",
     );
+  }
+
+  /**
+   * @param ListAdminEvent $listAdminEvent
+   *
+   * @final
+   */
+  protected function listEnd(ListAdminEvent $listAdminEvent)
+  {
+    if(!$listAdminEvent->getListMapper())
+    {
+      $listAdminEvent->getTemplateParameters()->setPath("@AustralWebsite/Admin/Page/moduleList.html.twig");
+    }
   }
 
   /**
@@ -125,6 +140,12 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   public function configureListMapper(ListAdminEvent $listAdminEvent)
   {
+    $homepageId = null;
+    if($filters = $listAdminEvent->getCurrentModule()->getParametersByKey("filters"))
+    {
+      $homepageId = $filters["homepageId"];
+    }
+
     $listAdminEvent->getListMapper()
       ->addColumn(new Column\Template("picto", " ", "@AustralWebsite/Admin/_Components/pagePicto.html.twig"))
       ->addColumn(new Column\Template("name", "form.labels.title", "@AustralWebsite/Admin/_Components/pageTitle.html.twig", array(
@@ -167,9 +188,16 @@ class PageAdmin extends Admin implements AdminModuleInterface
       ->getSection("homepage")
         ->setMapperType("list")
         ->setTitle("pages.list.page.homepage")
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) {
-            return $queryBuilder->where("root.isHomepage = true");
+        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use ($homepageId) {
+          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($homepageId) {
+            if($homepageId) {
+              return $queryBuilder->where("root.id = :homepageId")
+                ->setParameter("homepageId", $homepageId);
+            }
+            else {
+              return $queryBuilder->where("root.isHomepage = :isHomepage")
+                ->setParameter("isHomepage", true);
+            }
           });
           $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
             return $queryBuilder->orderBy("root.position", "ASC")
@@ -184,20 +212,27 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ->childrenRow(function(PageInterface $page) {
           return $page->getChildren();
         })
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) {
-            return $queryBuilder->where("root.isHomepage != true");
+        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use ($homepageId) {
+          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($homepageId) {
+            if($homepageId) {
+              return $queryBuilder->leftJoin("root.parent", "parent")
+                ->where("parent.id = :homepageId")
+                ->setParameter("homepageId", $homepageId);
+            }
+            else {
+              return $queryBuilder->leftJoin("root.parent", "parent")
+                ->where("root.isHomepage != :isHomepage")
+                ->setParameter("isHomepage", true);
+            }
           });
           $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
-            return $queryBuilder->leftJoin("root.parent", "parent")
-              ->where("parent.isHomepage = :isHomepage")
+            return $queryBuilder
               ->leftJoin("root.translates", "translates")->addSelect("translates")
               ->leftJoin("root.children", "children")->addSelect("children")
               ->leftJoin("children.children", "subChildren")->addSelect("subChildren")
               ->leftJoin("subChildren.children", "ThreeChildren")->addSelect("ThreeChildren")
               ->orderBy("root.position", "ASC")
-              ->addOrderBy("translates.language", "ASC")
-              ->setParameter("isHomepage", true);
+              ->addOrderBy("translates.language", "ASC");
           });
         })
       ->end();
@@ -210,19 +245,33 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
-    $countPages = $this->container->get('austral.entity_manager.page')->countAll();
+    $homepageId = null;
+    if($filters = $formAdminEvent->getCurrentModule()->getParametersByKey("filters"))
+    {
+      $homepageId = $filters["homepageId"];
+    }
+
+    $countPages = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use ($homepageId) {
+      $queryBuilder->where("root.homepageId = :homepageId")
+        ->setParameter("homepageId", $homepageId);
+    });
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
         ->setViewName(false)
         ->add(Field\EntityField::create("parent", Page::class,
           array(
-            'query_builder'     => function (EntityRepository $er) use($formAdminEvent){
-              return $er->createQueryBuilder('u')
+            'query_builder'     => function (EntityRepository $er) use($formAdminEvent, $homepageId) {
+              $queryBuilder = $er->createQueryBuilder('u')
                 ->where("u.id != :pageId")
                 ->setParameter("pageId", $formAdminEvent->getFormMapper()->getObject()->getId())
                 ->leftJoin("u.translates", "translates")->addSelect("translates")
-                ->orderBy('u.position', 'ASC');
+                ->orderBy('translates.refUrl', 'ASC');
+              if($homepageId) {
+                $queryBuilder->andWhere("u.homepageId = :homepageId")
+                  ->setParameter("homepageId", $homepageId);
+              }
+              return $queryBuilder;
             },
             'choice_label' => 'path',
             'isView' => array(
@@ -365,8 +414,16 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   protected function formUpdateBefore(FormAdminEvent $formAdminEvent)
   {
+
+
     /** @var PageInterface|EntityInterface $object */
     $object = $formAdminEvent->getFormMapper()->getObject();
+
+    if($filters = $formAdminEvent->getCurrentModule()->getParametersByKey("filters"))
+    {
+      $object->setHomepageId($filters["homepageId"]);
+    }
+
     if(!$object->getKeyname())
     {
       $object->setKeyname($object->getName()."-".$object->getId());
@@ -376,6 +433,13 @@ class PageAdmin extends Admin implements AdminModuleInterface
     {
       $object->setParent(null);
       $object->setAustralPictoClass( "austral-picto-home");
+
+      /** @var Domain $domain */
+      if($domain = $formAdminEvent->getCurrentModule()->getParametersByKey("domain"))
+      {
+        $domain->setHomepage($object);
+        $formAdminEvent->getAdminHandler()->getEntityManager()->update($domain, false);
+      }
     }
 
     $initDefaultParent = false;

@@ -13,7 +13,7 @@ namespace Austral\WebsiteBundle\Listener;
 use App\Entity\Austral\WebsiteBundle\Domain;
 use App\Entity\Austral\WebsiteBundle\Page;
 use App\Entity\Austral\WebsiteBundle\PageTranslate;
-use Austral\EntitySeoBundle\Event\PagesEvent;
+use Austral\EntitySeoBundle\Event\PagesSelectObjectsEvent;
 
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
@@ -62,22 +62,21 @@ class PagesListener
   }
 
   /**
-   * @param PagesEvent $pagesEvent
+   * @param PagesSelectObjectsEvent $pagesEvent
    *
    * @throws Exception
    */
-  public function selectObjects(PagesEvent $pagesEvent)
+  public function selectObjects(PagesSelectObjectsEvent $pagesEvent)
   {
   }
 
   /**
-   * @param PagesEvent $pagesEvent
+   * @param PagesSelectObjectsEvent $pagesEvent
    *
    * @throws Exception
-   *
    * DISABLED with error
    */
-  public function _selectObjects(PagesEvent $pagesEvent)
+  public function _selectObjects(PagesSelectObjectsEvent $pagesEvent)
   {
     $className = $pagesEvent->getClassname();
     $entityManager = $pagesEvent->getEntityManager();

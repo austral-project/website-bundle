@@ -10,14 +10,15 @@
 
 namespace Austral\WebsiteBundle\Entity\Interfaces;
 
-use Austral\WebsiteBundle\Entity\Domain;
-
 /**
  * Austral Domain Interface.
  * @author Matthieu Beurel <matthieu@austral.dev>
  */
 interface DomainInterface
 {
+
+  const SCHEME_HTTPS = "https";
+  const SCHEME_HTTP = "http";
 
   /**
    * @return PageInterface|null
@@ -42,6 +43,30 @@ interface DomainInterface
    * @return DomainInterface
    */
   public function setDomain(?string $domain): DomainInterface;
+
+  /**
+   * @return string|null
+   */
+  public function getName(): ?string;
+
+  /**
+   * @param string|null $name
+   *
+   * @return DomainInterface
+   */
+  public function setName(?string $name): DomainInterface;
+
+  /**
+   * @return string|null
+   */
+  public function getFavicon(): ?string;
+
+  /**
+   * @param string|null $favicon
+   *
+   * @return $this
+   */
+  public function setFavicon(?string $favicon): DomainInterface;
 
   /**
    * @return string
@@ -71,7 +96,7 @@ interface DomainInterface
   /**
    * @return bool
    */
-  public function isMaster(): bool;
+  public function getIsMaster(): bool;
 
   /**
    * @param bool $isMaster
@@ -83,7 +108,7 @@ interface DomainInterface
   /**
    * @return bool
    */
-  public function isEnabled(): bool;
+  public function getIsEnabled(): bool;
 
   /**
    * @param bool $isEnabled
@@ -91,6 +116,18 @@ interface DomainInterface
    * @return DomainInterface
    */
   public function setIsEnabled(bool $isEnabled): DomainInterface;
+
+  /**
+   * @return bool
+   */
+  public function getIsVirtual(): bool;
+
+  /**
+   * @param bool $isVirtual
+   *
+   * @return $this
+   */
+  public function setIsVirtual(bool $isVirtual): DomainInterface;
 
   /**
    * @return string|null

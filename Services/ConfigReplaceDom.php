@@ -199,7 +199,7 @@ Class ConfigReplaceDom
         if(strpos($linkKeyAndId, "_") !== false || strpos($linkKeyAndId, ":") !== false)
         {
           list($linkKey, $id) = strpos($linkKeyAndId, "_") ? explode("_", $linkKeyAndId) : explode(":", $linkKeyAndId);
-          if($object = $this->pages->retreiveByEntityAndId($linkKey, $id))
+          if($object = $this->pages->retreiveByEntityAndId($this->pages->retreiveEntityName($linkKey), $id))
           {
             $replaceValues[$value] = $this->router->generate("austral_website_page", array("slug"=>$object->getRefUrl()), $referenceType);
           }
