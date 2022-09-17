@@ -10,22 +10,21 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\ContentBlockBundle\Entity\Interfaces\EntityContentBlockInterface;
+use Austral\EntityBundle\Entity\Interfaces\ComponentsInterface;
 use Austral\ContentBlockBundle\Entity\Traits\EntityComponentsTrait;
 use Austral\EntityFileBundle\Annotation as AustralFile;
 use Austral\EntityFileBundle\Entity\Traits\EntityFileCropperTrait;
-use Austral\EntitySeoBundle\Entity\Traits\EntityHomepageTranslateTrait;
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
-use Austral\WebsiteBundle\Entity\Interfaces\EntitySocialNetworkInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTrait;
 
-use Austral\EntitySeoBundle\Entity\Traits\EntityRobotTrait;
-use Austral\EntitySeoBundle\Entity\Traits\EntitySeoTrait;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntityRobotInterface;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntitySeoInterface;
+use Austral\SeoBundle\Entity\Traits\EntityRobotTrait;
+use Austral\SeoBundle\Entity\Traits\EntitySeoTrait;
+use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
+use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateChildInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateChildTrait;
 
 use Austral\EntityBundle\Entity\Entity;
@@ -44,7 +43,13 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class PageTranslate extends Entity implements PageTranslateInterface, EntityInterface, EntityTranslateChildInterface, EntitySeoInterface, EntityRobotInterface, EntityContentBlockInterface, EntitySocialNetworkInterface
+abstract class PageTranslate extends Entity implements PageTranslateInterface,
+  EntityInterface,
+  TranslateChildInterface,
+  SeoInterface,
+  RobotInterface,
+  ComponentsInterface,
+  SocialNetworkInterface
 {
 
   use EntityTimestampableTrait;
@@ -54,7 +59,6 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface, E
   use EntitySocialNetworkTrait;
   use EntityComponentsTrait;
   use EntityFileCropperTrait;
-  use EntityHomepageTranslateTrait;
 
   /**
    * @var string
@@ -64,12 +68,12 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface, E
   protected $id;
 
   /**
-   * @var PageInterface|EntityTranslateMasterInterface
+   * @var PageInterface|TranslateMasterInterface
    *
    * @ORM\ManyToOne(targetEntity="Austral\WebsiteBundle\Entity\Interfaces\PageInterface", inversedBy="translates", cascade={"persist"})
    * @ORM\JoinColumn(name="master_id", referencedColumnName="id")
    */
-  protected EntityTranslateMasterInterface $master;
+  protected TranslateMasterInterface $master;
 
   /**
    * @var string|null
@@ -135,9 +139,9 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface, E
   }
 
   /**
-   * @return PageInterface|EntitySeoInterface|null
+   * @return PageInterface|SeoInterface|null
    */
-  public function getPageParent(): ?EntitySeoInterface
+  public function getPageParent(): ?SeoInterface
   {
     return $this->getMaster()->getPageParent();
   }

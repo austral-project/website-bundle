@@ -5,7 +5,7 @@
   "keywords":                                   ["Austral", "Website"],
   "license":                                    "MIT",
   "homepage":                                   "https://austral.dev",
-  "version":                                    "3.0",
+  "version":                                    "3.1",
   "authors": [
     {
       "name":                                 "Matthieu Beurel",
@@ -17,11 +17,11 @@
     "php":                                      "^7.4 || ^8.0",
 
     "austral/tools-bundle":                     "^3.0",
-    "austral/http-bundle":                      "^3.0",
-    "austral/entity-translate-bundle":          "^3.0",
-    "austral/entity-seo-bundle":                "^3.0",
-    "austral/content-block-bundle":             "^3.0",
-    "austral/entity-file-bundle":               "^3.0",
+    "austral/http-bundle":                      "^3.1",
+    "austral/seo-bundle":                       "^3.1",
+    "austral/entity-translate-bundle":          "^3.1",
+    "austral/content-block-bundle":             "^3.1",
+    "austral/entity-file-bundle":               "^3.1",
 
     "symfony/config":                           "^5.3|^5.4",
     "martin-georgiev/postgresql-for-doctrine":  "^1.2"

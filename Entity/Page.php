@@ -10,21 +10,25 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\ContentBlockBundle\Entity\Interfaces\EntityContentBlockInterface;
+use Austral\EntityBundle\Entity\Entity;
+use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\EntityBundle\Entity\Interfaces\TreePageInterface;
+use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
+use Austral\EntityBundle\Entity\Interfaces\ComponentsInterface;
+use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
+use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
+use Austral\EntityBundle\Entity\Interfaces\FilterByDomainInterface;
+use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
+use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 
-use Austral\EntitySeoBundle\Entity\Interfaces\EntityRobotInterface;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntitySeoInterface;
-use Austral\EntitySeoBundle\Entity\Traits\EntityHomepageTrait;
+use Austral\HttpBundle\Entity\Traits\FilterByDomainTrait;
 
-use Austral\WebsiteBundle\Entity\Interfaces\DomainInterface;
-use Austral\WebsiteBundle\Entity\Interfaces\EntitySocialNetworkInterface;
 use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTranslateMasterTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
-use Austral\EntityFileBundle\Entity\Interfaces\EntityFileInterface;
 use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterRobotTrait;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterSeoTrait;
@@ -32,9 +36,7 @@ use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterFileCropper
 use Austral\EntityTranslateBundle\Annotation\Translate;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterComponentsTrait;
 
-use Austral\EntityBundle\Entity\Entity;
-use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
+use Austral\SeoBundle\Annotation\ObjectUrl;
 
 use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
 use Doctrine\Common\Collections\Collection;
@@ -51,19 +53,29 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  * @Translate(relationClass="Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface")
+ * @ObjectUrl(methodGenerateLastPath="stringToLastPath")
  */
-abstract class Page extends Entity implements PageInterface, EntityInterface, EntityTranslateMasterInterface, EntityFileInterface, EntitySeoInterface, EntityRobotInterface, EntityContentBlockInterface, EntitySocialNetworkInterface
+abstract class Page extends Entity implements PageInterface,
+  EntityInterface,
+  TranslateMasterInterface,
+  FileInterface,
+  SeoInterface,
+  RobotInterface,
+  SocialNetworkInterface,
+  ComponentsInterface,
+  FilterByDomainInterface,
+  TreePageInterface
 {
   use EntityTimestampableTrait;
   use EntityFileTrait;
   use EntityTranslateMasterTrait;
   use EntityTranslateMasterRobotTrait;
   use EntityTranslateMasterSeoTrait;
-  use EntityHomepageTrait;
   use EntitySocialNetworkTranslateMasterTrait;
   use EntityTranslateMasterComponentsTrait;
   use EntityTranslateMasterFileCropperTrait;
   Use EntityTemplateTrait;
+  use FilterByDomainTrait;
 
   /**
    * @var string
@@ -98,14 +110,6 @@ abstract class Page extends Entity implements PageInterface, EntityInterface, En
    * @ORM\OrderBy({"position" = "ASC"})
    */
   protected Collection $children;
-
-  /**
-   * @var Collection
-   *
-   * @ORM\OneToMany(targetEntity="Austral\WebsiteBundle\Entity\Interfaces\DomainInterface", mappedBy="homepage")
-   * @ORM\OrderBy({"id" = "ASC"})
-   */
-  protected Collection $domains;
 
   /**
    * @var int|null
@@ -149,6 +153,20 @@ abstract class Page extends Entity implements PageInterface, EntityInterface, En
     $this->children = new ArrayCollection();
   }
 
+
+  /**
+   * @return string|null
+   * @throws Exception
+   */
+  public function stringToLastPath(): ?string
+  {
+    if($this->getIsHomepage())
+    {
+      return null;
+    }
+    return $this->__toString();
+  }
+
   /**
    * @return bool
    */
@@ -167,9 +185,9 @@ abstract class Page extends Entity implements PageInterface, EntityInterface, En
   }
 
   /**
-   * @return EntitySeoInterface|PageInterface
+   * @return SeoInterface|PageInterface
    */
-  public function getPageParent(): ?EntitySeoInterface
+  public function getPageParent(): ?SeoInterface
   {
     return $this->getParent();
   }
@@ -242,6 +260,25 @@ abstract class Page extends Entity implements PageInterface, EntityInterface, En
   }
 
   /**
+   * @return TreePageInterface|null
+   */
+  public function getTreePageParent(): ?TreePageInterface
+  {
+    return $this->getPageParent();
+  }
+
+  /**
+   * @param TreePageInterface $parent
+   *
+   * @return TreePageInterface|null
+   */
+  public function setTreePageParent(TreePageInterface $parent): ?TreePageInterface
+  {
+    $this->setParent($parent);
+    return $this;
+  }
+
+  /**
    * Get parent
    *
    * @return int|string|null
@@ -293,50 +330,6 @@ abstract class Page extends Entity implements PageInterface, EntityInterface, En
   public function getChildren(): Collection
   {
     return $this->children;
-  }
-
-  /**
-   * Add child
-   *
-   * @param DomainInterface $domain
-   *
-   * @return $this
-   */
-  public function addDomain(DomainInterface $domain): Page
-  {
-    if(!$this->domains->contains($domain))
-    {
-      $this->domains->add($domain);
-      $domain->setHomepage($this);
-    }
-    return $this;
-  }
-
-  /**
-   * Remove child
-   *
-   * @param DomainInterface $domain
-   *
-   * @return $this
-   */
-  public function removeDomain(DomainInterface $domain): Page
-  {
-    if($this->domains->contains($domain))
-    {
-      $domain->setHomepage(null);
-      $this->domains->removeElement($domain);
-    }
-    return $this;
-  }
-
-  /**
-   * Get children
-   *
-   * @return Collection
-   */
-  public function getDomains(): Collection
-  {
-    return $this->domains;
   }
 
   /**

@@ -10,14 +10,14 @@
 
 namespace Austral\WebsiteBundle\Listener;
 
-use App\Entity\Austral\WebsiteBundle\Domain;
+use App\Entity\Austral\HttpBundle\Domain;
 use App\Entity\Austral\WebsiteBundle\Page;
 use App\Entity\Austral\WebsiteBundle\PageTranslate;
-use Austral\EntitySeoBundle\Event\PagesSelectObjectsEvent;
+use Austral\SeoBundle\Event\PagesSelectObjectsEvent;
 
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
-use Austral\WebsiteBundle\EntityManager\DomainEntityManager;
+use Austral\HttpBundle\EntityManager\DomainEntityManager;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;

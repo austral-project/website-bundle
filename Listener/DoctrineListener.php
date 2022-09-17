@@ -12,7 +12,7 @@ namespace Austral\WebsiteBundle\Listener;
 
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\ToolsBundle\AustralTools;
-use Austral\WebsiteBundle\Entity\Interfaces\PageParentInterface;
+use Austral\EntityBundle\Entity\Interfaces\PageParentInterface;
 use App\Entity\Austral\WebsiteBundle\Page;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
@@ -50,9 +50,9 @@ class DoctrineListener implements EventSubscriber
    */
   public function getSubscribedEvents()
   {
-      return array(
-        Events::postLoad
-      );
+    return array(
+      Events::postLoad
+    );
   }
 
   /**

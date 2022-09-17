@@ -11,11 +11,11 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use App\Entity\Austral\WebsiteBundle\Page;
-use Austral\EntitySeoBundle\Services\Pages;
+use Austral\SeoBundle\Services\Pages;
 
 use Austral\EntityBundle\Event\EntityManagerEvent;
 
-use Austral\WebsiteBundle\Entity\Interfaces\PageParentInterface;
+use Austral\EntityBundle\Entity\Interfaces\PageParentInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -64,6 +64,7 @@ class EntityManagerListener implements EventSubscriberInterface
   {
     if($entityManagerEvent->getObject() instanceof PageParentInterface)
     {
+
       if($pageParent = $entityManagerEvent->getEntityManager()->getDoctrineEntityManager()->getRepository(Page::class)->retreiveByEntityExtends(get_class($entityManagerEvent->getObject())))
       {
         $entityManagerEvent->getObject()->setPageParent($pageParent);

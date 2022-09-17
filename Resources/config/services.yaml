@@ -13,7 +13,7 @@ services:
 
   austral.website.http.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\HttpWebsiteEventSubscriber
-    arguments:    [ "@service_container", "@austral.website.config", "@austral.website.domain", "@austral.tools.debug" ]
+    arguments:    [ "@service_container", "@austral.website.config", "@austral.http.domains.management", "@austral.tools.debug" ]
     tags:
       - { name: kernel.event_subscriber }
 
@@ -29,7 +29,7 @@ services:
     class:        Austral\WebsiteBundle\Listener\PagesListener
     arguments:    [ "@request_stack", "@security.authorization_checker", "@austral.entity_manager.domain"]
     tags:
-      - { name: kernel.event_listener, event: "austral.entity_seo.select_objects", method: selectObjects }
+      - { name: kernel.event_listener, event: "austral.seo.select_objects", method: selectObjects }
 
   austral.website.entity_manager.listener:
     class:        Austral\WebsiteBundle\Listener\EntityManagerListener
@@ -61,11 +61,7 @@ services:
 
   austral.website.config_replace_dom:
     class:          Austral\WebsiteBundle\Services\ConfigReplaceDom
-    arguments:      ["@austral.website.config_variable", "@austral.entity_seo.pages", "@router"]
-
-  austral.website.domain:
-    class:          Austral\WebsiteBundle\Services\DomainRequest
-    arguments:      ["@request_stack", "@austral.entity_manager.domain"]
+    arguments:      ["@austral.website.config_variable", "@austral.http.domains.management", "@austral.seo.url_parameter.management", "@router"]
 
 ##### Entities Manager #####
 
@@ -83,19 +79,6 @@ services:
   austral.entity_manager.tracking:
     class:          Austral\WebsiteBundle\EntityManager\TrackingEntityManager
     arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.tracking.class%" ]
-
-  ##### Domain Entity Manager
-  austral.entity_manager.domain:
-    class:          Austral\WebsiteBundle\EntityManager\DomainEntityManager
-    arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.domain.class%" ]
-
-
-##### Form Type
-  austral.website.subDomain_form_type:
-    class:          Austral\WebsiteBundle\Form\Type\SubDomainFormType
-    arguments:      [ "@security.authorization_checker" ]
-    tags:
-      - { name: form.type , alias: austral_subDomain_form_type}
 
 ##### Parameters #####
   austral.website.config:

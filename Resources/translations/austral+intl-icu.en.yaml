@@ -7,3 +7,13 @@ fields:
             one   { 1 sub page }
             other { # sub pages }
         }
+
+pages:
+  names:
+    pagesManageByDomain:
+      subTitle: >-
+                    {count, plural,
+                        =0    { 0 page }
+                        one   { 1 page }
+                        other { # pages }
+                    }

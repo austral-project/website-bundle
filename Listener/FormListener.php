@@ -53,21 +53,6 @@ class FormListener
    */
   public function formAddAutoFields(FormEvent $formEvent)
   {
-    if($this->websiteConfiguration->get('form.socialNetworkEnabled') &&
-      ( AustralTools::usedClass($formEvent->getFormMapper()->getObject(), EntitySocialNetworkTrait::class) ||
-        AustralTools::usedClass($formEvent->getFormMapper()->getObject(), EntitySocialNetworkTranslateMasterTrait::class)
-      )
-    )
-    {
-      $formEvent->getFormMapper()->addFieldset("fieldset.socialNetwork")
-        ->add(Field\TextField::create("socialTitle"))
-        ->addGroup("socialNetwork.content")
-          ->add(Field\UploadField::create("socialImage"))
-          ->add(Field\TextareaField::create("socialDescription"))
-        ->end()
-      ->end();
-    }
-
     if(AustralTools::usedClass($formEvent->getFormMapper()->getObject(), EntityTemplateTrait::class))
     {
       $templates = array();

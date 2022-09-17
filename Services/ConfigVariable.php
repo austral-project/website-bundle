@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\Services;
 use Austral\EntityFileBundle\File\Link\Generator;
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
@@ -82,7 +82,7 @@ Class ConfigVariable
       $variables = array();
       $configsAll = $this->entityManager->getRepository("Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface")->selectAllByIndexKeyname($this->language);
 
-      /** @var ConfigInterface|EntityTranslateMasterInterface $config */
+      /** @var ConfigInterface|TranslateMasterInterface $config */
       foreach($configsAll as $config)
       {
         /** @var ConfigTranslateInterface $configTranslate */

@@ -10,11 +10,11 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\TrackingTranslateInterface;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateChildInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateChildTrait;
 
 use Austral\EntityBundle\Entity\Entity;
@@ -31,7 +31,7 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class TrackingTranslate extends Entity implements TrackingTranslateInterface, EntityInterface, EntityTranslateChildInterface
+abstract class TrackingTranslate extends Entity implements TrackingTranslateInterface, EntityInterface, TranslateChildInterface
 {
   
   use EntityTimestampableTrait;
@@ -45,12 +45,12 @@ abstract class TrackingTranslate extends Entity implements TrackingTranslateInte
   protected $id;
   
   /**
-   * @var TrackingInterface|EntityTranslateMasterInterface
+   * @var TrackingInterface|TranslateMasterInterface
    *
    * @ORM\ManyToOne(targetEntity="\Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface", inversedBy="translates", cascade={"persist"})
    * @ORM\JoinColumn(name="master_id", referencedColumnName="id")
    */
-  protected EntityTranslateMasterInterface $master;
+  protected TranslateMasterInterface $master;
 
   /**
    * @var string|null

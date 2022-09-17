@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\EntityManager;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Repository\ConfigRepository;
 
@@ -38,7 +38,7 @@ class ConfigEntityManager extends EntityManager
    */
   public function create(array $values = array()): ConfigInterface
   {
-    /** @var ConfigInterface|EntityTranslateMasterInterface $object */
+    /** @var ConfigInterface|TranslateMasterInterface $object */
     $object = parent::create($values);
     $object->setCurrentLanguage($this->currentLanguage);
     $object->createNewTranslateByLanguage();

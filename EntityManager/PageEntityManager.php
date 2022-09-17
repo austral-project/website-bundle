@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\EntityManager;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterRobotTrait;
 use Austral\WebsiteBundle\Repository\PageRepository;
@@ -40,7 +40,7 @@ class PageEntityManager extends EntityManager
    */
   public function create(array $values = array()): PageInterface
   {
-    /** @var PageInterface|EntityTranslateMasterRobotTrait|EntityTranslateMasterInterface $object */
+    /** @var PageInterface|EntityTranslateMasterRobotTrait|TranslateMasterInterface $object */
     $object = parent::create($values);
     $object->setCurrentLanguage($this->currentLanguage);
     $object->createNewTranslateByLanguage();

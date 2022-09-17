@@ -10,10 +10,10 @@ fields:
 
 pages:
   names:
-    pageByDomain:
-      countElement: >-
+    pagesManageByDomain:
+      subTitle: >-
                 {count, plural,
-                    =0    {}
+                    =0    { 0 page }
                     one   { 1 page }
                     other { # pages }
                 }

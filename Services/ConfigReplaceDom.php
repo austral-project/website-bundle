@@ -10,7 +10,9 @@
 
 namespace Austral\WebsiteBundle\Services;
 
-use Austral\EntitySeoBundle\Services\Pages;
+use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
+use Austral\SeoBundle\Services\UrlParameterManagement;
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\ToolsBundle\AustralTools;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
@@ -28,9 +30,14 @@ Class ConfigReplaceDom
   protected ConfigVariable $configVariables;
 
   /**
-   * @var Pages
+   * @var DomainsManagement
    */
-  protected Pages $pages;
+  protected DomainsManagement $domainsManagement;
+
+  /**
+   * @var UrlParameterManagement
+   */
+  protected UrlParameterManagement $urlParameterManagement;
 
   /**
    * @var Router
@@ -38,14 +45,16 @@ Class ConfigReplaceDom
   protected Router $router;
 
   /**
+   * @param DomainsManagement $domainsManagement
    * @param ConfigVariable $configVariable
-   * @param Pages $pages
+   * @param UrlParameterManagement $urlParameterManagement
    * @param Router $router
    */
-  public function __construct(ConfigVariable $configVariable, Pages $pages, Router $router)
+  public function __construct(ConfigVariable $configVariable, DomainsManagement $domainsManagement, UrlParameterManagement $urlParameterManagement, Router $router)
   {
+    $this->domainsManagement = $domainsManagement;
     $this->configVariables = $configVariable;
-    $this->pages = $pages;
+    $this->urlParameterManagement = $urlParameterManagement;
     $this->router = $router;
   }
 
@@ -198,11 +207,23 @@ Class ConfigReplaceDom
         $linkKeyAndId = str_replace(array("&#x23;","#", "INTERNAL_LINK_"), "", $value);
         if(strpos($linkKeyAndId, "_") !== false || strpos($linkKeyAndId, ":") !== false)
         {
-          list($linkKey, $id) = strpos($linkKeyAndId, "_") ? explode("_", $linkKeyAndId) : explode(":", $linkKeyAndId);
-          if($object = $this->pages->retreiveByEntityAndId($this->pages->retreiveEntityName($linkKey), $id))
+          list($linkKey, $id) = $this->decodeInternalLink($linkKeyAndId);
+          /** @var UrlParameterInterface $urlParameter */
+          if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id))
           {
-            $replaceValues[$value] = $this->router->generate("austral_website_page", array("slug"=>$object->getRefUrl()), $referenceType);
+            $replaceValues[$value] = $this->router->generate("austral_website_page", array("slug"=>$urlParameter->getPath()), $referenceType);
           }
+          /** @var UrlParameterInterface $urlParameter */
+          elseif($linkKey === "UrlParameter" && $urlParameter = $this->urlParameterManagement->retrieveUrlParametersById($id))
+          {
+            $path = $this->router->generate("austral_website_page", array("slug"=>$urlParameter->getPath()), $referenceType);
+            if($this->domainsManagement->getCurrentDomain()->getId() !== $urlParameter->getDomainId())
+            {
+              $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
+            }
+            $replaceValues[$value] = $path;
+          }
+
           if(!array_key_exists($value, $replaceValues))
           {
             unset($values[$key]);
@@ -221,6 +242,26 @@ Class ConfigReplaceDom
     return $dom;
   }
 
+  /**
+   * @param $linkKeyAndId
+   *
+   * @return array
+   */
+  protected function decodeInternalLink($linkKeyAndId): array
+  {
+    if(strpos($linkKeyAndId, "::") !== false)
+    {
+      return explode("::", $linkKeyAndId);
+    }
+    elseif(strpos($linkKeyAndId, "_") !== false)
+    {
+      return explode("_", $linkKeyAndId);
+    }
+    else
+    {
+      return explode(":", $linkKeyAndId);
+    }
+  }
 
 
 }

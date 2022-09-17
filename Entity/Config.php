@@ -10,7 +10,7 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\EntityFileBundle\Entity\Interfaces\EntityFileInterface;
+use Austral\EntityBundle\Entity\Interfaces\FileInterface;
 use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 
@@ -18,7 +18,7 @@ use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
 use Austral\EntityTranslateBundle\Annotation\Translate;
 
@@ -35,7 +35,7 @@ use Ramsey\Uuid\Uuid;
  * @ORM\MappedSuperclass
  * @Translate(relationClass="Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface")
  */
-abstract class Config extends Entity implements ConfigInterface, EntityInterface, EntityTranslateMasterInterface, EntityFileInterface
+abstract class Config extends Entity implements ConfigInterface, EntityInterface, TranslateMasterInterface, FileInterface
 {
 
   use EntityFileTrait;

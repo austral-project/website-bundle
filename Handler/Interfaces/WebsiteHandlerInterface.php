@@ -11,7 +11,8 @@
 namespace Austral\WebsiteBundle\Handler\Interfaces;
 
 use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntitySeoInterface;
+use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
+use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\NotifyBundle\Mercure\Mercure;
 use Austral\WebsiteBundle\Services\ConfigVariable;
 
@@ -56,8 +57,20 @@ interface WebsiteHandlerInterface
   public function setPage(?EntityInterface $page): WebsiteHandlerInterface;
 
   /**
-   * @return EntityInterface|EntitySeoInterface|null
+   * @return EntityInterface|SeoInterface|null
    */
   public function getPage(): ?EntityInterface;
+
+  /**
+   * @param UrlParameterInterface|null $page
+   *
+   * @return $this
+   */
+  public function setUrlParameter(?UrlParameterInterface $page): WebsiteHandlerInterface;
+
+  /**
+   * @return UrlParameterInterface
+   */
+  public function getUrlParameter(): ?UrlParameterInterface;
 
 }

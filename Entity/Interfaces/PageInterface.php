@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\Entity\Interfaces;
 
-use Austral\EntitySeoBundle\Entity\Interfaces\EntitySeoInterface;
+use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 use Doctrine\Common\Collections\Collection;
 
 /**
@@ -27,9 +27,9 @@ interface PageInterface
   public function retreiveHomepagePage(PageInterface $page): PageInterface;
 
   /**
-   * @return EntitySeoInterface|PageInterface|null
+   * @return SeoInterface|PageInterface|null
    */
-  public function getPageParent(): ?EntitySeoInterface;
+  public function getPageParent(): ?SeoInterface;
 
   /**
    * @return PageInterface
@@ -91,31 +91,6 @@ interface PageInterface
    * @return Collection
    */
   public function getChildren(): Collection;
-
-  /**
-   * Add child
-   *
-   * @param DomainInterface $domain
-   *
-   * @return $this
-   */
-  public function addDomain(DomainInterface $domain): PageInterface;
-
-  /**
-   * Remove child
-   *
-   * @param DomainInterface $domain
-   *
-   * @return $this
-   */
-  public function removeDomain(DomainInterface $domain): PageInterface;
-
-  /**
-   * Get children
-   *
-   * @return Collection
-   */
-  public function getDomains(): Collection;
 
   /**
    * Get keyname

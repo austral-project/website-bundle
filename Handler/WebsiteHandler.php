@@ -13,23 +13,21 @@ namespace Austral\WebsiteBundle\Handler;
 use Austral\ContentBlockBundle\Entity\Component;
 use Austral\ContentBlockBundle\EntityManager\EditorComponentEntityManager;
 use Austral\ContentBlockBundle\Event\GuidelineEvent;
-use Austral\EntityFileBundle\Entity\Interfaces\EntityFileInterface;
-use Austral\EntitySeoBundle\Services\Pages;
+use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
+use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\HttpHandler;
 use Austral\NotifyBundle\Mercure\Mercure;
 use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
 use Austral\WebsiteBundle\Services\ConfigVariable;
 
-use Austral\ContentBlockBundle\Entity\Interfaces\EntityContentBlockInterface;
+use Austral\EntityBundle\Entity\Interfaces\ComponentsInterface;
 use Austral\ContentBlockBundle\Entity\Interfaces\LibraryInterface;
 use Austral\ContentBlockBundle\Entity\Traits\EntityComponentsTrait;
 use Austral\ContentBlockBundle\Event\ContentBlockEvent;
 
 use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntityRobotInterface;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntitySeoInterface;
 
-use Austral\WebsiteBundle\Entity\Interfaces\EntitySocialNetworkInterface;
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
 
 /**
@@ -40,9 +38,14 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
 {
 
   /**
-   * @var EntityInterface|EntitySeoInterface|null
+   * @var EntityInterface|null
    */
   protected ?EntityInterface $page = null;
+
+  /**
+   * @var UrlParameterInterface|FileInterface|null
+   */
+  protected ?UrlParameterInterface $urlParameter = null;
 
   /**
    * @var ConfigVariable
@@ -113,20 +116,11 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
    */
   protected function page(): WebsiteHandler
   {
-    if($this->page instanceof EntityRobotInterface)
-    {
-      $this->robotsParameters($this->page);
-    }
-    if($this->page instanceof EntitySeoInterface)
-    {
-      $this->seoParameters($this->page);
-    }
-    if($this->page instanceof EntitySocialNetworkInterface)
-    {
-      $this->socialParameters($this->page);
-    }
+    $this->robotsParameters();
+    $this->seoParameters($this->page);
+    $this->socialParameters($this->page);
 
-    if($this->page instanceof EntityContentBlockInterface)
+    if($this->page instanceof ComponentsInterface)
     {
       $contentBlockEvent = new ContentBlockEvent($this->page, "Front");
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
@@ -219,54 +213,52 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
    */
   protected function sitemap(): WebsiteHandler
   {
-    /** @var Pages $serviceSeo */
-    $seoPages = $this->container->get('austral.entity_seo.pages');
-    $this->templateParameters->addParameters("urls", $seoPages->getUrls());
+    /** @var UrlParameterManagement $urlParameterManagement */
+    $urlParameterManagement = $this->container->get('austral.seo.url_parameter.management');
+    $this->templateParameters->addParameters("urls", $urlParameterManagement->getUrlParametersByDomain());
     return $this;
   }
 
   /**
-   * @param EntityRobotInterface $page
-   *
    * @return $this
    * @throws \Exception
    */
-  protected function robotsParameters(EntityRobotInterface $page): WebsiteHandler
+  protected function robotsParameters(): WebsiteHandler
   {
     $this->templateParameters->addParameters("robots", array(
-      "index"           =>  $this->configVariable->getValueVariableByKey("site.index", false) && $page->getIsIndex(),
-      "follow"          =>  $this->configVariable->getValueVariableByKey("site.follow", false) && $page->getIsFollow(),
-      "status"          =>  $page->getStatus(),
+      "index"           =>  $this->configVariable->getValueVariableByKey("site.index", false) && $this->urlParameter->getIsIndex(),
+      "follow"          =>  $this->configVariable->getValueVariableByKey("site.follow", false) && $this->urlParameter->getIsFollow(),
+      "status"          =>  $this->urlParameter->getStatus(),
     ));
     return $this;
   }
 
   /**
-   * @param EntitySeoInterface $page
+   * @param EntityInterface|null $page
    *
    * @return $this
    */
-  protected function seoParameters(EntitySeoInterface $page): WebsiteHandler
+  protected function seoParameters(?EntityInterface $page = null): WebsiteHandler
   {
     $this->templateParameters->addParameters("seo", array(
-      "title"           =>  $page->getRefTitle() ?? $page->__toString(),
-      "description"     =>  $page->getRefDescription() ?? $page->__toString(),
-      "canonical"       =>  $page->getCanonical(),
+      "title"           =>  $this->urlParameter->getSeoTitle() ?? ($page ? $page->__toString() : ""),
+      "description"     =>  $this->urlParameter->getSeoDescription() ?? ($page ? $page->__toString() : ""),
+      "canonical"       =>  $this->urlParameter->getSeoCanonical(),
     ));
     return $this;
   }
 
   /**
-   * @param EntitySocialNetworkInterface|EntityFileInterface $page
+   * @param EntityInterface|FileInterface|null $page
    *
    * @return $this
    */
-  protected function socialParameters(EntitySocialNetworkInterface $page): WebsiteHandler
+  protected function socialParameters(?EntityInterface $page = null): WebsiteHandler
   {
     $this->templateParameters->addParameters("social", array(
-      "title"           =>  $page->getSocialTitle(),
-      "description"     =>  $page->getSocialDescription(),
-      "image"           =>  $this->uploadsFileLinkGenerator($page, 'socialImage', "original", "i", 1200, 630)
+      "title"           =>  $this->urlParameter->getSocialTitle() ?? ($page ? $page->__toString() : ""),
+      "description"     =>  $this->urlParameter->getSocialDescription() ?? ($page ? $page->__toString() : ""),
+      "image"           =>  $this->uploadsFileLinkGenerator($this->urlParameter, 'socialImage', "original", "i", 1200, 630)
     ));
     return $this;
   }
@@ -285,13 +277,13 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   }
 
   /**
-   * @param EntityFileInterface $object
+   * @param FileInterface $object
    * @param string $fieldname
    * @param array $params
    *
    * @return ?string
    */
-  protected function downloadFileLinkGenerator(EntityFileInterface $object, string $fieldname, array $params = array()): ?string
+  protected function downloadFileLinkGenerator(FileInterface $object, string $fieldname, array $params = array()): ?string
   {
     if($this->container->has('austral.entity_file.link.generator'))
     {
@@ -301,7 +293,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   }
 
   /**
-   * @param EntityFileInterface $object
+   * @param FileInterface $object
    * @param string $fieldname
    * @param string $type
    * @param string $mode
@@ -311,7 +303,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
    *
    * @return ?string
    */
-  protected function uploadsFileLinkGenerator(EntityFileInterface $object, string $fieldname, string $type = "original", string $mode = "i", int $width = null, int $height = null, array $params = array()): ?string
+  protected function uploadsFileLinkGenerator(FileInterface $object, string $fieldname, string $type = "original", string $mode = "i", int $width = null, int $height = null, array $params = array()): ?string
   {
     if($this->container->has('austral.entity_file.link.generator'))
     {
@@ -319,7 +311,6 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
     }
     return null;
   }
-
 
   /**
    * @param EntityInterface|null $page
@@ -333,11 +324,30 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   }
 
   /**
-   * @return EntityInterface|EntitySeoInterface|EntityTemplateTrait|null
+   * @return EntityInterface|SeoInterface|EntityTemplateTrait|null
    */
   public function getPage(): ?EntityInterface
   {
     return $this->page;
+  }
+
+  /**
+   * @param UrlParameterInterface |null $urlParameter
+   *
+   * @return $this
+   */
+  public function setUrlParameter(?UrlParameterInterface $urlParameter): WebsiteHandler
+  {
+    $this->urlParameter = $urlParameter;
+    return $this;
+  }
+
+  /**
+   * @return UrlParameterInterface |SeoInterface|EntityTemplateTrait|null
+   */
+  public function getUrlParameter(): ?UrlParameterInterface
+  {
+    return $this->urlParameter;
   }
 
 }

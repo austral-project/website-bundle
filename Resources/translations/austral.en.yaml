@@ -3,9 +3,12 @@ pages:
     pagesManage:
       singular:                                 Page
       plural:                                   Pages
-    pageByDomain:
-      singular:                                 "%domainName% Page"
-      plural:                                   "%domainName% Pages"
+    pagesManageByDomain:
+      singular:                                 "Page : %domainName%"
+      plural:                                   "Pages : %domainName%"
+    pagesManageForAllDomain:
+      singular:                                 "Page for all domains"
+      plural:                                   "Pages for all domains"
     config:
       singular:                                 Config
       plural:                                   Config
@@ -18,9 +21,6 @@ pages:
     configTracking:
       singular:                                 Tracking
       plural:                                   Tracking
-    configDomain:
-      singular:                                 Domain
-      plural:                                   Domains
     configArea:
       singular:                                 Area
       plural:                                   Areas
@@ -29,22 +29,8 @@ pages:
     page:
       homepage:                                 Homepage
 
-
-dashboard:
-  tiles:
-    pages:
-      published:
-        entitled:                               Pages published
-      draft:
-        entitled:                               Pages draft
-
-
 fieldset:
   socialNetwork:                                Share social network
-
-button:
-  new:
-    subDomain:                                  Add new sub domain
 
 fields:
   australPictoClass:
@@ -65,14 +51,8 @@ fields:
     entitled:                                   Text content
   contentBoolean:
     entitled:                                   Boolean value
-  domain:
-    entitled:                                   Domain
   homepage:
     entitled:                                   Homepage
-  subDomain:
-    entitled:                                   Sub domain
-  subDomains:
-    entitled:                                   Sub domains
   entityExtends:
     entitled:                                   Entity Extends
   titleNavigation:
@@ -80,20 +60,6 @@ fields:
     placeholder:                                Enter title for navigation ...
   template:
     entitled:                                   Template
-  isMaster:
-    entitled:                                   Is master ?
-  onePage:
-    entitled:                                   Has unique page ?
-  scheme:
-    entitled:                                   Scheme
-  redirectUrl:
-    entitled:                                   Redirect URL
-  isVirtual:
-    entitled:                                   Is virtual ?
-  favicon:
-    entitled:                                   Favicon
-  nameDomain:
-    entitled:                                   Name
 
 choices:
   config:

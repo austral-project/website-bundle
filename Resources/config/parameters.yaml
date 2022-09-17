@@ -7,7 +7,6 @@ parameters:
   austral.entity.page_translate.class:                                      App\Entity\Austral\WebsiteBundle\PageTranslate
   austral.entity.tracking.class:                                            App\Entity\Austral\WebsiteBundle\Tracking
   austral.entity.tracking_translate.class:                                  App\Entity\Austral\WebsiteBundle\TrackingTranslate
-  austral.entity.domain.class:                                              App\Entity\Austral\WebsiteBundle\Domain
 
 ##### Doctrine Resolve target Entities
   austral.resolve_target_entities.website:
@@ -17,4 +16,3 @@ parameters:
     Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface:         "%austral.entity.page_translate.class%"
     Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface:              "%austral.entity.tracking.class%"
     Austral\WebsiteBundle\Entity\Interfaces\TrackingTranslateInterface:     "%austral.entity.tracking_translate.class%"
-    Austral\WebsiteBundle\Entity\Interfaces\DomainInterface:                "%austral.entity.domain.class%"

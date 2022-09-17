@@ -11,7 +11,7 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use Austral\AdminBundle\Event\DashboardEvent;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntityRobotInterface;
+use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
 use Austral\WebsiteBundle\Services\ConfigVariable;
 
 use Austral\AdminBundle\Dashboard\Values as DashboardValues;
@@ -62,48 +62,6 @@ class DashboardListener
   public function dashboard(DashboardEvent $dashboardEvent)
   {
     $modules = $this->container->get('austral.admin.modules');
-
-    $nbPagesPublished = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use($modules) {
-      $queryBuilder->leftJoin("root.translates", "translates")
-        ->where("translates.status = :status")
-        ->andWhere("translates.language = :language")
-        ->setParameter("status", EntityRobotInterface::STATUS_PUBLISHED)
-        ->setParameter("language", $modules->getModuleByKey("page")->getLanguageDefault());
-    });
-
-    $nbPagesDraft = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use($modules) {
-      $queryBuilder->leftJoin("root.translates", "translates")
-        ->where("translates.status = :status")
-        ->andWhere("translates.language = :language")
-        ->setParameter("status", EntityRobotInterface::STATUS_DRAFT)
-        ->setParameter("language", $modules->getModuleByKey("page")->getLanguageDefault());
-    });
-
-    $dashboardTilePagesPublished = new DashboardValues\Tile("pages_published");
-    $dashboardTilePagesPublished->setEntitled("dashboard.tiles.pages.published.entitled")
-      ->setIsTranslatableText(true)
-      ->setColorNum(4)
-      ->setPicto("file")
-      ->setValue($nbPagesPublished);
-
-    $dashboardTilePagesDraft = new DashboardValues\Tile("pages_draft");
-    $dashboardTilePagesDraft->setEntitled("dashboard.tiles.pages.draft.entitled")
-      ->setIsTranslatableText(true)
-      ->setPicto("design")
-      ->setColorNum(5)
-      ->setValue($nbPagesDraft);
-
-    if($modules->getModuleByKey("page")->isGranted())
-    {
-      $dashboardTilePagesPublished->setUrl($modules->getModuleByKey("page")->generateUrl("list"));
-      $dashboardTilePagesDraft->setUrl($modules->getModuleByKey("page")->generateUrl("list"));
-    }
-
-
-    $dashboardEvent->getDashboardBlock()->getChild("austral_tiles_values")
-      ->addValue($dashboardTilePagesPublished)
-      ->addValue($dashboardTilePagesDraft);
-
 
     $dashboardOnOffIndex = new DashboardValues\OnOff("onOff_index");
     $dashboardOnOffIndex->setEntitled("fields.isIndex.entitled")

@@ -11,24 +11,26 @@
 namespace Austral\WebsiteBundle\Entity\Traits;
 
 use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateChildInterface;
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
 use Exception;
 
 /**
  * Austral Translate Entity Social Network To Master Translate Trait.
  * @author Matthieu Beurel <matthieu@austral.dev>
+ * @deprecated
  */
 trait EntitySocialNetworkTranslateMasterTrait
 {
   use EntityTranslateMasterTrait;
 
   /**
-   * @return EntitySocialNetworkTrait|EntityTranslateChildInterface|EntityInterface
+   * @return SocialNetworkInterface|TranslateChildInterface|EntityInterface
    * @throws Exception
    */
-  private function getTranslateCurrentSocialNetwork(): EntityTranslateChildInterface
+  private function getTranslateCurrentSocialNetwork(): SocialNetworkInterface
   {
     return $this->getTranslateCurrent();
   }
@@ -48,10 +50,10 @@ trait EntitySocialNetworkTranslateMasterTrait
    *
    * @param string|null $socialTitle
    *
-   * @return EntitySocialNetworkTranslateMasterTrait|EntityTranslateMasterInterface|EntityInterface
+   * @return SocialNetworkInterface|TranslateMasterInterface|EntityInterface
    * @throws Exception
    */
-  public function setSocialTitle(?string $socialTitle): EntityInterface
+  public function setSocialTitle(?string $socialTitle): SocialNetworkInterface
   {
     if($this->getTranslateCurrentSocialNetwork())
     {
@@ -75,10 +77,10 @@ trait EntitySocialNetworkTranslateMasterTrait
    *
    * @param string|null $socialDescription
    *
-   * @return EntitySocialNetworkTranslateMasterTrait|EntityTranslateMasterInterface|EntityInterface
+   * @return SocialNetworkInterface|TranslateMasterInterface|EntityInterface
    * @throws Exception
    */
-  public function setSocialDescription(?string $socialDescription): EntityInterface
+  public function setSocialDescription(?string $socialDescription): SocialNetworkInterface
   {
     if($this->getTranslateCurrentSocialNetwork())
     {
@@ -102,10 +104,10 @@ trait EntitySocialNetworkTranslateMasterTrait
    *
    * @param string|null $socialImage
    *
-   * @return EntitySocialNetworkTranslateMasterTrait|EntityTranslateMasterInterface|EntityInterface
+   * @return SocialNetworkInterface|TranslateMasterInterface|EntityInterface
    * @throws Exception
    */
-  public function setSocialImage(?string $socialImage): EntityInterface
+  public function setSocialImage(?string $socialImage): SocialNetworkInterface
   {
     if($this->getTranslateCurrentSocialNetwork())
     {

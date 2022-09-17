@@ -11,21 +11,25 @@
 
 namespace Austral\WebsiteBundle\EventSubscriber;
 
-use Austral\EntitySeoBundle\Services\Pages;
+use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
-use Austral\ToolsBundle\Configuration\ConfigurationInterface;
-use Austral\ToolsBundle\Services\Debug;
-use Austral\WebsiteBundle\Entity\Interfaces\DomainInterface;
-use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
-use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
+use Austral\HttpBundle\Services\DomainsManagement;
+use Austral\HttpBundle\Entity\Interfaces\DomainInterface;
 use Austral\HttpBundle\Event\Interfaces\HttpEventInterface;
 use Austral\HttpBundle\EventSubscriber\HttpEventSubscriber;
+
+use Austral\ToolsBundle\Configuration\ConfigurationInterface;
+use Austral\ToolsBundle\Services\Debug;
+
+use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
+use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
-use Austral\WebsiteBundle\Services\DomainRequest;
 use Austral\WebsiteBundle\Template\TemplateParameters;
+
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\QueryBuilder;
+
+use Doctrine\ORM\Query\QueryException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,9 +51,9 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
   protected string $debugContainer = "http.website.event";
 
   /**
-   * @var DomainRequest
+   * @var DomainsManagement
    */
-  protected DomainRequest $domainRequest;
+  protected DomainsManagement $domains;
 
   /**
    * HttpSubscriber constructor.
@@ -57,12 +61,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @param ContainerInterface $container
    * @param ConfigurationInterface $configuration
    * @param Debug $debug
-   * @param DomainRequest $domainRequest
+   * @param DomainsManagement $domains
+   *
+   * @throws QueryException
    */
-  public function __construct(ContainerInterface $container, ConfigurationInterface $configuration,  DomainRequest $domainRequest, Debug $debug)
+  public function __construct(ContainerInterface $container, ConfigurationInterface $configuration,  DomainsManagement $domains, Debug $debug)
   {
     parent::__construct($container, $configuration, $debug);
-    $this->domainRequest = $domainRequest;
+    $this->domains = $domains->initialize();
   }
 
   /**
@@ -90,7 +96,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $currentLocal = null;
 
     /** @var DomainInterface $currentDomain */
-    $currentDomain = $this->domainRequest->getCurrentDomain();
+    $currentDomain = $this->domains->getCurrentDomain();
 
     if($currentDomain && $currentDomain->getLanguage()) {
       $currentLocal = $currentDomain->getLanguage();
@@ -120,7 +126,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $requestUri = urldecode($httpEvent->getKernelEvent()->getRequest()->getRequestUri());
     $pathInfo = urldecode(trim($httpEvent->getKernelEvent()->getRequest()->getPathInfo(), "/"));
 
-    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $httpEvent->getKernelEvent()->getRequest()->getLocale()))
+    /** @var DomainInterface $domain */
+    $domain = $this->domains->getCurrentDomain();
+
+    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain->getId(), $httpEvent->getKernelEvent()->getRequest()->getLocale()))
     {
       $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
       $response = new RedirectResponse($urlRedirect, $redirection->getStatusCode());
@@ -130,17 +139,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     $host = $httpEvent->getKernelEvent()->getRequest()->headers->get('host');
 
-    /** @var DomainInterface $domain */
-    $domain = $this->domainRequest->retrieveCurrentDomain(!$this->container->get('security.authorization_checker')->isGranted("IS_AUTHENTICATED_FULLY"))->getCurrentDomain();
-
-    /** @var Pages $servicePages */
-    $servicePages = $this->container->get("austral.entity_seo.pages");
-
     $slug = $requestAttributes->get('slug', null);
     if(!$domain)
     {
       /** @var DomainInterface $domainMaster */
-      $domainMaster = $this->domainRequest->getDomainMaster();
+      $domainMaster = $this->domains->getDomainMaster();
       if($domainMaster)
       {
         $response = new RedirectResponse("{$domainMaster->getScheme()}://{$domainMaster->getDomain()}".($slug ? "/{$slug}" : ""), 301);
@@ -159,11 +162,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }
-      elseif($domain->getHomepage())
-      {
-        $servicePages->setHomepageId($domain->getHomepage()->getId());
-      }
+      $this->domains->setFilterDomainId($domain->getId());
     }
+
+    /** @var UrlParameterManagement $urlParameterManagement */
+    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management");
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");
@@ -176,7 +179,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $handlerMethod = $requestAttributes->get('_handler_method', null);
     if($requestAttributes->get('_austral_page', false))
     {
-      if(!$currentPage = $servicePages->retreiveByRefUrl($slug))
+      if(!$urlParameter = $urlParameterManagement->retrieveUrlParameters($slug))
       {
         if(!$domain || !$domain->getOnePage())
         {
@@ -184,11 +187,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         }
         else
         {
-          $currentPage = $domain->getHomepage();
+          $urlParameter = $urlParameterManagement->retrieveUrlParameters("");
         }
       }
-
-      $websiteHandler->setPage($currentPage);
+      $currentPage = $urlParameter->getObject();
+      $websiteHandler->setUrlParameter($urlParameter)->setPage($currentPage);
       $handlerMethod = $handlerMethod ? : "page";
       $templateName = "default";
       if(method_exists($currentPage, "getTemplate"))
@@ -266,7 +269,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     }
 
     /** @var Pages $servicePages */
-    $servicePages = $this->container->get("austral.entity_seo.pages");
+    $servicePages = $this->container->get("austral.seo.pages");
 
     /** @var PageInterface $currentPage */
     if($currentPage = $servicePages->retreiveByCode("Page_error-{$response->getStatusCode()}"))

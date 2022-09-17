@@ -11,6 +11,7 @@
 namespace Austral\WebsiteBundle\Entity\Traits;
 
 use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
 use Austral\EntityFileBundle\Annotation as AustralFile;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -18,6 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Austral Translate Entity Social Network Trait.
  * @author Matthieu Beurel <matthieu@austral.dev>
+ * @deprecated
  */
 trait EntitySocialNetworkTrait
 {
@@ -51,9 +53,9 @@ trait EntitySocialNetworkTrait
    *
    * @param string|null $socialTitle
    *
-   * @return EntitySocialNetworkTrait|EntityInterface
+   * @return SocialNetworkInterface|EntityInterface
    */
-  public function setSocialTitle(?string $socialTitle): EntityInterface
+  public function setSocialTitle(?string $socialTitle): SocialNetworkInterface
   {
     $this->socialTitle = $socialTitle;
     return $this;
@@ -74,9 +76,9 @@ trait EntitySocialNetworkTrait
    *
    * @param string|null $socialDescription
    *
-   * @return EntitySocialNetworkTrait|EntityInterface
+   * @return SocialNetworkInterface|EntityInterface
    */
-  public function setSocialDescription(?string $socialDescription): EntityInterface
+  public function setSocialDescription(?string $socialDescription): SocialNetworkInterface
   {
     $this->socialDescription = $socialDescription;
     return $this;
@@ -97,9 +99,9 @@ trait EntitySocialNetworkTrait
    *
    * @param string|null $socialImage
    *
-   * @return EntitySocialNetworkTrait|EntityInterface
+   * @return SocialNetworkInterface|EntityInterface
    */
-  public function setSocialImage(?string $socialImage): EntityInterface
+  public function setSocialImage(?string $socialImage): SocialNetworkInterface
   {
     $this->socialImage = $socialImage;
     return $this;

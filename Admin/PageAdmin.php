@@ -12,7 +12,6 @@ namespace Austral\WebsiteBundle\Admin;
 
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
-use Austral\WebsiteBundle\Entity\Domain;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\ContentBlockBundle\Field\ContentBlockField;
@@ -50,21 +49,9 @@ class PageAdmin extends Admin implements AdminModuleInterface
   {
     return array(
       FormAdminEvent::EVENT_UPDATE_BEFORE     =>  "formUpdateBefore",
+      FormAdminEvent::EVENT_END               =>  "formEnd",
       ListAdminEvent::EVENT_END               =>  "listEnd",
     );
-  }
-
-  /**
-   * @param ListAdminEvent $listAdminEvent
-   *
-   * @final
-   */
-  protected function listEnd(ListAdminEvent $listAdminEvent)
-  {
-    if(!$listAdminEvent->getListMapper())
-    {
-      $listAdminEvent->getTemplateParameters()->setPath("@AustralWebsite/Admin/Page/moduleList.html.twig");
-    }
   }
 
   /**
@@ -136,16 +123,32 @@ class PageAdmin extends Admin implements AdminModuleInterface
   }
 
   /**
+   * @param string|null $domainId
+   *
+   * @return bool
+   */
+  protected function isMultiDomain(?string $domainId = null): bool
+  {
+    $isMultidomain = false;
+    if(!$domainId)
+    {
+      if($this->container->get("austral.http.domains.management")->getEnabledDomainWithoutVirtual() > 1)
+      {
+        $isMultidomain = true;
+      }
+    }
+    return $isMultidomain;
+  }
+
+
+  /**
    * @param ListAdminEvent $listAdminEvent
    */
   public function configureListMapper(ListAdminEvent $listAdminEvent)
   {
-    $homepageId = null;
-    if($filters = $listAdminEvent->getCurrentModule()->getParametersByKey("filters"))
-    {
-      $homepageId = $filters["homepageId"];
-    }
-
+    /** @var string|null $domainId */
+    $domainId = $listAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
+    $isMultiDomain = $this->isMultiDomain($domainId);
     $listAdminEvent->getListMapper()
       ->addColumn(new Column\Template("picto", " ", "@AustralWebsite/Admin/_Components/pagePicto.html.twig"))
       ->addColumn(new Column\Template("name", "form.labels.title", "@AustralWebsite/Admin/_Components/pageTitle.html.twig", array(
@@ -184,45 +187,47 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ), $listAdminEvent->getCurrentModule()->generateUrl("change", array('language'=>"__language__")),
           $listAdminEvent->getCurrentModule()->isGranted("edit")
         ), "page-status"
-      )
-      ->getSection("homepage")
-        ->setMapperType("list")
-        ->setTitle("pages.list.page.homepage")
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use ($homepageId) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($homepageId) {
-            if($homepageId) {
-              return $queryBuilder->where("root.id = :homepageId")
-                ->setParameter("homepageId", $homepageId);
-            }
-            else {
-              return $queryBuilder->where("root.isHomepage = :isHomepage")
-                ->setParameter("isHomepage", true);
-            }
-          });
-          $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
-            return $queryBuilder->orderBy("root.position", "ASC")
-              ->leftJoin("root.translates", "translates")->addSelect("translates")
-              ->addOrderBy("translates.language", "ASC");
-          });
-        })
-      ->end()
+      );
 
-      ->getSection("default")
+      if(!$isMultiDomain)
+      {
+        $listAdminEvent->getListMapper()->getSection("homepage")
+          ->setMapperType("list")
+          ->setTitle("pages.list.page.homepage")
+          ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
+            $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) {
+              $queryBuilder->andWhere("root.isHomepage = :isHomepage")
+                ->setParameter("isHomepage", true);
+              return $queryBuilder;
+            });
+            $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
+              return $queryBuilder->orderBy("root.position", "ASC")
+                ->leftJoin("root.translates", "translates")->addSelect("translates")
+                ->addOrderBy("translates.language", "ASC");
+            });
+          })
+          ->end();
+      }
+
+      $listAdminEvent->getListMapper()->getSection("default")
         ->setMapperType("list")
         ->childrenRow(function(PageInterface $page) {
           return $page->getChildren();
         })
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use ($homepageId) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($homepageId) {
-            if($homepageId) {
-              return $queryBuilder->leftJoin("root.parent", "parent")
-                ->where("parent.id = :homepageId")
-                ->setParameter("homepageId", $homepageId);
-            }
-            else {
-              return $queryBuilder->leftJoin("root.parent", "parent")
-                ->where("root.isHomepage != :isHomepage")
+        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use($isMultiDomain) {
+          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($isMultiDomain) {
+            if(!$isMultiDomain)
+            {
+              $queryBuilder->leftJoin("root.parent", "parent")
+                ->andWhere("parent.isHomepage = :isParentHomepage")
+                ->setParameter("isParentHomepage", true)
+                ->andWhere("root.isHomepage != :isHomepage")
                 ->setParameter("isHomepage", true);
+            }
+            else
+            {
+              $queryBuilder->leftJoin("root.parent", "parent")
+                ->andWhere("parent.id IS NULL");
             }
           });
           $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
@@ -245,15 +250,13 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
-    $homepageId = null;
-    if($filters = $formAdminEvent->getCurrentModule()->getParametersByKey("filters"))
-    {
-      $homepageId = $filters["homepageId"];
-    }
+    /** @var string|null $domainId */
+    $domainId = $formAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
+    $isMultiDomain = $this->isMultiDomain($domainId);
 
-    $countPages = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use ($homepageId) {
-      $queryBuilder->where("root.homepageId = :homepageId")
-        ->setParameter("homepageId", $homepageId);
+    $countPages = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use ($domainId) {
+      $queryBuilder->where("root.domainId = :domainId")
+        ->setParameter("domainId", $domainId);
     });
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
@@ -261,19 +264,22 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ->setViewName(false)
         ->add(Field\EntityField::create("parent", Page::class,
           array(
-            'query_builder'     => function (EntityRepository $er) use($formAdminEvent, $homepageId) {
+            'query_builder'     => function (EntityRepository $er) use($formAdminEvent, $domainId) {
               $queryBuilder = $er->createQueryBuilder('u')
                 ->where("u.id != :pageId")
                 ->setParameter("pageId", $formAdminEvent->getFormMapper()->getObject()->getId())
                 ->leftJoin("u.translates", "translates")->addSelect("translates")
                 ->orderBy('translates.refUrl', 'ASC');
-              if($homepageId) {
-                $queryBuilder->andWhere("u.homepageId = :homepageId")
-                  ->setParameter("homepageId", $homepageId);
+              if($domainId) {
+                $queryBuilder->andWhere("u.domainId = :domainId")
+                  ->setParameter("domainId", $domainId);
+              }
+              else {
+                $queryBuilder->andWhere("u.domainId IS NULL");
               }
               return $queryBuilder;
             },
-            'choice_label' => 'path',
+            'choice_label' => '__toString',
             'isView' => array(
               function($object) {
                 return !$object->getIsHomepage();
@@ -301,41 +307,14 @@ class PageAdmin extends Admin implements AdminModuleInterface
                 "--element-choice-hover-color:var(--color-green-100)"
               )
             )
-          ), array('isView' => function(){
-            return $this->container->get('security.authorization_checker')->isGranted('ROLE_ROOT');
+          ), array('isView' => function() use($isMultiDomain) {
+            return $this->container->get('security.authorization_checker')->isGranted('ROLE_ROOT') && !$isMultiDomain;
           })
-        ))
-        ->add(Field\ChoiceField::create("status",
-          array(
-            "choices.status.unpublished"   =>  array(
-              "value"   =>  "unpublished",
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-main-20)",
-                "--element-choice-current-color:var(--color-main-90)",
-                "--element-choice-hover-color:var(--color-main-90)"
-              )
-            ),
-            "choices.status.draft"         =>  array(
-              "value"   =>  "draft",
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-purple-20)",
-                "--element-choice-current-color:var(--color-purple-100)",
-                "--element-choice-hover-color:var(--color-purple-100)"
-              )
-            ),
-            "choices.status.published"     =>  array(
-              "value"   =>  "published",
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-green-20)",
-                "--element-choice-current-color:var(--color-green-100)",
-                "--element-choice-hover-color:var(--color-green-100)"
-              )
-            )
-          )
         ))
       ->end()
 
       ->addFieldset("fieldset.dev.config")
+        ->setCollapse(true)
         ->setIsView($this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"))
         ->add(Field\TextField::create("keyname", array(
             "autoConstraints" => false,
@@ -410,36 +389,32 @@ class PageAdmin extends Admin implements AdminModuleInterface
   /**
    * @param FormAdminEvent $formAdminEvent
    *
+   * @final
+   */
+  protected function formEnd(FormAdminEvent $formAdminEvent)
+  {
+    if($formAdminEvent->getFormMapper()->getObject()->getIsHomepage())
+    {
+      $formAdminEvent->getFormMapper()
+        ->getSubFormMapperByKey("urlParameters")
+        ->removeAllField("pathLast");
+    }
+  }
+
+  /**
+   * @param FormAdminEvent $formAdminEvent
+   *
    * @throws Exception
    */
   protected function formUpdateBefore(FormAdminEvent $formAdminEvent)
   {
 
-
     /** @var PageInterface|EntityInterface $object */
     $object = $formAdminEvent->getFormMapper()->getObject();
-
-    if($filters = $formAdminEvent->getCurrentModule()->getParametersByKey("filters"))
-    {
-      $object->setHomepageId($filters["homepageId"]);
-    }
 
     if(!$object->getKeyname())
     {
       $object->setKeyname($object->getName()."-".$object->getId());
-    }
-
-    if($object->getIsHomepage())
-    {
-      $object->setParent(null);
-      $object->setAustralPictoClass( "austral-picto-home");
-
-      /** @var Domain $domain */
-      if($domain = $formAdminEvent->getCurrentModule()->getParametersByKey("domain"))
-      {
-        $domain->setHomepage($object);
-        $formAdminEvent->getAdminHandler()->getEntityManager()->update($domain, false);
-      }
     }
 
     $initDefaultParent = false;
@@ -455,9 +430,16 @@ class PageAdmin extends Admin implements AdminModuleInterface
     {
       $initDefaultParent = true;
     }
-    if($initDefaultParent && !$object->getIsHomepage())
+
+    /** @var string|null $domainId */
+    $domainId = $formAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
+    $isMultiDomain = $this->isMultiDomain($domainId);
+    if($initDefaultParent && !$object->getIsHomepage() && !$isMultiDomain)
     {
-      $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKeyname("homepage");
+      $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKeyname("homepage", function(QueryBuilder $queryBuilder) use($domainId) {
+        $queryBuilder->andWhere("root.domainId = :domainId")
+          ->setParameter("domainId", $domainId);
+      });
       $object->setParent($parentDefault);
     }
   }

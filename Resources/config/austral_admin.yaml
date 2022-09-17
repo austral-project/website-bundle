@@ -12,7 +12,7 @@ services:
 
   austral.website.module.listener:
     class: Austral\WebsiteBundle\Listener\ModuleListener
-    arguments: [ "@translator", "@austral.website.domain", "@austral.entity_manager.page","@austral.entity_file.link.generator", "@austral.admin.config" ]
+    arguments: [ "@translator", "@austral.http.domains.management", "@austral.entity_manager.page","@austral.entity_file.link.generator", "@austral.admin.config" ]
     tags:
       - { name: kernel.event_listener, event: "austral.event.module.admin.add", method: moduleAdd }
 
@@ -21,13 +21,11 @@ parameters:
   austral.admin.class.page.class:                                  Austral\WebsiteBundle\Admin\PageAdmin
   austral.admin.class.config.class:                                Austral\WebsiteBundle\Admin\ConfigAdmin
   austral.admin.class.tracking.class:                              Austral\WebsiteBundle\Admin\TrackingAdmin
-  austral.admin.class.domain.class:                                Austral\WebsiteBundle\Admin\DomainAdmin
 
   austral.admin.modules.website_bundle.page.enabled:                  true
   austral.admin.modules.website_bundle.config.enabled:                true
   austral.admin.modules.website_bundle.config.tracking.enabled:       true
   austral.admin.modules.website_bundle.config.config.enabled:         true
-  austral.admin.modules.website_bundle.config.domain.enabled:         true
 
   austral_admin.modules.website_bundle:
     page:
@@ -52,14 +50,6 @@ parameters:
       actions:
         index:                    "listChildrenModules"
       children:
-        domain:
-          enabled:                "%austral.admin.modules.website_bundle.config.domain.enabled%"
-          name:                   "Domain"
-          picto:                  "austral-picto-globe"
-          pictoTile:              "parameters"
-          route:                  "domain"
-          class:                  "%austral.admin.class.domain.class%"
-          translate:              "male_c"
         tracking:
           enabled:                "%austral.admin.modules.website_bundle.config.tracking.enabled%"
           name:                   "Tracking"

@@ -10,11 +10,11 @@
 
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
 
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateChildInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateChildTrait;
 
 use Austral\EntityFileBundle\Annotation as AustralFile;
@@ -35,7 +35,7 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class ConfigTranslate extends Entity implements ConfigTranslateInterface, EntityInterface, EntityTranslateChildInterface
+abstract class ConfigTranslate extends Entity implements ConfigTranslateInterface, EntityInterface, TranslateChildInterface
 {
 
   use EntityTranslateChildTrait;
@@ -49,12 +49,12 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
   protected $id;
   
   /**
-   * @var ConfigInterface|EntityTranslateMasterInterface
+   * @var ConfigInterface|TranslateMasterInterface
    *
    * @ORM\ManyToOne(targetEntity="\Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface", inversedBy="translates", cascade={"persist"})
    * @ORM\JoinColumn(name="master_id", referencedColumnName="id")
    */
-  protected EntityTranslateMasterInterface $master;
+  protected TranslateMasterInterface $master;
 
   /**
    * @var string|null

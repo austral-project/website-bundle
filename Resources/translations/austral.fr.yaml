@@ -3,12 +3,12 @@ pages:
     pagesManage:
       singular:                                 Page
       plural:                                   Pages
-    pageByDomain:
-      singular:                                 "Page de %domainName%"
-      plural:                                   "Pages de %domainName%"
-    pageAll:
-      singular:                                 "page"
-      plural:                                   "Pages"
+    pagesManageByDomain:
+      singular:                                 "Page : %domainName%"
+      plural:                                   "Pages : %domainName%"
+    pagesManageForAllDomain:
+      singular:                                 "Page pour tous les domaines"
+      plural:                                   "Pages pour tous les domaines"
     config:
       singular:                                 Configuration
       plural:                                   Configuration
@@ -21,9 +21,6 @@ pages:
     configTracking:
       singular:                                 Tracking
       plural:                                   Tracking
-    configDomain:
-      singular:                                 Domaine
-      plural:                                   Domaines
     area:
       singular:                                 Zone
       plural:                                   Zones
@@ -32,20 +29,8 @@ pages:
     page:
       homepage:                                 Page d'accueil
 
-dashboard:
-  tiles:
-    pages:
-      published:
-        entitled:                               Pages publiées
-      draft:
-        entitled:                               Pages privées
-
 fieldset:
   socialNetwork:                                Partage réseau social
-
-button:
-  new:
-    subDomain:                                  Ajouter un sous domaine
 
 fields:
   australPictoClass:
@@ -66,8 +51,6 @@ fields:
     entitled:                                   Contenu texte
   contentBoolean:
     entitled:                                   Valeur booléenne
-  domain:
-    entitled:                                   Domaine
   homepage:
     entitled:                                   Page d'accueil
   subDomain:
@@ -81,20 +64,6 @@ fields:
     placeholder:                                Saisir le titre pour la navigation ...
   template:
     entitled:                                   Template
-  isMaster:
-    entitled:                                   Est le domaine principal ?
-  onePage:
-    entitled:                                   N'a qu'une seule page ?
-  scheme:
-    entitled:                                   Scheme
-  redirectUrl:
-    entitled:                                   Url de redirection
-  isVirtual:
-    entitled:                                   Est virtuel ?
-  favicon:
-    entitled:                                   Favicon
-  nameDomain:
-    entitled:                                   Nom
 
 choices:
   config:

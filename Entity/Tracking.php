@@ -14,7 +14,7 @@ namespace Austral\WebsiteBundle\Entity;
 use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
-use Austral\EntityTranslateBundle\Entity\Interfaces\EntityTranslateMasterInterface;
+use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface;
 use Doctrine\Common\Collections\Collection;
@@ -30,7 +30,7 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class Tracking extends Entity implements TrackingInterface, EntityInterface, EntityTranslateMasterInterface
+abstract class Tracking extends Entity implements TrackingInterface, EntityInterface, TranslateMasterInterface
 {
 
   const TYPE_USER = "user";

@@ -11,7 +11,7 @@
 namespace Austral\WebsiteBundle\Admin;
 
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
-use Austral\EntitySeoBundle\Entity\Interfaces\EntitySeoInterface;
+use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 
 use Austral\FilterBundle\Filter\Type as FilterType;
@@ -93,8 +93,8 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
     $pagesList = array();
-    $pages = $this->container->get("austral.entity_seo.pages")->getUrls();
-    /** @var EntitySeoInterface|EntityInterface $object */
+    $pages = $this->container->get("austral.seo.pages")->getUrls();
+    /** @var SeoInterface|EntityInterface $object */
     foreach($pages as $object)
     {
       if(!array_key_exists($object->getClassname(), $pagesList))
@@ -103,7 +103,6 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
       }
       $pagesList[$object->getClassname()][$object->__toString()] = "{$object->getClassname()}:{$object->getId()}";
     }
-
 
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.generalInformation")
