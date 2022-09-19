@@ -10,12 +10,6 @@ services:
     tags:
       - { name: kernel.event_listener, event: "austral.event.admin.dashboard", method: dashboard }
 
-  austral.website.module.listener:
-    class: Austral\WebsiteBundle\Listener\ModuleListener
-    arguments: [ "@translator", "@austral.http.domains.management", "@austral.entity_manager.page","@austral.entity_file.link.generator", "@austral.admin.config" ]
-    tags:
-      - { name: kernel.event_listener, event: "austral.event.module.admin.add", method: moduleAdd }
-
 parameters:
 
   austral.admin.class.page.class:                                  Austral\WebsiteBundle\Admin\PageAdmin

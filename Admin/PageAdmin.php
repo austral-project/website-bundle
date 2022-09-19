@@ -258,6 +258,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
       $queryBuilder->where("root.domainId = :domainId")
         ->setParameter("domainId", $domainId);
     });
+
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
@@ -265,17 +266,19 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ->add(Field\EntityField::create("parent", Page::class,
           array(
             'query_builder'     => function (EntityRepository $er) use($formAdminEvent, $domainId) {
-              $queryBuilder = $er->createQueryBuilder('u')
-                ->where("u.id != :pageId")
+              $queryBuilder = $er->createQueryBuilder('root')
+                ->where("root.id != :pageId")
                 ->setParameter("pageId", $formAdminEvent->getFormMapper()->getObject()->getId())
-                ->leftJoin("u.translates", "translates")->addSelect("translates")
-                ->orderBy('translates.refUrl', 'ASC');
+                ->leftJoin("root.translates", "translates")->addSelect("translates")
+                ->leftJoin("root.parent", "parent")
+                ->orderBy('parent.id', 'DESC')
+                ->addOrderBy('translates.name', 'ASC');
               if($domainId) {
-                $queryBuilder->andWhere("u.domainId = :domainId")
+                $queryBuilder->andWhere("root.domainId = :domainId")
                   ->setParameter("domainId", $domainId);
               }
               else {
-                $queryBuilder->andWhere("u.domainId IS NULL");
+                $queryBuilder->andWhere("root.domainId IS NULL");
               }
               return $queryBuilder;
             },

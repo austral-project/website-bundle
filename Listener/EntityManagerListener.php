@@ -11,11 +11,11 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use App\Entity\Austral\WebsiteBundle\Page;
-use Austral\SeoBundle\Services\Pages;
 
 use Austral\EntityBundle\Event\EntityManagerEvent;
 
 use Austral\EntityBundle\Entity\Interfaces\PageParentInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -31,11 +31,6 @@ class EntityManagerListener implements EventSubscriberInterface
    * @var EventDispatcherInterface
    */
   protected EventDispatcherInterface $dispatcher;
-
-  /**
-   * @var Pages
-   */
-  protected Pages $pages;
 
   /**
    * @param EventDispatcherInterface $dispatcher
@@ -58,16 +53,16 @@ class EntityManagerListener implements EventSubscriberInterface
   /**
    * @param EntityManagerEvent $entityManagerEvent
    *
-   * @throws \Doctrine\ORM\NonUniqueResultException
+   * @throws NonUniqueResultException
    */
   public function create(EntityManagerEvent $entityManagerEvent)
   {
-    if($entityManagerEvent->getObject() instanceof PageParentInterface)
+    $object = $entityManagerEvent->getObject();
+    if($object instanceof PageParentInterface)
     {
-
-      if($pageParent = $entityManagerEvent->getEntityManager()->getDoctrineEntityManager()->getRepository(Page::class)->retreiveByEntityExtends(get_class($entityManagerEvent->getObject())))
+      if($pageParent = $entityManagerEvent->getEntityManager()->getDoctrineEntityManager()->getRepository(Page::class)->retreiveByEntityExtends(get_class($object)))
       {
-        $entityManagerEvent->getObject()->setPageParent($pageParent);
+        $object->setPageParent($pageParent);
         $pageParent->addChildEntities($entityManagerEvent->getObject());
       }
     }

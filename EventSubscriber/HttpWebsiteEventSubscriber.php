@@ -23,6 +23,7 @@ use Austral\ToolsBundle\Configuration\ConfigurationInterface;
 use Austral\ToolsBundle\Services\Debug;
 
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
+use Austral\WebsiteBundle\EntityManager\PageEntityManager;
 use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
 use Austral\WebsiteBundle\Template\TemplateParameters;
@@ -129,7 +130,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var DomainInterface $domain */
     $domain = $this->domains->getCurrentDomain();
 
-    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain->getId(), $httpEvent->getKernelEvent()->getRequest()->getLocale()))
+    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getKernelEvent()->getRequest()->getLocale()))
     {
       $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
       $response = new RedirectResponse($urlRedirect, $redirection->getStatusCode());
@@ -150,7 +151,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }
-      else
+      elseif($this->domains->getEnabledDomainWithoutVirtual() > 0)
       {
         throw new NotFoundHttpException("Domain {$host} not found !");
       }
@@ -250,6 +251,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @param HttpEventInterface $httpEvent
    *
    * @return void
+   * @throws NonUniqueResultException
    */
   public function onException(HttpEventInterface $httpEvent)
   {
@@ -268,11 +270,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
-    /** @var Pages $servicePages */
-    $servicePages = $this->container->get("austral.seo.pages");
+    /** @var PageEntityManager $pageEntityManager */
+    $pageEntityManager = $this->container->get("austral.entity_manager.page");
 
     /** @var PageInterface $currentPage */
-    if($currentPage = $servicePages->retreiveByCode("Page_error-{$response->getStatusCode()}"))
+    if($currentPage = $pageEntityManager->retreiveByKey("keyname", "error-{$response->getStatusCode()}"))
     {
       try {
         /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
