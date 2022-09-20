@@ -24,6 +24,7 @@ use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 
 use Austral\HttpBundle\Entity\Traits\FilterByDomainTrait;
 
+use Austral\SeoBundle\Entity\Traits\UrlParameterTrait;
 use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTranslateMasterTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
@@ -76,6 +77,7 @@ abstract class Page extends Entity implements PageInterface,
   use EntityTranslateMasterFileCropperTrait;
   Use EntityTemplateTrait;
   use FilterByDomainTrait;
+  use UrlParameterTrait;
 
   /**
    * @var string
@@ -268,7 +270,7 @@ abstract class Page extends Entity implements PageInterface,
   }
 
   /**
-   * @param TreePageInterface $parent
+   * @param TreePageInterface|PageInterface $parent
    *
    * @return TreePageInterface|null
    */
@@ -514,15 +516,6 @@ abstract class Page extends Entity implements PageInterface,
   {
     $this->childrenEntities[$childrenEntities->getId()] = $childrenEntities;
     return $this;
-  }
-
-  /**
-   * @return string
-   * @throws Exception
-   */
-  public function getPath(): ?string
-  {
-    return $this->getTranslateCurrent() ? $this->getTranslateCurrent()->getPath() : null;
   }
 
 }

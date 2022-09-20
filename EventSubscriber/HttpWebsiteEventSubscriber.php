@@ -14,13 +14,10 @@ namespace Austral\WebsiteBundle\EventSubscriber;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
-use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\HttpBundle\Entity\Interfaces\DomainInterface;
 use Austral\HttpBundle\Event\Interfaces\HttpEventInterface;
 use Austral\HttpBundle\EventSubscriber\HttpEventSubscriber;
 
-use Austral\ToolsBundle\Configuration\ConfigurationInterface;
-use Austral\ToolsBundle\Services\Debug;
 
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\EntityManager\PageEntityManager;
@@ -30,8 +27,6 @@ use Austral\WebsiteBundle\Template\TemplateParameters;
 
 use Doctrine\ORM\NonUniqueResultException;
 
-use Doctrine\ORM\Query\QueryException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -50,27 +45,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @var string
    */
   protected string $debugContainer = "http.website.event";
-
-  /**
-   * @var DomainsManagement
-   */
-  protected DomainsManagement $domains;
-
-  /**
-   * HttpSubscriber constructor.
-   *
-   * @param ContainerInterface $container
-   * @param ConfigurationInterface $configuration
-   * @param Debug $debug
-   * @param DomainsManagement $domains
-   *
-   * @throws QueryException
-   */
-  public function __construct(ContainerInterface $container, ConfigurationInterface $configuration,  DomainsManagement $domains, Debug $debug)
-  {
-    parent::__construct($container, $configuration, $debug);
-    $this->domains = $domains->initialize();
-  }
 
   /**
    * @return array[]
@@ -97,7 +71,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $currentLocal = null;
 
     /** @var DomainInterface $currentDomain */
-    $currentDomain = $this->domains->getCurrentDomain();
+    $currentDomain = $this->domainsManagement->getCurrentDomain();
 
     if($currentDomain && $currentDomain->getLanguage()) {
       $currentLocal = $currentDomain->getLanguage();
@@ -128,7 +102,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $pathInfo = urldecode(trim($httpEvent->getKernelEvent()->getRequest()->getPathInfo(), "/"));
 
     /** @var DomainInterface $domain */
-    $domain = $this->domains->getCurrentDomain();
+    $domain = $this->domainsManagement->getCurrentDomain();
 
     if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getKernelEvent()->getRequest()->getLocale()))
     {
@@ -144,14 +118,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     if(!$domain)
     {
       /** @var DomainInterface $domainMaster */
-      $domainMaster = $this->domains->getDomainMaster();
+      $domainMaster = $this->domainsManagement->getDomainMaster();
       if($domainMaster)
       {
         $response = new RedirectResponse("{$domainMaster->getScheme()}://{$domainMaster->getDomain()}".($slug ? "/{$slug}" : ""), 301);
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }
-      elseif($this->domains->getEnabledDomainWithoutVirtual() > 0)
+      elseif($this->domainsManagement->getEnabledDomainWithoutVirtual() > 0)
       {
         throw new NotFoundHttpException("Domain {$host} not found !");
       }
@@ -163,11 +137,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }
-      $this->domains->setFilterDomainId($domain->getId());
+      $this->domainsManagement->setFilterDomainId($domain->getId());
     }
 
     /** @var UrlParameterManagement $urlParameterManagement */
-    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management");
+    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")->initialize();
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");

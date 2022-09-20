@@ -14,9 +14,9 @@ use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\ToolsBundle\AustralTools;
 use Austral\EntityBundle\Entity\Interfaces\PageParentInterface;
 use App\Entity\Austral\WebsiteBundle\Page;
+use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 
@@ -65,9 +65,10 @@ class DoctrineListener implements EventSubscriber
     $object = $ea->getObject();
     if($object instanceof PageParentInterface)
     {
-      if($pageParent = $this->getPageParent($args, ClassUtils::getClass($object)))
+      /** @var PageInterface $pageParent */
+      if($pageParent = $this->getPageParent($args, $object->getClassnameForMapping()))
       {
-        $object->setPageParent($pageParent);
+        $object->setTreePageParent($pageParent);
         $pageParent->addChildEntities($object);
       }
     }
@@ -77,13 +78,13 @@ class DoctrineListener implements EventSubscriber
    * @param LifecycleEventArgs $args
    * @param $class
    *
-   * @return array|mixed|string|null
+   * @return PageInterface|null
    */
-  protected function getPageParent(LifecycleEventArgs $args, $class)
+  protected function getPageParent(LifecycleEventArgs $args, $class): ?PageInterface
   {
     if(!$this->pagesParent)
     {
-      $this->pagesParent = $args->getEntityManager()->getRepository(Page::class)->selectByEntityExtends();
+      $this->pagesParent = $args->getObjectManager()->getRepository(Page::class)->selectByEntityExtends();
     }
     return AustralTools::getValueByKey($this->pagesParent, $class, null);
   }
