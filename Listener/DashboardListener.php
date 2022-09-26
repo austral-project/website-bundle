@@ -15,7 +15,6 @@ use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
 use Austral\WebsiteBundle\Services\ConfigVariable;
 
 use Austral\AdminBundle\Dashboard\Values as DashboardValues;
-use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

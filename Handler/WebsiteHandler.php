@@ -324,7 +324,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   }
 
   /**
-   * @return EntityInterface|SeoInterface|EntityTemplateTrait|null
+   * @return EntityInterface|EntityTemplateTrait|null
    */
   public function getPage(): ?EntityInterface
   {
@@ -332,7 +332,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   }
 
   /**
-   * @param UrlParameterInterface |null $urlParameter
+   * @param UrlParameterInterface|null $urlParameter
    *
    * @return $this
    */
@@ -343,7 +343,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   }
 
   /**
-   * @return UrlParameterInterface |SeoInterface|EntityTemplateTrait|null
+   * @return UrlParameterInterface|EntityInterface|null
    */
   public function getUrlParameter(): ?UrlParameterInterface
   {

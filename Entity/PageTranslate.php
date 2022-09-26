@@ -80,7 +80,13 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface,
    * @ORM\Column(name="name", type="string", length=255, nullable=false )
    */
   protected ?string $name = null;
-  
+
+  /**
+   * @var string|null
+   * @ORM\Column(name="ref_h1", type="string", length=255, nullable=true)
+   */
+  protected ?string $refH1 = null;
+
   /**
    * @var string|null
    * @ORM\Column(name="summary", type="text", nullable=true )
@@ -123,27 +129,11 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface,
   }
 
   /**
-   * @return bool
-   */
-  public function getRefUrlLastEnabled(): bool
-  {
-    return !$this->getMaster()->getRefUrlLastEnabled();
-  }
-
-  /**
    * @return string
    */
   public function __toString()
   {
     return $this->name ?? "";
-  }
-
-  /**
-   * @return PageInterface|SeoInterface|null
-   */
-  public function getPageParent(): ?SeoInterface
-  {
-    return $this->getMaster()->getPageParent();
   }
 
   /**
@@ -166,6 +156,37 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface,
   {
     $this->name = $name;
     return $this;
+  }
+
+  /**
+   * Set refH1
+   *
+   * @param string|null $refH1
+   *
+   * @return PageTranslateInterface
+   */
+  public function setRefH1(?string $refH1):PageTranslateInterface
+  {
+    $this->refH1 = $refH1;
+    return $this;
+  }
+
+  /**
+   * Get refH1
+   *
+   * @return string|null
+   */
+  public function getRefH1(): ?string
+  {
+    return $this->refH1;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getRefH1OrDefault(): ?string
+  {
+    return $this->refH1 ? : $this->__toString();
   }
 
   /**
@@ -247,15 +268,6 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface,
   {
     $this->imageReelname = $imageReelname;
     return $this;
-  }
-
-  /**
-   * @return string
-   * @throws Exception
-   */
-  public function getPath(): string
-  {
-    return $this->getBaseUrl().$this->getRefUrlLast();
   }
 
 }

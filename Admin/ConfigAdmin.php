@@ -93,8 +93,7 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
     $pagesList = array();
-    $pages = $this->container->get("austral.seo.pages")->getUrls();
-    /** @var SeoInterface|EntityInterface $object */
+    /*$pages = $this->container->get("austral.seo.url_parameter.management")->getUrls();
     foreach($pages as $object)
     {
       if(!array_key_exists($object->getClassname(), $pagesList))
@@ -102,7 +101,7 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
         $pagesList[$object->getClassname()] = array();
       }
       $pagesList[$object->getClassname()][$object->__toString()] = "{$object->getClassname()}:{$object->getId()}";
-    }
+    }*/
 
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.generalInformation")

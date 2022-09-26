@@ -72,7 +72,7 @@ class PageRepository extends EntityRepository
     $queryBuilder = $this->createQueryBuilder('root');
     $queryBuilder->where("root.entityExtends IS NOT NULL")
       ->leftJoin("root.translates", "translates")->addSelect("translates");
-    $queryBuilder->indexBy("root", "root.entityExtends");
+    $queryBuilder->indexBy("root", "root.id");
     $query = $queryBuilder->getQuery();
     try {
       $objects = $query->execute();

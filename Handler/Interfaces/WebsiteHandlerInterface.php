@@ -62,14 +62,14 @@ interface WebsiteHandlerInterface
   public function getPage(): ?EntityInterface;
 
   /**
-   * @param UrlParameterInterface|null $page
+   * @param UrlParameterInterface|EntityInterface|null $urlParameter
    *
    * @return $this
    */
-  public function setUrlParameter(?UrlParameterInterface $page): WebsiteHandlerInterface;
+  public function setUrlParameter(?UrlParameterInterface $urlParameter): WebsiteHandlerInterface;
 
   /**
-   * @return UrlParameterInterface
+   * @return UrlParameterInterface|EntityInterface|null
    */
   public function getUrlParameter(): ?UrlParameterInterface;
 

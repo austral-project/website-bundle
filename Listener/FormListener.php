@@ -17,8 +17,6 @@ use Austral\FormBundle\Mapper\Fieldset;
 use Austral\ToolsBundle\AustralTools;
 
 use Austral\WebsiteBundle\Configuration\WebsiteConfiguration;
-use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTrait;
-use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTranslateMasterTrait;
 
 use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
 use Exception;

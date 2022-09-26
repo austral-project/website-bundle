@@ -199,6 +199,7 @@ Class ConfigReplaceDom
         $values[$matchContentValue] = $matchContentValue;
       }
     }
+
     if($values)
     {
       $replaceValues = array();
@@ -210,11 +211,6 @@ Class ConfigReplaceDom
           list($linkKey, $id) = $this->decodeInternalLink($linkKeyAndId);
           /** @var UrlParameterInterface $urlParameter */
           if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id))
-          {
-            $replaceValues[$value] = $this->router->generate("austral_website_page", array("slug"=>$urlParameter->getPath()), $referenceType);
-          }
-          /** @var UrlParameterInterface $urlParameter */
-          elseif($linkKey === "UrlParameter" && $urlParameter = $this->urlParameterManagement->retrieveUrlParametersById($id))
           {
             $path = $this->router->generate("austral_website_page", array("slug"=>$urlParameter->getPath()), $referenceType);
             if($this->domainsManagement->getCurrentDomain()->getId() !== $urlParameter->getDomainId())

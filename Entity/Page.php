@@ -10,36 +10,38 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
+use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
+use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
+
 use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\EntityBundle\Entity\Interfaces\TreePageInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
 use Austral\EntityBundle\Entity\Interfaces\ComponentsInterface;
-use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
-use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
-use Austral\EntityBundle\Entity\Interfaces\FilterByDomainInterface;
-use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
 use Austral\EntityBundle\Entity\Interfaces\FileInterface;
 use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 
 use Austral\HttpBundle\Entity\Traits\FilterByDomainTrait;
+use Austral\HttpBundle\Annotation\DomainFilter;
 
+use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
+use Austral\SeoBundle\Entity\Traits\TreePageParentTrait;
+use Austral\SeoBundle\Annotation\UrlParameterObject;
 use Austral\SeoBundle\Entity\Traits\UrlParameterTrait;
-use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTranslateMasterTrait;
-use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
 
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
-use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterRobotTrait;
-use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterSeoTrait;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterFileCropperTrait;
 use Austral\EntityTranslateBundle\Annotation\Translate;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterComponentsTrait;
 
-use Austral\SeoBundle\Annotation\ObjectUrl;
+use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
+use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
+use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
+use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTranslateMasterTrait;
+use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterRobotTrait;
+use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterSeoTrait;
 
-use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -54,30 +56,32 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  * @Translate(relationClass="Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface")
- * @ObjectUrl(methodGenerateLastPath="stringToLastPath")
+ * @UrlParameterObject(methodGenerateLastPath="stringToLastPath", methodUrlName="name")
+ * @DomainFilter(forAllDomainEnabled=true, autoDomainId=true)
  */
 abstract class Page extends Entity implements PageInterface,
+  TreePageInterface,
   EntityInterface,
   TranslateMasterInterface,
   FileInterface,
+  ComponentsInterface,
   SeoInterface,
   RobotInterface,
-  SocialNetworkInterface,
-  ComponentsInterface,
-  FilterByDomainInterface,
-  TreePageInterface
+  SocialNetworkInterface
 {
   use EntityTimestampableTrait;
   use EntityFileTrait;
   use EntityTranslateMasterTrait;
-  use EntityTranslateMasterRobotTrait;
-  use EntityTranslateMasterSeoTrait;
-  use EntitySocialNetworkTranslateMasterTrait;
   use EntityTranslateMasterComponentsTrait;
   use EntityTranslateMasterFileCropperTrait;
   Use EntityTemplateTrait;
   use FilterByDomainTrait;
   use UrlParameterTrait;
+  use TreePageParentTrait;
+
+  use EntityTranslateMasterRobotTrait;
+  use EntityTranslateMasterSeoTrait;
+  use EntitySocialNetworkTranslateMasterTrait;
 
   /**
    * @var string
@@ -187,9 +191,9 @@ abstract class Page extends Entity implements PageInterface,
   }
 
   /**
-   * @return SeoInterface|PageInterface
+   * @return PageInterface
    */
-  public function getPageParent(): ?SeoInterface
+  public function getPageParent(): ?PageInterface
   {
     return $this->getParent();
   }
@@ -224,6 +228,15 @@ abstract class Page extends Entity implements PageInterface,
    * @return string|null
    * @throws Exception
    */
+  public function getRefH1OrDefault(): ?string
+  {
+    return $this->getTranslateCurrent() ? $this->getTranslateCurrent()->getRefH1OrDefault() : null;
+  }
+
+  /**
+   * @return string|null
+   * @throws Exception
+   */
   public function getName(): ?string
   {
     return $this->getTranslateCurrent() ? $this->getTranslateCurrent()->getName() : null;
@@ -247,8 +260,20 @@ abstract class Page extends Entity implements PageInterface,
    */
   public function setParent(?PageInterface $parent): Page
   {
+    if($parent)
+    {
+      $this->addTreePageParent($parent, $this->getDomainId());
+    }
     $this->parent = $parent;
     return $this;
+  }
+
+  /**
+   * @return TreePageInterface|EntityInterface|null
+   */
+  public function getTreePageParent(string $domainId = "current"): ?TreePageInterface
+  {
+    return $this->parent;
   }
 
   /**
@@ -259,25 +284,6 @@ abstract class Page extends Entity implements PageInterface,
   public function getParent(): ?PageInterface
   {
     return $this->parent;
-  }
-
-  /**
-   * @return TreePageInterface|null
-   */
-  public function getTreePageParent(): ?TreePageInterface
-  {
-    return $this->getPageParent();
-  }
-
-  /**
-   * @param TreePageInterface|PageInterface $parent
-   *
-   * @return TreePageInterface|null
-   */
-  public function setTreePageParent(TreePageInterface $parent): ?TreePageInterface
-  {
-    $this->setParent($parent);
-    return $this;
   }
 
   /**

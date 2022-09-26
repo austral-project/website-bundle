@@ -11,6 +11,7 @@
 
 namespace Austral\WebsiteBundle\EventSubscriber;
 
+use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
@@ -111,10 +112,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $httpEvent->getKernelEvent()->setResponse($response);
       return;
     }
-
     $host = $httpEvent->getKernelEvent()->getRequest()->headers->get('host');
 
     $slug = $requestAttributes->get('slug', null);
+
     if(!$domain)
     {
       /** @var DomainInterface $domainMaster */
@@ -125,7 +126,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }
-      elseif($this->domainsManagement->getEnabledDomainWithoutVirtual() > 0)
+      elseif($this->domainsManagement->getEnabledDomainWithoutVirtual())
       {
         throw new NotFoundHttpException("Domain {$host} not found !");
       }
@@ -148,13 +149,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     /** @var HttpHandlerInterface|WebsiteHandlerInterface $websiteHandler */
     $websiteHandler = $this->container->get("austral.website.handler");
-
+    $websiteHandler->setDomainsManagement($this->domainsManagement);
     $websiteHandler->setTemplateParameters($templateParameters);
 
     $handlerMethod = $requestAttributes->get('_handler_method', null);
+    $templateName = "default";
     if($requestAttributes->get('_austral_page', false))
     {
-      if(!$urlParameter = $urlParameterManagement->retrieveUrlParameters($slug))
+      if(!$urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), $slug, true))
       {
         if(!$domain || !$domain->getOnePage())
         {
@@ -162,23 +164,39 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         }
         else
         {
-          $urlParameter = $urlParameterManagement->retrieveUrlParameters("");
+          $urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), "", true);
         }
       }
-      $currentPage = $urlParameter->getObject();
-      $websiteHandler->setUrlParameter($urlParameter)->setPage($currentPage);
-      $handlerMethod = $handlerMethod ? : "page";
-      $templateName = "default";
-      if(method_exists($currentPage, "getTemplate"))
+
+      if($urlParameter->getStatus() !== UrlParameterInterface::STATUS_PUBLISHED)
       {
-        $templateName = $currentPage->getTemplate();
+        if(!$websiteHandler->isGranted("IS_AUTHENTICATED_FULLY") || $urlParameter->getStatus() === UrlParameterInterface::STATUS_UNPUBLISHED)
+        {
+          $websiteHandler->pageNotFound();
+        }
       }
-      $templateParameters->addParameters("currentPage", $currentPage);
+
+      $websiteHandler->setUrlParameter($urlParameter);
+      if($currentPage = $urlParameter->getObject())
+      {
+        $websiteHandler->setPage($currentPage);
+        $handlerMethod = $handlerMethod ? : "page";
+        if(method_exists($currentPage, "getTemplate"))
+        {
+          $templateName = $currentPage->getTemplate();
+        }
+        $templateParameters->addParameters("currentPage", $currentPage);
+      }
+      elseif($actionName = $urlParameter->getActionRelation())
+      {
+        $handlerMethod = $actionName;
+      }
     }
     else
     {
       $templateName = $handlerMethod;
     }
+
     if($handlerMethod)
     {
       $websiteHandler->setHandlerMethod($handlerMethod);

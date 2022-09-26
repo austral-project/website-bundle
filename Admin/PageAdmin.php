@@ -12,6 +12,8 @@ namespace Austral\WebsiteBundle\Admin;
 
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
+use Austral\HttpBundle\Services\DomainsManagement;
+use Austral\SeoBundle\Model\UrlParametersByDomain;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\ContentBlockBundle\Field\ContentBlockField;
@@ -123,32 +125,12 @@ class PageAdmin extends Admin implements AdminModuleInterface
   }
 
   /**
-   * @param string|null $domainId
-   *
-   * @return bool
-   */
-  protected function isMultiDomain(?string $domainId = null): bool
-  {
-    $isMultidomain = false;
-    if(!$domainId)
-    {
-      if($this->container->get("austral.http.domains.management")->getEnabledDomainWithoutVirtual() > 1)
-      {
-        $isMultidomain = true;
-      }
-    }
-    return $isMultidomain;
-  }
-
-
-  /**
    * @param ListAdminEvent $listAdminEvent
    */
   public function configureListMapper(ListAdminEvent $listAdminEvent)
   {
     /** @var string|null $domainId */
     $domainId = $listAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
-    $isMultiDomain = $this->isMultiDomain($domainId);
     $listAdminEvent->getListMapper()
       ->addColumn(new Column\Template("picto", " ", "@AustralWebsite/Admin/_Components/pagePicto.html.twig"))
       ->addColumn(new Column\Template("name", "form.labels.title", "@AustralWebsite/Admin/_Components/pageTitle.html.twig", array(
@@ -189,7 +171,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ), "page-status"
       );
 
-      if(!$isMultiDomain)
+      if($domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS)
       {
         $listAdminEvent->getListMapper()->getSection("homepage")
           ->setMapperType("list")
@@ -214,9 +196,9 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ->childrenRow(function(PageInterface $page) {
           return $page->getChildren();
         })
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use($isMultiDomain) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($isMultiDomain) {
-            if(!$isMultiDomain)
+        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use($domainId) {
+          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($domainId) {
+            if($domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS)
             {
               $queryBuilder->leftJoin("root.parent", "parent")
                 ->andWhere("parent.isHomepage = :isParentHomepage")
@@ -252,13 +234,6 @@ class PageAdmin extends Admin implements AdminModuleInterface
   {
     /** @var string|null $domainId */
     $domainId = $formAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
-    $isMultiDomain = $this->isMultiDomain($domainId);
-
-    $countPages = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use ($domainId) {
-      $queryBuilder->where("root.domainId = :domainId")
-        ->setParameter("domainId", $domainId);
-    });
-
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
@@ -289,7 +264,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
               },
               $formAdminEvent->getFormMapper()->getObject()
             ),
-            "required"  =>  $countPages > 0
+            "required"  =>  $domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS
           )
         ))
         ->add(Field\ChoiceField::create("isHomepage",
@@ -310,8 +285,8 @@ class PageAdmin extends Admin implements AdminModuleInterface
                 "--element-choice-hover-color:var(--color-green-100)"
               )
             )
-          ), array('isView' => function() use($isMultiDomain) {
-            return $this->container->get('security.authorization_checker')->isGranted('ROLE_ROOT') && !$isMultiDomain;
+          ), array('isView' => function() use($domainId) {
+            return $this->container->get('security.authorization_checker')->isGranted('ROLE_ROOT') && $domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS;
           })
         ))
       ->end()
@@ -436,8 +411,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
 
     /** @var string|null $domainId */
     $domainId = $formAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
-    $isMultiDomain = $this->isMultiDomain($domainId);
-    if($initDefaultParent && !$object->getIsHomepage() && !$isMultiDomain)
+    if($initDefaultParent && !$object->getIsHomepage() && $domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS)
     {
       $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKeyname("homepage", function(QueryBuilder $queryBuilder) use($domainId) {
         $queryBuilder->andWhere("root.domainId = :domainId")

@@ -11,8 +11,8 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\ToolsBundle\AustralTools;
-use Austral\EntityBundle\Entity\Interfaces\PageParentInterface;
+use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
+use Austral\WebsiteBundle\Entity\Interfaces\WebsitePageParentInterface;
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Doctrine\Common\EventArgs;
@@ -63,13 +63,16 @@ class DoctrineListener implements EventSubscriber
     $ea = $this->getEventAdapter($args);
     /** @var EntityInterface $object */
     $object = $ea->getObject();
-    if($object instanceof PageParentInterface)
+    if($object instanceof TreePageInterface && $object instanceof WebsitePageParentInterface)
     {
-      /** @var PageInterface $pageParent */
-      if($pageParent = $this->getPageParent($args, $object->getClassnameForMapping()))
+      if($websitePages = $this->getPageParent($args, $object->getClassnameForMapping()))
       {
-        $object->setTreePageParent($pageParent);
-        $pageParent->addChildEntities($object);
+        /** @var PageInterface $pageParent */
+        foreach ($websitePages as $pageParent)
+        {
+          $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? "current");
+          $pageParent->addChildEntities($object);
+        }
       }
     }
   }
@@ -78,15 +81,39 @@ class DoctrineListener implements EventSubscriber
    * @param LifecycleEventArgs $args
    * @param $class
    *
-   * @return PageInterface|null
+   * @return array
    */
-  protected function getPageParent(LifecycleEventArgs $args, $class): ?PageInterface
+  protected function getPageParent(LifecycleEventArgs $args, $class): array
   {
     if(!$this->pagesParent)
     {
       $this->pagesParent = $args->getObjectManager()->getRepository(Page::class)->selectByEntityExtends();
     }
-    return AustralTools::getValueByKey($this->pagesParent, $class, null);
+    $websitePagesSelected = array();
+
+    /** @var PageInterface $pageParent */
+    foreach ($this->pagesParent as $pageParent)
+    {
+      if(strpos($pageParent->getEntityExtends(), ",") !== false)
+      {
+        $keyExplode = explode(",",$pageParent->getEntityExtends());
+        if(count($keyExplode)>1)
+        {
+          foreach ($keyExplode as $newKey)
+          {
+            if(trim($newKey) === $class)
+            {
+              $websitePagesSelected[] = $pageParent;
+            }
+          }
+        }
+      }
+      elseif($pageParent->getEntityExtends() === $class)
+      {
+        $websitePagesSelected[] = $pageParent;
+      }
+    }
+    return $websitePagesSelected;
   }
 
   /**
