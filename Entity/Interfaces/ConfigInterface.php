@@ -53,6 +53,18 @@ interface ConfigInterface
    */
   public function setType(string $type): ConfigInterface;
 
+  /**
+   * @return bool
+   */
+  public function getWithDomain(): bool;
+
+  /**
+   * @param bool $withDomain
+   *
+   * @return $this
+   */
+  public function setWithDomain(bool $withDomain): ConfigInterface;
+
 }
 
     

@@ -50,7 +50,7 @@ services:
 ##### Website Services
   austral.website.config_variable:
     class:          Austral\WebsiteBundle\Services\ConfigVariable
-    arguments:      ["@request_stack", "@doctrine.orm.entity_manager", "@austral.entity_file.link.generator"]
+    arguments:      ["@request_stack",  "@austral.http.domains.management", "@doctrine.orm.entity_manager", "@austral.entity_file.link.generator"]
 
   austral.website.config_replace_dom:
     class:          Austral\WebsiteBundle\Services\ConfigReplaceDom
@@ -77,3 +77,10 @@ services:
   austral.website.config:
     class:          Austral\WebsiteBundle\Configuration\WebsiteConfiguration
     arguments:      ["%austral_website_config%"]
+
+##### Form Type #####
+  austral.website.config_value_by_domain.form_type:
+    class:        Austral\WebsiteBundle\Form\Type\ValueByDomainFormType
+    arguments:    [ "@security.authorization_checker" ]
+    tags:
+      - { name: form.type , alias: austral_config_value_by_domain_form_type }

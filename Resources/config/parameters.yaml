@@ -3,6 +3,7 @@ parameters:
 ##### Entities Class
   austral.entity.config.class:                                              App\Entity\Austral\WebsiteBundle\Config
   austral.entity.config_translate.class:                                    App\Entity\Austral\WebsiteBundle\ConfigTranslate
+  austral.entity.config_value_by_domain.class:                              App\Entity\Austral\WebsiteBundle\ConfigValueByDomain
   austral.entity.page.class:                                                App\Entity\Austral\WebsiteBundle\Page
   austral.entity.page_translate.class:                                      App\Entity\Austral\WebsiteBundle\PageTranslate
   austral.entity.tracking.class:                                            App\Entity\Austral\WebsiteBundle\Tracking
@@ -12,6 +13,7 @@ parameters:
   austral.resolve_target_entities.website:
     Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface:                "%austral.entity.config.class%"
     Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface:       "%austral.entity.config_translate.class%"
+    Austral\WebsiteBundle\Entity\Interfaces\ConfigValueByDomainInterface:   "%austral.entity.config_value_by_domain.class%"
     Austral\WebsiteBundle\Entity\Interfaces\PageInterface:                  "%austral.entity.page.class%"
     Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface:         "%austral.entity.page_translate.class%"
     Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface:              "%austral.entity.tracking.class%"

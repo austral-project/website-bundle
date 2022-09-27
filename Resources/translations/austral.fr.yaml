@@ -31,6 +31,7 @@ pages:
 
 fieldset:
   socialNetwork:                                Partage réseau social
+  content_by_domain:                            "Contenu : %domainName%"
 
 fields:
   australPictoClass:
@@ -64,12 +65,15 @@ fields:
     placeholder:                                Saisir le titre pour la navigation ...
   template:
     entitled:                                   Template
+  withDomain:
+    entitled:                                   Valeur pour les domains
 
 choices:
   config:
     type:
       all:                                      Tout
       text:                                     Texte
+      internal-link:                            Lien interne
       image:                                    Image
       imageText:                                Image & Text
       file:                                     Fichier

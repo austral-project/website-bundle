@@ -60,6 +60,8 @@ fields:
     placeholder:                                Enter title for navigation ...
   template:
     entitled:                                   Template
+  withDomain:
+    entitled:                                   Value for domains
 
 choices:
   config:

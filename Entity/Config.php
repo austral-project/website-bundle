@@ -54,6 +54,12 @@ abstract class Config extends Entity implements ConfigInterface, EntityInterface
    * @ORM\Column(name="name", type="string", length=255, nullable=false )
    */
   protected ?string $name = null;
+
+  /**
+   * @var boolean
+   * @ORM\Column(name="with_domain", type="boolean", nullable=true, options={"default": false})
+   */
+  protected bool $withDomain = false;
   
   /**
    * @var string|null
@@ -215,6 +221,25 @@ abstract class Config extends Entity implements ConfigInterface, EntityInterface
   public function setFile($file): Config
   {
     $this->getTranslateCurrent()->setFile($file);
+    return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function getWithDomain(): bool
+  {
+    return $this->withDomain;
+  }
+
+  /**
+   * @param bool $withDomain
+   *
+   * @return $this
+   */
+  public function setWithDomain(bool $withDomain): Config
+  {
+    $this->withDomain = $withDomain;
     return $this;
   }
 

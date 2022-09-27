@@ -10,13 +10,11 @@
 
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
-use Austral\ToolsBundle\AustralTools;
-use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
+use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
+use Austral\HttpBundle\Entity\Traits\FilterByDomainTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
-
-use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
-use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateChildTrait;
+use Austral\WebsiteBundle\Entity\Interfaces\ConfigValueByDomainInterface;
 
 use Austral\EntityFileBundle\Annotation as AustralFile;
 
@@ -24,25 +22,23 @@ use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
 
-
-use Austral\WebsiteBundle\Entity\Interfaces\ConfigValueByDomainInterface;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Ramsey\Uuid\Uuid;
 
 
 /**
- * Austral ConfigTranslate Entity.
+ * Austral ConfigValueByDomain Entity.
  * @author Matthieu Beurel <matthieu@austral.dev>
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class ConfigTranslate extends Entity implements ConfigTranslateInterface, EntityInterface, TranslateChildInterface
+abstract class ConfigValueByDomain extends Entity implements ConfigValueByDomainInterface, EntityInterface, FileInterface
 {
 
-  use EntityTranslateChildTrait;
+  use EntityFileTrait;
   use EntityTimestampableTrait;
+  use FilterByDomainTrait;
 
   /**
    * @var string
@@ -52,17 +48,12 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
   protected $id;
   
   /**
-   * @var ConfigInterface|TranslateMasterInterface
+   * @var ConfigTranslateInterface
    *
-   * @ORM\ManyToOne(targetEntity="\Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface", inversedBy="translates", cascade={"persist"})
-   * @ORM\JoinColumn(name="master_id", referencedColumnName="id")
+   * @ORM\ManyToOne(targetEntity="\Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface", inversedBy="valuesByDomain", cascade={"persist"})
+   * @ORM\JoinColumn(name="config_id", referencedColumnName="id")
    */
-  protected TranslateMasterInterface $master;
-
-  /**
-   * @ORM\OneToMany(targetEntity="\Austral\WebsiteBundle\Entity\Interfaces\ConfigValueByDomainInterface", mappedBy="config", cascade={"persist", "remove"})
-   */
-  protected Collection $valuesByDomain;
+  protected ConfigTranslateInterface $config;
 
   /**
    * @var string|null
@@ -118,6 +109,25 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
   }
 
   /**
+   * @return ConfigTranslateInterface
+   */
+  public function getConfig(): ConfigTranslateInterface
+  {
+    return $this->config;
+  }
+
+  /**
+   * @param ConfigTranslateInterface $config
+   *
+   * @return ConfigValueByDomain
+   */
+  public function setConfig(ConfigTranslateInterface $config): ConfigValueByDomain
+  {
+    $this->config = $config;
+    return $this;
+  }
+
+  /**
    * Get image
    * @return string|null
    */
@@ -133,7 +143,7 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
    *
    * @return $this
    */
-  public function setImage(?string $image): ConfigTranslate
+  public function setImage(?string $image): ConfigValueByDomainInterface
   {
     $this->image = $image;
     return $this;
@@ -155,7 +165,7 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
    *
    * @return $this
    */
-  public function setFile(?string $file): ConfigTranslate
+  public function setFile(?string $file): ConfigValueByDomainInterface
   {
     $this->file = $file;
     return $this;
@@ -177,7 +187,7 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
    *
    * @return $this
    */
-  public function setContentText(?string $contentText): ConfigTranslate
+  public function setContentText(?string $contentText): ConfigValueByDomainInterface
   {
     $this->contentText = $contentText;
     return $this;
@@ -195,9 +205,9 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
   /**
    * @param bool $contentBoolean
    *
-   * @return ConfigTranslate
+   * @return ConfigValueByDomainInterface
    */
-  public function setContentBoolean(bool $contentBoolean): ConfigTranslate
+  public function setContentBoolean(bool $contentBoolean): ConfigValueByDomainInterface
   {
     $this->contentBoolean = $contentBoolean;
     return $this;
@@ -214,70 +224,12 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
   /**
    * @param string|null $internalLink
    *
-   * @return ConfigTranslate
+   * @return ConfigValueByDomainInterface
    */
-  public function setInternalLink(?string $internalLink): ConfigTranslate
+  public function setInternalLink(?string $internalLink): ConfigValueByDomainInterface
   {
     $this->internalLink = $internalLink;
     return $this;
-  }
-
-  /**
-   * @return Collection
-   */
-  public function getValuesByDomain(): Collection
-  {
-    return $this->valuesByDomain;
-  }
-
-  /**
-   * @param Collection $valuesByDomain
-   *
-   * @return $this
-   */
-  public function setValuesByDomain(Collection $valuesByDomain): ConfigTranslate
-  {
-    $this->valuesByDomain = $valuesByDomain;
-    return $this;
-  }
-
-  /**
-   * Add translates
-   *
-   * @param ConfigValueByDomainInterface $valueByDomain
-   *
-   * @return ConfigTranslate
-   */
-  public function addValueByDomain(ConfigValueByDomainInterface $valueByDomain): ConfigTranslate
-  {
-    if(!$this->valuesByDomain->contains($valueByDomain))
-    {
-      $this->valuesByDomain->add($valueByDomain);
-    }
-    return $this;
-  }
-
-  /**
-   * @var array
-   */
-  protected array $valuesByDomainByDomainId = array();
-
-  /**
-   * @param string $domainId
-   *
-   * @return ConfigValueByDomainInterface|null
-   */
-  public function getValueByDomainId(string $domainId): ?ConfigValueByDomainInterface
-  {
-    if(!$this->valuesByDomainByDomainId)
-    {
-      /** @var ConfigValueByDomain $valueByDomain */
-      foreach($this->valuesByDomain as $valueByDomain)
-      {
-        $this->valuesByDomainByDomainId[$valueByDomain->getDomainId()] = $valueByDomain;
-      }
-    }
-    return AustralTools::getValueByKey($this->valuesByDomainByDomainId, $domainId, null);
   }
 
 }

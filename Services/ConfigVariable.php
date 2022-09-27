@@ -11,6 +11,7 @@
 namespace Austral\WebsiteBundle\Services;
 use Austral\EntityFileBundle\File\Link\Generator;
 use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
@@ -36,6 +37,11 @@ Class ConfigVariable
   protected EntityManager $entityManager;
 
   /**
+   * @var DomainsManagement
+   */
+  protected DomainsManagement $domainsManagement;
+
+  /**
    * @var string|null
    */
   protected ?string $language;
@@ -52,11 +58,12 @@ Class ConfigVariable
    * @param EntityManager $entityManager
    * @param Generator $fileLinkGenerator
    */
-  public function __construct(RequestStack $requestStack, EntityManager $entityManager, Generator $fileLinkGenerator)
+  public function __construct(RequestStack $requestStack, DomainsManagement $domainsManagement, EntityManager $entityManager, Generator $fileLinkGenerator)
   {
     $this->fileLinkGenerator = $fileLinkGenerator;
     $request = $requestStack->getCurrentRequest();
     $this->language = $request ? $request->getLocale() : null;
+    $this->domainsManagement = $domainsManagement;
     $this->entityManager = $entityManager;
   }
 
@@ -80,7 +87,13 @@ Class ConfigVariable
     if(!$this->variables)
     {
       $variables = array();
-      $configsAll = $this->entityManager->getRepository("Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface")->selectAllByIndexKeyname($this->language);
+
+      $domainCurrentId = null;
+      if($this->domainsManagement->getEnabledDomainWithoutVirtual())
+      {
+        $domainCurrentId = $this->domainsManagement->getCurrentDomain()->getId();
+      }
+      $configsAll = $this->entityManager->getRepository("Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface")->selectAllByIndexKeyname($this->language, $domainCurrentId);
 
       /** @var ConfigInterface|TranslateMasterInterface $config */
       foreach($configsAll as $config)
@@ -88,37 +101,46 @@ Class ConfigVariable
         /** @var ConfigTranslateInterface $configTranslate */
         $configTranslate = $config->getTranslateCurrent();
 
+        if($config->getWithDomain())
+        {
+          $configValue = $configTranslate->getValueByDomainId($domainCurrentId);
+        }
+        else
+        {
+          $configValue = $configTranslate;
+        }
+
         if($config->getType() == "all")
         {
           $variables["{$config->getKeyname()}.text"] = array(
             "text"  =>  "{$config->__toString()} - Text",
             "type"  =>  "text",
             "key"   =>  "{$config->getKeyname()}.text",
-            "value" =>  nl2br($config->getTranslateCurrent()->getContentText())
+            "value" =>  nl2br($configValue->getContentText())
           );
           $variables["{$config->getKeyname()}.boolean"] = array(
             "text"  =>  "{$config->__toString()} - Boolean",
             "type"  =>  "boolean",
             "key"   =>  "{$config->getKeyname()}.boolean",
-            "value" =>  $config->getTranslateCurrent()->getContentBoolean()
+            "value" =>  $configValue->getContentBoolean()
           );
           $variables["{$config->getKeyname()}.image"] = array(
             "text"  =>  "{$config->__toString()} - Picture",
             "type"  =>  "image",
             "key"   =>  "{$config->getKeyname()}.image",
-            "value" =>  $this->fileLinkGenerator->image($config, "image")
+            "value" =>  $config->getWithDomain() ? $this->fileLinkGenerator->image($configValue, "image") : $this->fileLinkGenerator->image($config, "image")
           );
           $variables["{$config->getKeyname()}.file"] = array(
             "text"  =>  "{$config->__toString()} - File",
             "type"  =>  "file",
             "key"   =>  "{$config->getKeyname()}.file",
-            "value" =>  $this->fileLinkGenerator->download($config, "file")
+            "value" =>  $config->getWithDomain() ? $this->fileLinkGenerator->download($configValue, "file") : $this->fileLinkGenerator->download($config, "file")
           );
           $variables["{$config->getKeyname()}.internal-link"] = array(
             "text"  =>  "{$config->__toString()} - Internal Link",
             "type"  =>  "internal-link",
             "key"   =>  "{$config->getKeyname()}.internal-link",
-            "value" =>  $this->fileLinkGenerator->download($config, "internal-link")
+            "value" =>  "#INTERNAL_LINK_{$configValue->getInternalLink()}#"
           );
         }
         elseif($config->getType() == "text")
@@ -127,7 +149,7 @@ Class ConfigVariable
             "text"  =>  $config->__toString(),
             "type"  =>  "text",
             "key"   =>  $config->getKeyname(),
-            "value" =>  nl2br($configTranslate->getContentText())
+            "value" =>  nl2br($configValue->getContentText())
           );
         }
         elseif($config->getType() == "image")
@@ -136,7 +158,7 @@ Class ConfigVariable
             "text"  =>  $config->__toString(),
             "type"  =>  "image",
             "key"   =>  "{$config->getKeyname()}",
-            "value" =>  $this->fileLinkGenerator->image($config, "image")
+            "value" =>  $config->getWithDomain() ? $this->fileLinkGenerator->image($configValue, "image") : $this->fileLinkGenerator->image($config, "image")
           );
         }
         elseif($config->getType() == "image-text")
@@ -145,13 +167,13 @@ Class ConfigVariable
             "text"  =>  "{$config->__toString()} - Text",
             "type"  =>  "text",
             "key"   =>  "{$config->getKeyname()}.text",
-            "value" =>  nl2br($config->getTranslateCurrent()->getContentText())
+            "value" =>  nl2br($configValue->getContentText())
           );
           $variables["{$config->getKeyname()}.image"] = array(
             "text"  =>  "{$config->__toString()} - Picture",
             "type"  =>  "image",
             "key"   =>  "{$config->getKeyname()}.image",
-            "value" =>  $this->fileLinkGenerator->image($config, "image")
+            "value" =>  $config->getWithDomain() ? $this->fileLinkGenerator->image($configValue, "image") : $this->fileLinkGenerator->image($config, "image")
           );
         }
         elseif($config->getType() == "file")
@@ -160,7 +182,7 @@ Class ConfigVariable
             "text"  =>  "{$config->__toString()}",
             "type"  =>  "file",
             "key"   =>  "{$config->getKeyname()}",
-            "value" =>  $this->fileLinkGenerator->download($config, "file")
+            "value" =>  $config->getWithDomain() ? $this->fileLinkGenerator->download($configValue, "file") : $this->fileLinkGenerator->download($config, "file")
           );
         }
         elseif($config->getType() == "file-text")
@@ -169,13 +191,13 @@ Class ConfigVariable
             "text"  =>  "{$config->__toString()} - Text",
             "type"  =>  "text",
             "key"   =>  "{$config->getKeyname()}.text",
-            "value" =>  nl2br($config->getTranslateCurrent()->getContentText())
+            "value" =>  nl2br($configValue->getContentText())
           );
           $variables["{$config->getKeyname()}.file"] = array(
             "text"  =>  "{$config->__toString()} - File",
             "type"  =>  "file",
             "key"   =>  "{$config->getKeyname()}.file",
-            "value" =>  $this->fileLinkGenerator->image($config, "file")
+            "value" =>  $config->getWithDomain() ? $this->fileLinkGenerator->download($configValue, "file") : $this->fileLinkGenerator->download($config, "file")
           );
         }
         elseif($config->getType() == "checkbox")
@@ -184,7 +206,7 @@ Class ConfigVariable
             "text"  =>  $config->__toString(),
             "type"  =>  "boolean",
             "key"   =>  $config->getKeyname(),
-            "value" =>  $config->getTranslateCurrent()->getContentBoolean()
+            "value" =>  $configValue->getContentBoolean()
           );
         }
         elseif($config->getType() == "internal-link")
@@ -193,7 +215,7 @@ Class ConfigVariable
             "text"  =>  $config->__toString(),
             "type"  =>  "internal-link",
             "key"   =>  $config->getKeyname(),
-            "value" =>  "#INTERNAL_LINK_{$config->getTranslateCurrent()->getInternalLink()}#"
+            "value" =>  "#INTERNAL_LINK_{$configValue->getInternalLink()}#"
           );
         }
       }

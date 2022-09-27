@@ -10,8 +10,13 @@
  
 namespace Austral\WebsiteBundle\Admin;
 
+use App\Entity\Austral\WebsiteBundle\ConfigValueByDomain;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
 use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
+use Austral\FormBundle\Mapper\Fieldset;
+use Austral\FormBundle\Mapper\FormMapper;
+use Austral\HttpBundle\Entity\Domain;
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 
 use Austral\FilterBundle\Filter\Type as FilterType;
@@ -103,25 +108,49 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
       $pagesList[$object->getClassname()][$object->__toString()] = "{$object->getClassname()}:{$object->getId()}";
     }*/
 
+    /** @var DomainsManagement $domainsManagement */
+    $domainsManagement = $this->container->get('austral.http.domains.management');
+
     $formAdminEvent->getFormMapper()
+
+      ->addFieldset("fieldset.right")
+        ->setPositionName(Fieldset::POSITION_RIGHT)
+        ->add(Field\ChoiceField::create("withDomain",
+          array(
+            "choices.status.no"         =>  false,
+            "choices.status.yes"        =>  true,
+          ), array(
+            "attr"        =>  array(
+              "data-view-by-choices-parent"   =>  ".form-container",
+              "data-view-by-choices-children" =>  ".fieldset-by-choice",
+              'data-view-by-choices' =>  json_encode(array(
+                true           =>  "fieldset-values-by-domain",
+                false          =>  "fieldset-values-for-all-domains"
+              ))
+            ),
+
+          ))
+        )
+      ->end()
+
+
       ->addFieldset("fieldset.generalInformation")
         ->add(Field\TextField::create("name"))
         ->add(Field\TextField::create("keyname"))
-      ->end()
-      ->addFieldset("fieldset.content")
         ->add(Field\SelectField::create("type", array(
-              "choices.config.type.all"             =>  "all",
-              "choices.config.type.text"            =>  "text",
-              "choices.config.type.internal-link"   =>  "internal-link",
-              "choices.config.type.image"           =>  "image",
-              "choices.config.type.imageText"       =>  "image-text",
-              "choices.config.type.file"            =>  "file",
-              "choices.config.type.fileText"        =>  "file-text",
-              "choices.config.type.checkbox"        =>  "checkbox",
-            ),
+            "choices.config.type.all"             =>  "all",
+            "choices.config.type.text"            =>  "text",
+            "choices.config.type.internal-link"   =>  "internal-link",
+            "choices.config.type.image"           =>  "image",
+            "choices.config.type.imageText"       =>  "image-text",
+            "choices.config.type.file"            =>  "file",
+            "choices.config.type.fileText"        =>  "file-text",
+            "choices.config.type.checkbox"        =>  "checkbox",
+          ),
             array(
               "required"    =>  true,
               "attr"        =>  array(
+                "data-view-by-choices-parent" =>  ".form-container .central-container",
                 'data-view-by-choices' =>  json_encode(array(
                   'all'           =>  "element-view-all",
                   "text"          =>  "element-view-text",
@@ -136,6 +165,10 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
             )
           )
         )
+      ->end();
+
+      $formAdminEvent->getFormMapper()->addFieldset("fieldset.content")
+        ->setAttr(array("class" =>  "fieldset-content-parent fieldset-by-choice fieldset-values-for-all-domains"))
         ->add(Field\TextareaField::create("contentText", null, array("container" =>  array('class'=>"view-element-by-choices element-view-all element-view-text"))))
         ->add(Field\SelectField::create("internalLink", $pagesList, array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-internal-link"))))
         ->add(Field\SwitchField::create("contentBoolean", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-checkbox"))))
@@ -146,7 +179,98 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
           )
         ))
       ->end();
+
+      if($domainsManagement->getEnabledDomainWithoutVirtual())
+      {
+        $this->addFieldValuesByDomain($formAdminEvent->getFormMapper(), $domainsManagement);
+      }
+
   }
+
+
+  protected function addFieldValuesByDomain(FormMapper $formMapper, DomainsManagement $domainsManagement)
+  {
+    $configValuesByDomainExist = $formMapper->getObject()->getTranslateCurrent()->getValuesByDomain();
+
+    $configValuesByDomain = array();
+    /** @var ConfigValueByDomain $valueByDomain */
+    foreach ($configValuesByDomainExist as $valueByDomain)
+    {
+      $configValuesByDomain[$valueByDomain->getDomainId()] = $valueByDomain;
+    }
+
+    /** @var Domain $domain */
+    foreach ($domainsManagement->getDomainsWithoutVirtual() as $domain)
+    {
+      if(!array_key_exists($domain->getId(), $configValuesByDomain))
+      {
+        $configValueByDomain = new ConfigValueByDomain();
+        $configValueByDomain->setDomainId($domain->getId());
+        $configValuesByDomain[$domain->getId()] = $configValueByDomain;
+      }
+    }
+
+    $configByValueDomain = new ConfigValueByDomain();
+    $configByValueDomainFormMapper = new FormMapper();
+    $configByValueDomainFormMapper->setObject($configByValueDomain);
+
+
+    $valueByDomainFormType = $this->container->get('austral.website.config_value_by_domain.form_type');
+    $valueByDomainFormType->setFormMapper($configByValueDomainFormMapper);
+
+    $formMapper->addSubFormMapper("valuesByDomains", $configByValueDomainFormMapper);
+
+
+    $configByValueDomainFormMapper->addFieldset("fieldset.content_by_domain")
+      ->setAttr(array("class" =>  "fieldset-content-parent fieldset-by-choice fieldset-values-by-domain"))
+      ->setClosureTranslateArgument(function(Fieldset $fieldset, $object) use($domainsManagement) {
+        $fieldset->addTranslateArguments("%domainName%",
+          $domainsManagement->getDomainById($object->getDomainId()) ? $domainsManagement->getDomainById($object->getDomainId())->getName() : "");
+      })
+      ->add(Field\TextareaField::create("contentText", null, array("container" =>  array('class'=>"view-element-by-choices element-view-all element-view-text"))))
+      ->add(Field\SelectField::create("internalLink", array(), array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-internal-link"))))
+      ->add(Field\SwitchField::create("contentBoolean", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-checkbox"))))
+      ->add(Field\UploadField::create("image", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-image"))))
+      ->add(Field\UploadField::create("file", array(
+          "container"   =>  array('class'=>"view-element-by-choices element-view-all element-view-file"),
+          "blockSize"   =>  Field\UploadField::LIGHT
+        )
+      ))
+    ->end();
+
+    $formMapper->addFieldset("valuesByDomains", false)
+      ->setPositionName(Fieldset::POSITION_NONE)
+      ->add(Field\CollectionEmbedField::create("valuesByDomains", array(
+          "button"              =>  "button.new.emailAddress",
+          "allow"               =>  array(
+            "child"               =>  false,
+            "add"                 =>  false,
+            "delete"              =>  false,
+          ),
+          "entry"               =>  array("type"  => get_class($valueByDomainFormType)),
+          "sortable"            =>  array(
+            "value"               =>  function($configValueByDomain) use($domainsManagement) {
+              return $domainsManagement->getDomainById($configValueByDomain->getDomainId())->getPosition()."-".$configValueByDomain->getDomainId();
+            },
+          ),
+          "getter"              =>  function($object) use($configValuesByDomain) {
+            return $configValuesByDomain;
+          },
+          "setter"              =>  function($object) use($configValuesByDomain) {
+            /** @var ConfigValueByDomain $configValueByDomain */
+            foreach($configValuesByDomain as $configValueByDomain)
+            {
+              $configValueByDomain->setConfig($object->getTranslateCurrent());
+              $object->getTranslateCurrent()->addValueByDomain($configValueByDomain);
+            }
+          }
+        )
+      ))
+      ->end();
+
+
+  }
+
 
   /**
    * @param FormAdminEvent $formAdminEvent

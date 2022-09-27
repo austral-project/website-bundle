@@ -50,7 +50,9 @@ class ConfigRepository extends EntityRepository
     if(strpos($name, "count") === false)
     {
       $queryBuilder->leftJoin('root.translates', 'translates')
-        ->addSelect('translates');
+        ->addSelect('translates')
+        ->leftJoin('translates.valuesByDomain', 'valuesByDomain')
+        ->addSelect('valuesByDomain');
     }
     return $queryBuilder;
   }
@@ -61,12 +63,20 @@ class ConfigRepository extends EntityRepository
    * @return Collection|array
    * @throws QueryException
    */
-  public function selectAllByIndexKeyname(?string $language = null)
+  public function selectAllByIndexKeyname(?string $language = null, ?string $domainCurrentId = null)
   {
    $queryBuilder = $this->createQueryBuilder('root')
       ->leftJoin('root.translates', 'translates')->addSelect('translates')
+      ->leftJoin('translates.valuesByDomain', 'valuesByDomain')->addSelect('valuesByDomain')
       ->where("translates.language = :language")
       ->setParameter("language",  $language);
+
+   if($domainCurrentId)
+   {
+     $queryBuilder->andWhere("valuesByDomain.domainId = :domainId OR valuesByDomain.id IS NULL")
+       ->setParameter("domainId", $domainCurrentId);
+   }
+
 
    $queryBuilder->indexBy("root", "root.keyname");
 

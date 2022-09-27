@@ -10,13 +10,11 @@
 
 namespace Austral\WebsiteBundle\Entity\Interfaces;
 
-use Doctrine\Common\Collections\Collection;
-
 /**
- * Austral ConfigTranslate Interface.
+ * Austral ConfigValueByDomain Interface.
  * @author Matthieu Beurel <matthieu@austral.dev>
  */
-interface ConfigTranslateInterface
+interface ConfigValueByDomainInterface
 {
 
   /**
@@ -32,7 +30,7 @@ interface ConfigTranslateInterface
    *
    * @return $this
    */
-  public function setImage(?string $image): ConfigTranslateInterface;
+  public function setImage(?string $image): ConfigValueByDomainInterface;
 
   /**
    * Get file
@@ -47,7 +45,7 @@ interface ConfigTranslateInterface
    *
    * @return $this
    */
-  public function setFile(?string $file): ConfigTranslateInterface;
+  public function setFile(?string $file): ConfigValueByDomainInterface;
 
   /**
    * Get contentText
@@ -62,7 +60,7 @@ interface ConfigTranslateInterface
    *
    * @return $this
    */
-  public function setContentText(?string $contentText): ConfigTranslateInterface;
+  public function setContentText(?string $contentText): ConfigValueByDomainInterface;
 
   /**
    * Get contentBoolean
@@ -73,9 +71,9 @@ interface ConfigTranslateInterface
   /**
    * @param bool $contentBoolean
    *
-   * @return ConfigTranslateInterface
+   * @return ConfigValueByDomainInterface
    */
-  public function setContentBoolean(bool $contentBoolean): ConfigTranslateInterface;
+  public function setContentBoolean(bool $contentBoolean): ConfigValueByDomainInterface;
 
   /**
    * @return string|null
@@ -85,30 +83,9 @@ interface ConfigTranslateInterface
   /**
    * @param string|null $internalLink
    *
-   * @return ConfigTranslateInterface
+   * @return ConfigValueByDomainInterface
    */
-  public function setInternalLink(?string $internalLink): ConfigTranslateInterface;
-
-  /**
-   * @return Collection
-   */
-  public function getValuesByDomain(): Collection;
-
-  /**
-   * @param Collection $valuesByDomain
-   *
-   * @return $this
-   */
-  public function setValuesByDomain(Collection $valuesByDomain): ConfigTranslateInterface;
-
-  /**
-   * Add translates
-   *
-   * @param ConfigValueByDomainInterface $valueByDomain
-   *
-   * @return ConfigTranslateInterface
-   */
-  public function addValueByDomain(ConfigValueByDomainInterface $valueByDomain): ConfigTranslateInterface;
+  public function setInternalLink(?string $internalLink): ConfigValueByDomainInterface;
 
 }
 
