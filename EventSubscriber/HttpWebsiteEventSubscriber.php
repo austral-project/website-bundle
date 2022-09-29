@@ -65,7 +65,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @param HttpEventInterface $httpEvent
    *
    * @return void
-   * @throws NonUniqueResultException
    */
   public function onRequestInitialise(HttpEventInterface $httpEvent)
   {
@@ -154,6 +153,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     $handlerMethod = $requestAttributes->get('_handler_method', null);
     $templateName = "default";
+
     if($requestAttributes->get('_austral_page', false))
     {
       if(!$urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), $slug, true))

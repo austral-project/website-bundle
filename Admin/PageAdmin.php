@@ -13,7 +13,6 @@ namespace Austral\WebsiteBundle\Admin;
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
-use Austral\SeoBundle\Model\UrlParametersByDomain;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\ContentBlockBundle\Field\ContentBlockField;
@@ -130,7 +129,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
   public function configureListMapper(ListAdminEvent $listAdminEvent)
   {
     /** @var string|null $domainId */
-    $domainId = $listAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
+    $domainId = $listAdminEvent->getCurrentModule()->getFilterDomainId();
     $listAdminEvent->getListMapper()
       ->addColumn(new Column\Template("picto", " ", "@AustralWebsite/Admin/_Components/pagePicto.html.twig"))
       ->addColumn(new Column\Template("name", "form.labels.title", "@AustralWebsite/Admin/_Components/pageTitle.html.twig", array(
@@ -233,7 +232,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
     /** @var string|null $domainId */
-    $domainId = $formAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
+    $domainId = $formAdminEvent->getCurrentModule()->getFilterDomainId();
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
@@ -251,9 +250,6 @@ class PageAdmin extends Admin implements AdminModuleInterface
               if($domainId) {
                 $queryBuilder->andWhere("root.domainId = :domainId")
                   ->setParameter("domainId", $domainId);
-              }
-              else {
-                $queryBuilder->andWhere("root.domainId IS NULL");
               }
               return $queryBuilder;
             },
@@ -410,7 +406,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
     }
 
     /** @var string|null $domainId */
-    $domainId = $formAdminEvent->getCurrentModule()->getParametersByKey("austral_filter_by_domain");
+    $domainId = $formAdminEvent->getCurrentModule()->getFilterDomainId();
     if($initDefaultParent && !$object->getIsHomepage() && $domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS)
     {
       $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKeyname("homepage", function(QueryBuilder $queryBuilder) use($domainId) {

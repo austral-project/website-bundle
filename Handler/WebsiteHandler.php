@@ -29,6 +29,7 @@ use Austral\ContentBlockBundle\Event\ContentBlockEvent;
 use Austral\EntityBundle\Entity\EntityInterface;
 
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Handler Website Master abstract.
@@ -126,7 +127,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
     }
 
-    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy())
+    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy("keyname", $this->domainsManagement->getCurrentDomain()->getId()))
     {
       /** @var LibraryInterface|EntityComponentsTrait $library */
       foreach($libraries as $library)
@@ -137,8 +138,8 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
           $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
         }
       }
-      $this->templateParameters->addParameters("libraries", $libraries);
     }
+    $this->templateParameters->addParameters("libraries", $libraries);
     $method = "initPageEntity{$this->page->getClassname()}";
     if(method_exists($this, $method))
     {
@@ -310,6 +311,21 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       return $this->container->get('austral.entity_file.link.generator')->image($object, $fieldname, $type, $mode, $width, $height, $params);
     }
     return null;
+  }
+
+  /**
+   * Generates a URL from the given parameters.
+   *
+   * @param string $route         The name of the route
+   * @param mixed          $parameters    An array of parameters
+   * @param bool|string    $referenceType The type of reference (one of the constants in UrlGeneratorInterface)
+   *
+   * @return string The generated URL
+   * @see UrlGeneratorInterface
+   */
+  public function australGenerateUrl(string $route, EntityInterface $object, $parameters = array(), string $domainId = "current", $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH, $env = null): string
+  {
+    return $this->container->get('austral.seo.routing')->generate($route, $object, $parameters, $domainId, $referenceType);
   }
 
   /**

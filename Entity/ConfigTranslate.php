@@ -26,6 +26,7 @@ use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
 
 
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigValueByDomainInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -105,6 +106,7 @@ abstract class ConfigTranslate extends Entity implements ConfigTranslateInterfac
   {
     parent::__construct();
     $this->id = Uuid::uuid4()->toString();
+    $this->valuesByDomain = new ArrayCollection();
   }
 
   /**
