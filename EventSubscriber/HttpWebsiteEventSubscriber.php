@@ -291,6 +291,9 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         }
         $templateParameters->addParameters("currentPage", $currentPage);
         $websiteHandler->setHandlerMethod("page");
+        $urlParameter = $this->container->get("austral.seo.url_parameter.management")
+          ->retreiveUrlParameterByObject($currentPage, $this->domainsManagement->getCurrentDomain()->getId());
+        $websiteHandler->setUrlParameter($urlParameter);
         if(!$templatePath = $this->configuration->get("templates.{$templateName}.path"))
         {
           $templatePath = $this->configuration->get("templates.default.path");

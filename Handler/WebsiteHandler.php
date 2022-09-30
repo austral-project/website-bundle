@@ -227,9 +227,9 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   protected function robotsParameters(): WebsiteHandler
   {
     $this->templateParameters->addParameters("robots", array(
-      "index"           =>  $this->configVariable->getValueVariableByKey("site.index", false) && $this->urlParameter->getIsIndex(),
-      "follow"          =>  $this->configVariable->getValueVariableByKey("site.follow", false) && $this->urlParameter->getIsFollow(),
-      "status"          =>  $this->urlParameter->getStatus(),
+      "index"           =>  $this->configVariable->getValueVariableByKey("site.index", false) && $this->urlParameter ? $this->urlParameter->getIsIndex() : false,
+      "follow"          =>  $this->configVariable->getValueVariableByKey("site.follow", false) && $this->urlParameter ? $this->urlParameter->getIsFollow() : false,
+      "status"          =>  $this->urlParameter ? $this->urlParameter->getStatus() : UrlParameterInterface::STATUS_DRAFT,
     ));
     return $this;
   }
@@ -242,9 +242,9 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   protected function seoParameters(?EntityInterface $page = null): WebsiteHandler
   {
     $this->templateParameters->addParameters("seo", array(
-      "title"           =>  $this->urlParameter->getSeoTitle() ?? ($page ? $page->__toString() : ""),
-      "description"     =>  $this->urlParameter->getSeoDescription() ?? ($page ? $page->__toString() : ""),
-      "canonical"       =>  $this->urlParameter->getSeoCanonical(),
+      "title"           =>  $this->urlParameter && $this->urlParameter->getSeoTitle() ? $this->urlParameter->getSeoTitle() : ($page ? $page->__toString() : ""),
+      "description"     =>  $this->urlParameter && $this->urlParameter->getSeoDescription() ? $this->urlParameter->getSeoDescription() : ($page ? $page->__toString() : ""),
+      "canonical"       =>  $this->urlParameter && $this->urlParameter->getSeoCanonical() ? $this->urlParameter->getSeoCanonical() : null,
     ));
     return $this;
   }
@@ -257,9 +257,9 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   protected function socialParameters(?EntityInterface $page = null): WebsiteHandler
   {
     $this->templateParameters->addParameters("social", array(
-      "title"           =>  $this->urlParameter->getSocialTitle() ?? ($page ? $page->__toString() : ""),
-      "description"     =>  $this->urlParameter->getSocialDescription() ?? ($page ? $page->__toString() : ""),
-      "image"           =>  $this->uploadsFileLinkGenerator($this->urlParameter, 'socialImage', "original", "i", 1200, 630)
+      "title"           =>  $this->urlParameter && $this->urlParameter->getSocialTitle() ? $this->urlParameter->getSocialTitle() : ($page ? $page->__toString() : ""),
+      "description"     =>  $this->urlParameter && $this->urlParameter->getSocialDescription() ? $this->urlParameter->getSocialDescription() : ($page ? $page->__toString() : ""),
+      "image"           =>  $this->urlParameter ? $this->uploadsFileLinkGenerator($this->urlParameter, 'socialImage', "original", "i", 1200, 630) : null
     ));
     return $this;
   }
