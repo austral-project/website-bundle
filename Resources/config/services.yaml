@@ -25,12 +25,6 @@ services:
     tags:
       - { name: doctrine.event_subscriber, connection: default }
 
-  austral.website.entity_manager.listener:
-    class:        Austral\WebsiteBundle\Listener\EntityManagerListener
-    arguments:    ["@event_dispatcher"]
-    tags:
-      - { name: kernel.event_listener, event: "austral.entity_manager.create", method: create }
-
 ##### Website Handler
   austral.website.handler:
     class:        App\Handler\WebsiteHandler
