@@ -11,6 +11,7 @@
 
 namespace Austral\WebsiteBundle\EventSubscriber;
 
+use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
@@ -186,6 +187,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
           $templateName = $currentPage->getTemplate();
         }
         $templateParameters->addParameters("currentPage", $currentPage);
+
+        if($currentPage instanceof TreePageInterface)
+        {
+          $templateParameters->addParameters("pageParent", $currentPage->getTreePageParent($this->domainsManagement->getCurrentDomain()->getId()));
+        }
       }
       elseif($actionName = $urlParameter->getActionRelation())
       {
