@@ -64,10 +64,12 @@ class EntityManagerListener implements EventSubscriberInterface
   {
     if($entityManagerEvent->getObject() instanceof PageParentInterface)
     {
+      /** @var PageParentInterface $object */
+      $object = $entityManagerEvent->getObject();
       if($pageParent = $entityManagerEvent->getEntityManager()->getDoctrineEntityManager()->getRepository(Page::class)->retreiveByEntityExtends(get_class($entityManagerEvent->getObject())))
       {
-        $entityManagerEvent->getObject()->setPageParent($pageParent);
-        $pageParent->addChildEntities($entityManagerEvent->getObject());
+        $object->setPageParent($pageParent);
+        $pageParent->addChildEntities($object);
       }
     }
   }
