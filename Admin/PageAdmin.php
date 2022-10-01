@@ -7,12 +7,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
- 
+
 namespace Austral\WebsiteBundle\Admin;
 
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
-use Austral\WebsiteBundle\Entity\Domain;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\ContentBlockBundle\Field\ContentBlockField;
@@ -49,22 +48,8 @@ class PageAdmin extends Admin implements AdminModuleInterface
   public function getEvents() : array
   {
     return array(
-      FormAdminEvent::EVENT_UPDATE_BEFORE     =>  "formUpdateBefore",
-      ListAdminEvent::EVENT_END               =>  "listEnd",
+      FormAdminEvent::EVENT_UPDATE_BEFORE =>  "formUpdateBefore"
     );
-  }
-
-  /**
-   * @param ListAdminEvent $listAdminEvent
-   *
-   * @final
-   */
-  protected function listEnd(ListAdminEvent $listAdminEvent)
-  {
-    if(!$listAdminEvent->getListMapper())
-    {
-      $listAdminEvent->getTemplateParameters()->setPath("@AustralWebsite/Admin/Page/moduleList.html.twig");
-    }
   }
 
   /**
@@ -140,12 +125,6 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   public function configureListMapper(ListAdminEvent $listAdminEvent)
   {
-    $homepageId = null;
-    if($filters = $listAdminEvent->getCurrentModule()->getParametersByKey("filters"))
-    {
-      $homepageId = $filters["homepageId"];
-    }
-
     $listAdminEvent->getListMapper()
       ->addColumn(new Column\Template("picto", " ", "@AustralWebsite/Admin/_Components/pagePicto.html.twig"))
       ->addColumn(new Column\Template("name", "form.labels.title", "@AustralWebsite/Admin/_Components/pageTitle.html.twig", array(
@@ -153,88 +132,74 @@ class PageAdmin extends Admin implements AdminModuleInterface
       )))
       ->addColumn(new Column\Template("children", "fields.page.children.entitled",
         "@AustralWebsite/Admin/_Components/pageChildren.html.twig",
-          array('class' =>  "right-position")
-        ), "nb-children"
+        array('class' =>  "right-position")
+      ), "nb-children"
       )
       ->addColumn(new Column\Choices("status", "fields.page.status.entitled", array(
-          "published"       => array(
-            "entitled" => "choices.status.published",
-            "styles"  =>  array(
-              "--element-choice-current-background:var(--color-green-20)",
-              "--element-choice-current-color:var(--color-green-100)",
-              "--element-choice-hover-color:var(--color-green-100)"
-            )
-          ),
-          "draft"           => array(
-            "entitled" => "choices.status.draft",
-            "styles"  =>  array(
-              "--element-choice-current-background:var(--color-purple-20)",
-              "--element-choice-current-color:var(--color-purple-100)",
-              "--element-choice-hover-color:var(--color-purple-100)"
-            )
-          ),
-          "unpublished"     => array(
-            "entitled" => "choices.status.unpublished",
-            "styles"  =>  array(
-              "--element-choice-current-background:var(--color-main-20)",
-              "--element-choice-current-color:var(--color-main-90)",
-              "--element-choice-hover-color:var(--color-main-90)"
-            )
-          ),
-        ), $listAdminEvent->getCurrentModule()->generateUrl("change", array('language'=>"__language__")),
-          $listAdminEvent->getCurrentModule()->isGranted("edit")
-        ), "page-status"
+        "published"       => array(
+          "entitled" => "choices.status.published",
+          "styles"  =>  array(
+            "--element-choice-current-background:var(--color-green-20)",
+            "--element-choice-current-color:var(--color-green-100)",
+            "--element-choice-hover-color:var(--color-green-100)"
+          )
+        ),
+        "draft"           => array(
+          "entitled" => "choices.status.draft",
+          "styles"  =>  array(
+            "--element-choice-current-background:var(--color-purple-20)",
+            "--element-choice-current-color:var(--color-purple-100)",
+            "--element-choice-hover-color:var(--color-purple-100)"
+          )
+        ),
+        "unpublished"     => array(
+          "entitled" => "choices.status.unpublished",
+          "styles"  =>  array(
+            "--element-choice-current-background:var(--color-main-20)",
+            "--element-choice-current-color:var(--color-main-90)",
+            "--element-choice-hover-color:var(--color-main-90)"
+          )
+        ),
+      ), $listAdminEvent->getCurrentModule()->generateUrl("change", array('language'=>"__language__")),
+        $listAdminEvent->getCurrentModule()->isGranted("edit")
+      ), "page-status"
       )
       ->getSection("homepage")
-        ->setMapperType("list")
-        ->setTitle("pages.list.page.homepage")
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use ($homepageId) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($homepageId) {
-            if($homepageId) {
-              return $queryBuilder->where("root.id = :homepageId")
-                ->setParameter("homepageId", $homepageId);
-            }
-            else {
-              return $queryBuilder->where("root.isHomepage = :isHomepage")
-                ->setParameter("isHomepage", true);
-            }
-          });
-          $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
-            return $queryBuilder->orderBy("root.position", "ASC")
-              ->leftJoin("root.translates", "translates")->addSelect("translates")
-              ->addOrderBy("translates.language", "ASC");
-          });
-        })
+      ->setMapperType("list")
+      ->setTitle("pages.list.page.homepage")
+      ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
+        $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) {
+          return $queryBuilder->where("root.isHomepage = true");
+        });
+        $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
+          return $queryBuilder->orderBy("root.position", "ASC")
+            ->leftJoin("root.translates", "translates")->addSelect("translates")
+            ->addOrderBy("translates.language", "ASC");
+        });
+      })
       ->end()
 
       ->getSection("default")
-        ->setMapperType("list")
-        ->childrenRow(function(PageInterface $page) {
-          return $page->getChildren();
-        })
-        ->buildDataHydrate(function(DataHydrateORM $dataHydrate) use ($homepageId) {
-          $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) use($homepageId) {
-            if($homepageId) {
-              return $queryBuilder->leftJoin("root.parent", "parent")
-                ->where("parent.id = :homepageId")
-                ->setParameter("homepageId", $homepageId);
-            }
-            else {
-              return $queryBuilder->leftJoin("root.parent", "parent")
-                ->where("root.isHomepage != :isHomepage")
-                ->setParameter("isHomepage", true);
-            }
-          });
-          $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
-            return $queryBuilder
-              ->leftJoin("root.translates", "translates")->addSelect("translates")
-              ->leftJoin("root.children", "children")->addSelect("children")
-              ->leftJoin("children.children", "subChildren")->addSelect("subChildren")
-              ->leftJoin("subChildren.children", "ThreeChildren")->addSelect("ThreeChildren")
-              ->orderBy("root.position", "ASC")
-              ->addOrderBy("translates.language", "ASC");
-          });
-        })
+      ->setMapperType("list")
+      ->childrenRow(function(PageInterface $page) {
+        return $page->getChildren();
+      })
+      ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
+        $dataHydrate->addQueryBuilderClosure(function(QueryBuilder $queryBuilder) {
+          return $queryBuilder->where("root.isHomepage != true");
+        });
+        $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
+          return $queryBuilder->leftJoin("root.parent", "parent")
+            ->where("parent.isHomepage = :isHomepage")
+            ->leftJoin("root.translates", "translates")->addSelect("translates")
+            ->leftJoin("root.children", "children")->addSelect("children")
+            ->leftJoin("children.children", "subChildren")->addSelect("subChildren")
+            ->leftJoin("subChildren.children", "ThreeChildren")->addSelect("ThreeChildren")
+            ->orderBy("root.position", "ASC")
+            ->addOrderBy("translates.language", "ASC")
+            ->setParameter("isHomepage", true);
+        });
+      })
       ->end();
   }
 
@@ -245,165 +210,151 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
-    $homepageId = null;
-    if($filters = $formAdminEvent->getCurrentModule()->getParametersByKey("filters"))
-    {
-      $homepageId = $filters["homepageId"];
-    }
-
-    $countPages = $this->container->get('austral.entity_manager.page')->countAll(function(QueryBuilder $queryBuilder) use ($homepageId) {
-      $queryBuilder->where("root.homepageId = :homepageId")
-        ->setParameter("homepageId", $homepageId);
-    });
+    $countPages = $this->container->get('austral.entity_manager.page')->countAll();
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
-        ->setPositionName(Fieldset::POSITION_RIGHT)
-        ->setViewName(false)
-        ->add(Field\EntityField::create("parent", Page::class,
-          array(
-            'query_builder'     => function (EntityRepository $er) use($formAdminEvent, $homepageId) {
-              $queryBuilder = $er->createQueryBuilder('u')
-                ->where("u.id != :pageId")
-                ->setParameter("pageId", $formAdminEvent->getFormMapper()->getObject()->getId())
-                ->leftJoin("u.translates", "translates")->addSelect("translates")
-                ->orderBy('translates.refUrl', 'ASC');
-              if($homepageId) {
-                $queryBuilder->andWhere("u.homepageId = :homepageId")
-                  ->setParameter("homepageId", $homepageId);
-              }
-              return $queryBuilder;
+      ->setPositionName(Fieldset::POSITION_RIGHT)
+      ->setViewName(false)
+      ->add(Field\EntityField::create("parent", Page::class,
+        array(
+          'query_builder'     => function (EntityRepository $er) use($formAdminEvent){
+            return $er->createQueryBuilder('u')
+              ->where("u.id != :pageId")
+              ->setParameter("pageId", $formAdminEvent->getFormMapper()->getObject()->getId())
+              ->leftJoin("u.translates", "translates")->addSelect("translates")
+              ->orderBy('u.position', 'ASC');
+          },
+          'choice_label' => 'path',
+          'isView' => array(
+            function($object) {
+              return !$object->getIsHomepage();
             },
-            'choice_label' => 'path',
-            'isView' => array(
-              function($object) {
-                return !$object->getIsHomepage();
-              },
-              $formAdminEvent->getFormMapper()->getObject()
-            ),
-            "required"  =>  $countPages > 0
-          )
-        ))
-        ->add(Field\ChoiceField::create("isHomepage",
-          array(
-            "choices.status.no"     =>  array(
-              "value"   =>  false,
-              "styles"  =>  array(
-                "--element-choice-current-background:var(color-main-20)",
-                "--element-choice-current-color:var(--color-main-100)",
-                "--element-choice-hover-color:var(--color-main-100)"
-              )
-            ),
-            "choices.status.yes"     =>  array(
-              "value"   =>  true,
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-green-20)",
-                "--element-choice-current-color:var(--color-green-100)",
-                "--element-choice-hover-color:var(--color-green-100)"
-              )
+            $formAdminEvent->getFormMapper()->getObject()
+          ),
+          "required"  =>  $countPages > 0
+        )
+      ))
+      ->add(Field\ChoiceField::create("isHomepage",
+        array(
+          "choices.status.no"     =>  array(
+            "value"   =>  false,
+            "styles"  =>  array(
+              "--element-choice-current-background:var(color-main-20)",
+              "--element-choice-current-color:var(--color-main-100)",
+              "--element-choice-hover-color:var(--color-main-100)"
             )
-          ), array('isView' => function(){
-            return $this->container->get('security.authorization_checker')->isGranted('ROLE_ROOT');
-          })
-        ))
-        ->add(Field\ChoiceField::create("status",
-          array(
-            "choices.status.unpublished"   =>  array(
-              "value"   =>  "unpublished",
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-main-20)",
-                "--element-choice-current-color:var(--color-main-90)",
-                "--element-choice-hover-color:var(--color-main-90)"
-              )
-            ),
-            "choices.status.draft"         =>  array(
-              "value"   =>  "draft",
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-purple-20)",
-                "--element-choice-current-color:var(--color-purple-100)",
-                "--element-choice-hover-color:var(--color-purple-100)"
-              )
-            ),
-            "choices.status.published"     =>  array(
-              "value"   =>  "published",
-              "styles"  =>  array(
-                "--element-choice-current-background:var(--color-green-20)",
-                "--element-choice-current-color:var(--color-green-100)",
-                "--element-choice-hover-color:var(--color-green-100)"
-              )
+          ),
+          "choices.status.yes"     =>  array(
+            "value"   =>  true,
+            "styles"  =>  array(
+              "--element-choice-current-background:var(--color-green-20)",
+              "--element-choice-current-color:var(--color-green-100)",
+              "--element-choice-hover-color:var(--color-green-100)"
             )
           )
-        ))
-      ->end()
-
-      ->addFieldset("fieldset.dev.config")
-        ->setIsView($this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"))
-        ->add(Field\TextField::create("keyname", array(
-            "autoConstraints" => false,
-            "isView" => $this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT")
-          )
-        ))
-        ->add(Field\TextField::create("australPictoClass",  array(
-          "isView" => $this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"),
-        )))
-        ->add(Field\TextField::create("entityExtends", array(
-          "isView" => $this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"),
-        )))
-      ->end()
-
-      ->addFieldset("fieldset.generalInformation")
-  
-        ->add(Field\TextField::create("name", array(
-            "entitled"    => "fields.mainTitle.entitled",
-            "placeholder" => "fields.mainTitle.placeholder"
-          )
-        ))
-        ->add(Field\TextField::create("refH1", array(
-            "placeholder" => "fields.refH1.placeholder",
-          )
-        ))
-        ->addGroup("generalInformations")
-          ->addGroup("generalInformations")
-            ->setDirection(GroupFields::DIRECTION_COLUMN)
-            ->setStyle(GroupFields::STYLE_NONE)
-            ->setSize(GroupFields::SIZE_COL_6)
-            ->add(Field\TextareaField::create("summary", null, array(
-                  'attr' => array(
-                    'data-austral-tag' => ""
-                  ),
-                  "group" =>  array(
-                    'class' =>  "full"
-                  )
-                )
-              )
+        ), array('isView' => function(){
+          return $this->container->get('security.authorization_checker')->isGranted('ROLE_ROOT');
+        })
+      ))
+      ->add(Field\ChoiceField::create("status",
+        array(
+          "choices.status.unpublished"   =>  array(
+            "value"   =>  "unpublished",
+            "styles"  =>  array(
+              "--element-choice-current-background:var(--color-main-20)",
+              "--element-choice-current-color:var(--color-main-90)",
+              "--element-choice-hover-color:var(--color-main-90)"
             )
-          ->end()
-          ->addGroup("image")
-            ->setDirection(GroupFields::DIRECTION_COLUMN)
-            ->setStyle(GroupFields::STYLE_NONE)
-            ->setSize(GroupFields::SIZE_COL_6)
-
-            ->add(Field\UploadField::create("image"))
-          ->end()
-        ->end()
-        ->addPopin("popup-editor-image", "image", array(
-            "button"  =>  array(
-              "entitled"            =>  "actions.picture.edit",
-              "picto"               =>  "",
-              "class"               =>  "button-action"
-            ),
-            "popin"  =>  array(
-              "id"            =>  "upload",
-              "template"      =>  "uploadEditor",
+          ),
+          "choices.status.draft"         =>  array(
+            "value"   =>  "draft",
+            "styles"  =>  array(
+              "--element-choice-current-background:var(--color-purple-20)",
+              "--element-choice-current-color:var(--color-purple-100)",
+              "--element-choice-hover-color:var(--color-purple-100)"
+            )
+          ),
+          "choices.status.published"     =>  array(
+            "value"   =>  "published",
+            "styles"  =>  array(
+              "--element-choice-current-background:var(--color-green-20)",
+              "--element-choice-current-color:var(--color-green-100)",
+              "--element-choice-hover-color:var(--color-green-100)"
             )
           )
         )
-          ->add(Field\TextField::create("imageAlt", array('entitled'=>"fields.alt.entitled")))
-          ->add(Field\TextField::create("imageReelname", array('entitled'=>"fields.reelname.entitled")))
-        ->end()
+      ))
+      ->end()
+
+      ->addFieldset("fieldset.dev.config")
+      ->setIsView($this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"))
+      ->add(Field\TextField::create("keyname", array(
+          "autoConstraints" => false,
+          "isView" => $this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT")
+        )
+      ))
+      ->add(Field\TextField::create("australPictoClass",  array(
+        "isView" => $this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"),
+      )))
+      ->add(Field\TextField::create("entityExtends", array(
+        "isView" => $this->container->get("security.authorization_checker")->isGranted("ROLE_ROOT"),
+      )))
+      ->end()
+
+      ->addFieldset("fieldset.generalInformation")
+
+      ->add(Field\TextField::create("name", array(
+          "entitled"    => "fields.mainTitle.entitled",
+          "placeholder" => "fields.mainTitle.placeholder"
+        )
+      ))
+      ->add(Field\TextField::create("refH1", array(
+          "placeholder" => "fields.refH1.placeholder",
+        )
+      ))
+      ->addGroup("generalInformations")
+      ->addGroup("generalInformations")
+      ->setDirection(GroupFields::DIRECTION_COLUMN)
+      ->setStyle(GroupFields::STYLE_NONE)
+      ->setSize(GroupFields::SIZE_COL_6)
+      ->add(Field\TextareaField::create("summary", null, array(
+          'attr' => array(
+            'data-austral-tag' => ""
+          ),
+          "group" =>  array(
+            'class' =>  "full"
+          )
+        )
+      )
+      )
+      ->end()
+      ->addGroup("image")
+      ->setDirection(GroupFields::DIRECTION_COLUMN)
+      ->setStyle(GroupFields::STYLE_NONE)
+      ->setSize(GroupFields::SIZE_COL_6)
+
+      ->add(Field\UploadField::create("image"))
+      ->end()
+      ->end()
+      ->addPopin("popup-editor-image", "image", array(
+          "button"  =>  array(
+            "entitled"            =>  "actions.picture.edit",
+            "picto"               =>  "",
+            "class"               =>  "button-action"
+          ),
+          "popin"  =>  array(
+            "id"            =>  "upload",
+            "template"      =>  "uploadEditor",
+          )
+        )
+      )
+      ->add(Field\TextField::create("imageAlt", array('entitled'=>"fields.alt.entitled")))
+      ->add(Field\TextField::create("imageReelname", array('entitled'=>"fields.reelname.entitled")))
+      ->end()
       ->end()
 
       ->addFieldset("fieldset.contentBlock")
-        ->add(new ContentBlockField())
+      ->add(new ContentBlockField())
       ->end();
   }
 
@@ -414,16 +365,8 @@ class PageAdmin extends Admin implements AdminModuleInterface
    */
   protected function formUpdateBefore(FormAdminEvent $formAdminEvent)
   {
-
-
     /** @var PageInterface|EntityInterface $object */
     $object = $formAdminEvent->getFormMapper()->getObject();
-
-    if($filters = $formAdminEvent->getCurrentModule()->getParametersByKey("filters"))
-    {
-      $object->setHomepageId($filters["homepageId"]);
-    }
-
     if(!$object->getKeyname())
     {
       $object->setKeyname($object->getName()."-".$object->getId());
@@ -433,13 +376,6 @@ class PageAdmin extends Admin implements AdminModuleInterface
     {
       $object->setParent(null);
       $object->setAustralPictoClass( "austral-picto-home");
-
-      /** @var Domain $domain */
-      if($domain = $formAdminEvent->getCurrentModule()->getParametersByKey("domain"))
-      {
-        $domain->setHomepage($object);
-        $formAdminEvent->getAdminHandler()->getEntityManager()->update($domain, false);
-      }
     }
 
     $initDefaultParent = false;
@@ -461,8 +397,5 @@ class PageAdmin extends Admin implements AdminModuleInterface
       $object->setParent($parentDefault);
     }
   }
-
-
-
 
 }
