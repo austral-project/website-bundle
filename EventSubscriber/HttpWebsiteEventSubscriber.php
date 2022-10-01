@@ -25,7 +25,6 @@ use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
 use Austral\WebsiteBundle\Services\DomainRequest;
 use Austral\WebsiteBundle\Template\TemplateParameters;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -117,12 +116,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var AttributeBagInterface $requestAttributes */
     $requestAttributes = $httpEvent->getKernelEvent()->getRequest()->attributes;
 
-    $requestUri = urldecode($httpEvent->getKernelEvent()->getRequest()->getRequestUri());
-    $pathInfo = urldecode(trim($httpEvent->getKernelEvent()->getRequest()->getPathInfo(), "/"));
-
+    $pathInfo = urldecode(ltrim($httpEvent->getKernelEvent()->getRequest()->getPathInfo(), "/"));
     if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $httpEvent->getKernelEvent()->getRequest()->getLocale()))
     {
-      $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
+      $urlRedirect = $redirection->getUrlDestination();
+      if(strpos($urlRedirect, "/") !== 0)
+      {
+        $urlRedirect = "/{$urlRedirect}";
+      }
       $response = new RedirectResponse($urlRedirect, $redirection->getStatusCode());
       $httpEvent->getKernelEvent()->setResponse($response);
       return;
