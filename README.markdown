@@ -16,7 +16,7 @@ composer require austral/website-bundle
 ```
 
 ## Documentation
-See documentation on the [official website](https://austral.dev/bundles/website-bundle)
+See documentation on the [official website](https://austral.dev/en/bundles/website-bundle)
 
 ## Commit Messages
 
