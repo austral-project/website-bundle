@@ -216,7 +216,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   {
     /** @var UrlParameterManagement $urlParameterManagement */
     $urlParameterManagement = $this->container->get('austral.seo.url_parameter.management');
-    $this->templateParameters->addParameters("urls", $urlParameterManagement->getUrlParametersByDomain()->getUrlParametersPath());
+    $this->templateParameters->addParameters("urls", $urlParameterManagement->getUrlParametersByDomain()->getUrlParametersPathIndexed());
     return $this;
   }
 
