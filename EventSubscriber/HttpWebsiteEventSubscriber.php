@@ -11,6 +11,7 @@
 
 namespace Austral\WebsiteBundle\EventSubscriber;
 
+use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntitySeoBundle\Services\Pages;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
@@ -91,16 +92,19 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var DomainInterface $currentDomain */
     $currentDomain = $this->domainRequest->getCurrentDomain();
 
-    if($currentDomain && $currentDomain->getLanguage()) {
+    if($currentDomain && $currentDomain->getLanguage())
+    {
       $currentLocal = $currentDomain->getLanguage();
     }
-    if($httpEvent->getKernelEvent()->getRequest()->attributes->has("_locale"))
+    elseif($httpEvent->getKernelEvent()->getRequest()->attributes->has("_locale"))
     {
       $currentLocal = $httpEvent->getKernelEvent()->getRequest()->attributes->get("_locale");
     }
+
     if(!$httpEvent->getKernelEvent()->getRequest()->attributes->has("language"))
     {
-      $httpEvent->getKernelEvent()->getRequest()->attributes->set("language", $currentLocal ? : $this->container->getParameter('locale'));
+      $currentLocal = $currentLocal ? : $this->container->getParameter('locale');
+      $httpEvent->getKernelEvent()->getRequest()->attributes->set("language", $currentLocal);
     }
     $httpEvent->getHttpRequest()->setLanguage($currentLocal);
   }
@@ -269,7 +273,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var Pages $servicePages */
     $servicePages = $this->container->get("austral.entity_seo.pages");
 
-    /** @var PageInterface $currentPage */
+    /** @var PageInterface|EntityInterface $currentPage */
     if($currentPage = $servicePages->retreiveByCode("Page_error-{$response->getStatusCode()}"))
     {
       try {
