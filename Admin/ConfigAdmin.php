@@ -16,6 +16,7 @@ use Austral\FormBundle\Mapper\Fieldset;
 use Austral\FormBundle\Mapper\FormMapper;
 use Austral\HttpBundle\Entity\Domain;
 use Austral\HttpBundle\Services\DomainsManagement;
+use Austral\ListBundle\DataHydrate\DataHydrateORM;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 
 use Austral\FilterBundle\Filter\Type as FilterType;
@@ -28,6 +29,7 @@ use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\FormBundle\Field as Field;
 use Austral\ListBundle\Column as Column;
 
+use Doctrine\ORM\QueryBuilder;
 use Exception;
 
 /**
@@ -83,6 +85,11 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
   public function configureListMapper(ListAdminEvent $listAdminEvent)
   {
     $listAdminEvent->getListMapper()
+      ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
+        $dataHydrate->addQueryBuilderPaginatorClosure(function(QueryBuilder $queryBuilder) {
+          return $queryBuilder->orderBy("root.name", "ASC");
+        });
+      })
       ->addColumn(new Column\Value("name"))
       ->addColumn(new Column\Value("keyname"))
       ->addColumn(new Column\Value("contentText"))
