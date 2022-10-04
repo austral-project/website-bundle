@@ -105,7 +105,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var DomainInterface $domain */
     $domain = $this->domainsManagement->getCurrentDomain();
 
-    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getKernelEvent()->getRequest()->getLocale()))
+    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getHttpRequest()->getLanguage()))
     {
       $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
       $response = new RedirectResponse($urlRedirect, $redirection->getStatusCode());
