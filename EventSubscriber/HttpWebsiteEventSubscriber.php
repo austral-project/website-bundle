@@ -100,7 +100,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $requestAttributes = $httpEvent->getKernelEvent()->getRequest()->attributes;
 
     $requestUri = urldecode($httpEvent->getKernelEvent()->getRequest()->getRequestUri());
-    $pathInfo = urldecode(trim($httpEvent->getKernelEvent()->getRequest()->getPathInfo(), "/"));
+    $pathInfo = urldecode(ltrim($httpEvent->getKernelEvent()->getRequest()->getPathInfo(), "/"));
 
     /** @var DomainInterface $domain */
     $domain = $this->domainsManagement->getCurrentDomain();

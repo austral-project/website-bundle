@@ -12,7 +12,6 @@ namespace Austral\WebsiteBundle\Admin;
 
 use App\Entity\Austral\WebsiteBundle\ConfigValueByDomain;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
-use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 use Austral\FormBundle\Mapper\Fieldset;
 use Austral\FormBundle\Mapper\FormMapper;
 use Austral\HttpBundle\Entity\Domain;
@@ -98,15 +97,6 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
   public function configureFormMapper(FormAdminEvent $formAdminEvent)
   {
     $pagesList = array();
-    /*$pages = $this->container->get("austral.seo.url_parameter.management")->getUrls();
-    foreach($pages as $object)
-    {
-      if(!array_key_exists($object->getClassname(), $pagesList))
-      {
-        $pagesList[$object->getClassname()] = array();
-      }
-      $pagesList[$object->getClassname()][$object->__toString()] = "{$object->getClassname()}:{$object->getId()}";
-    }*/
 
     /** @var DomainsManagement $domainsManagement */
     $domainsManagement = $this->container->get('austral.http.domains.management');
