@@ -13,6 +13,7 @@ namespace Austral\WebsiteBundle\Admin;
 use App\Entity\Austral\WebsiteBundle\Page;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
+use Austral\SeoBundle\Column\UrlParameterStatus;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 
 use Austral\ContentBlockBundle\Field\ContentBlockField;
@@ -140,32 +141,8 @@ class PageAdmin extends Admin implements AdminModuleInterface
           array('class' =>  "right-position")
         ), "nb-children"
       )
-      ->addColumn(new Column\Choices("status", "fields.page.status.entitled", array(
-          "published"       => array(
-            "entitled" => "choices.status.published",
-            "styles"  =>  array(
-              "--element-choice-current-background:var(--color-green-20)",
-              "--element-choice-current-color:var(--color-green-100)",
-              "--element-choice-hover-color:var(--color-green-100)"
-            )
-          ),
-          "draft"           => array(
-            "entitled" => "choices.status.draft",
-            "styles"  =>  array(
-              "--element-choice-current-background:var(--color-purple-20)",
-              "--element-choice-current-color:var(--color-purple-100)",
-              "--element-choice-hover-color:var(--color-purple-100)"
-            )
-          ),
-          "unpublished"     => array(
-            "entitled" => "choices.status.unpublished",
-            "styles"  =>  array(
-              "--element-choice-current-background:var(--color-main-20)",
-              "--element-choice-current-color:var(--color-main-90)",
-              "--element-choice-hover-color:var(--color-main-90)"
-            )
-          ),
-        ), $listAdminEvent->getCurrentModule()->generateUrl("change", array('language'=>"__language__")),
+      ->addColumn(new UrlParameterStatus("fields.page.status.entitled", array(),
+        $listAdminEvent->getCurrentModule()->generateUrl("change", array('language'=>"__language__")),
           $listAdminEvent->getCurrentModule()->isGranted("edit")
         ), "page-status"
       );
