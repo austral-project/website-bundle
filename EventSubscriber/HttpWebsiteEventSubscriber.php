@@ -29,6 +29,7 @@ use Austral\WebsiteBundle\Template\TemplateParameters;
 
 use Doctrine\ORM\NonUniqueResultException;
 
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -271,8 +272,12 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var PageEntityManager $pageEntityManager */
     $pageEntityManager = $this->container->get("austral.entity_manager.page");
 
+    $domainId = $this->domainsManagement->getCurrentDomain()->getId();
     /** @var PageInterface $currentPage */
-    if($currentPage = $pageEntityManager->retreiveByKey("keyname", "error-{$response->getStatusCode()}"))
+    if($currentPage = $pageEntityManager->retreiveByKey("keyname", "error-{$response->getStatusCode()}", function(QueryBuilder $queryBuilder) use($domainId){
+      $queryBuilder->andWhere("root.domainId = :domainId")
+        ->setParameter("domainId", $domainId);
+    }))
     {
       try {
         /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
