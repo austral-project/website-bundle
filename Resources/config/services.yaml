@@ -18,12 +18,19 @@ services:
       - { name: kernel.event_subscriber }
 
 
-##### Website Listener Kernel
+##### Website Listener
 
   austral.website.doctrine.listener:
     class:        Austral\WebsiteBundle\Listener\DoctrineListener
     tags:
       - { name: doctrine.event_subscriber, connection: default }
+
+
+  austral.website.entity_manager.listener:
+    class:        Austral\WebsiteBundle\Listener\EntityManagerListener
+    arguments:    ["@austral.entity_manager.page"]
+    tags:
+      - { name: kernel.event_listener, event: "austral.entity_manager.duplicate", method: duplicate }
 
 ##### Website Handler
   austral.website.handler:

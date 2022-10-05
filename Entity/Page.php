@@ -47,6 +47,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Ramsey\Uuid\Uuid;
 
 
@@ -58,6 +59,7 @@ use Ramsey\Uuid\Uuid;
  * @Translate(relationClass="Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface")
  * @UrlParameterObject(methodGenerateLastPath="stringToLastPath", methodUrlName="name")
  * @DomainFilter(forAllDomainEnabled=true, autoDomainId=true)
+ * @UniqueEntity(fields={"domainId", "keyname"}, errorPath="keyname")
  */
 abstract class Page extends Entity implements PageInterface,
   TreePageInterface,
@@ -92,7 +94,7 @@ abstract class Page extends Entity implements PageInterface,
 
   /**
    * @var string|null
-   * @ORM\Column(name="keyname", type="string", length=128, unique=true, nullable=false )
+   * @ORM\Column(name="keyname", type="string", length=128, nullable=false )
    */
   protected ?string $keyname = null;
   
