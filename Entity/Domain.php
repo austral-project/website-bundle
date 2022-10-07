@@ -117,6 +117,12 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
 
   /**
    * @var boolean
+   * @ORM\Column(name="with_uri", type="boolean", nullable=false, options={"default": false})
+   */
+  protected bool $withUri = false;
+
+  /**
+   * @var boolean
    * @ORM\Column(name="one_page", type="boolean", nullable=true, options={"default": false})
    */
   protected bool $onePage = false;
@@ -385,6 +391,25 @@ abstract class Domain extends Entity implements DomainInterface, EntityInterface
   public function setLanguage(?string $language): Domain
   {
     $this->language = $language;
+    return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function getWithUri(): bool
+  {
+    return $this->withUri;
+  }
+
+  /**
+   * @param bool $withUri
+   *
+   * @return Domain
+   */
+  public function setWithUri(bool $withUri): Domain
+  {
+    $this->withUri = $withUri;
     return $this;
   }
 

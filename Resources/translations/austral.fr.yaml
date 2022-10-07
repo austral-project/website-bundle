@@ -95,6 +95,8 @@ fields:
     entitled:                                   Favicon
   nameDomain:
     entitled:                                   Nom
+  withUriDomain:
+    entitled:                                   Conserver l'url ?
 
 choices:
   config:

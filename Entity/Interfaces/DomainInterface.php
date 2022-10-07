@@ -165,6 +165,17 @@ interface DomainInterface
    */
   public function setLanguage(?string $language): DomainInterface;
 
+  /**
+   * @return bool
+   */
+  public function getWithUri(): bool;
+
+  /**
+   * @param bool $withUri
+   *
+   * @return DomainInterface
+   */
+  public function setWithUri(bool $withUri): DomainInterface;
 
 }
 

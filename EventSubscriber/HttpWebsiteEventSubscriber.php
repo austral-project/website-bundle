@@ -160,7 +160,12 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     else {
       if($domain->getRedirectUrl())
       {
-        $response = new RedirectResponse($domain->getRedirectUrl(), 301);
+        $redirectUrl = rtrim($domain->getRedirectUrl(), "/");
+        if($domain->getWithUri())
+        {
+          $redirectUrl .= $httpEvent->getKernelEvent()->getRequest()->getPathInfo();
+        }
+        $response = new RedirectResponse($redirectUrl, 301);
         $httpEvent->getKernelEvent()->setResponse($response);
         return;
       }

@@ -77,6 +77,10 @@ Class DomainRequest
     {
       $this->retrieveCurrentDomain();
     }
+    if($this->currentDomain->getIsVirtual())
+    {
+      $this->currentDomain = $this->getDomainMaster();
+    }
     return $this->currentDomain;
   }
 
