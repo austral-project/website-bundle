@@ -55,6 +55,7 @@ Class ConfigVariable
    * ReplaceConfigValues constructor.
    *
    * @param RequestStack $requestStack
+   * @param DomainsManagement $domainsManagement
    * @param EntityManager $entityManager
    * @param Generator $fileLinkGenerator
    */
@@ -101,7 +102,7 @@ Class ConfigVariable
         /** @var ConfigTranslateInterface $configTranslate */
         $configTranslate = $config->getTranslateCurrent();
 
-        if($config->getWithDomain())
+        if($config->getWithDomain() && $domainCurrentId)
         {
           $configValue = $configTranslate->getValueByDomainId($domainCurrentId);
         }
