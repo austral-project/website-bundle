@@ -11,6 +11,7 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\WebsitePageParentInterface;
 use App\Entity\Austral\WebsiteBundle\Page;
@@ -70,7 +71,7 @@ class DoctrineListener implements EventSubscriber
         /** @var PageInterface $pageParent */
         foreach ($websitePages as $pageParent)
         {
-          $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? "current");
+          $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? DomainsManagement::DOMAIN_ID_MASTER);
           $pageParent->addChildEntities($object);
         }
       }
