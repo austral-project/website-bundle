@@ -10,6 +10,7 @@
  
 namespace Austral\WebsiteBundle\Entity;
 
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
 
@@ -262,10 +263,6 @@ abstract class Page extends Entity implements PageInterface,
    */
   public function setParent(?PageInterface $parent): Page
   {
-    if($parent)
-    {
-      $this->addTreePageParent($parent, $this->getDomainId());
-    }
     $this->parent = $parent;
     return $this;
   }
@@ -273,15 +270,15 @@ abstract class Page extends Entity implements PageInterface,
   /**
    * @return TreePageInterface|EntityInterface|null
    */
-  public function getTreePageParent(string $domainId = "current"): ?TreePageInterface
+  public function addTreePageParent(TreePageInterface $treePageParent, string $domainId = DomainsManagement::DOMAIN_ID_MASTER): ?TreePageInterface
   {
-    return $this->parent;
+    return $this->getParent();
   }
 
   /**
    * Get parent
    *
-   * @return PageInterface|null
+   * @return PageInterface|TreePageInterface|null
    */
   public function getParent(): ?PageInterface
   {
