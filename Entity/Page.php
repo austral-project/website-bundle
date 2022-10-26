@@ -276,6 +276,14 @@ abstract class Page extends Entity implements PageInterface,
   }
 
   /**
+   * @return TreePageInterface|EntityInterface|null
+   */
+  public function getTreePageParent(string $domainId = DomainsManagement::DOMAIN_ID_MASTER, bool $strict = false): ?TreePageInterface
+  {
+    return $this->getParent();
+  }
+
+  /**
    * Get parent
    *
    * @return PageInterface|TreePageInterface|null
