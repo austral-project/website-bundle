@@ -9,6 +9,7 @@
  */
 
 namespace Austral\WebsiteBundle\Services;
+use Austral\EntityBundle\Entity\Interfaces\FileInterface;
 use Austral\EntityFileBundle\File\Link\Generator;
 use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
@@ -96,7 +97,7 @@ Class ConfigVariable
       }
       $configsAll = $this->entityManager->getRepository("Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface")->selectAllByIndexKeyname($this->language, $domainCurrentId);
 
-      /** @var ConfigInterface|TranslateMasterInterface $config */
+      /** @var ConfigInterface|FileInterface|TranslateMasterInterface $config */
       foreach($configsAll as $config)
       {
         /** @var ConfigTranslateInterface $configTranslate */
@@ -104,10 +105,12 @@ Class ConfigVariable
 
         if($config->getWithDomain() && $domainCurrentId)
         {
+          /** @var ConfigInterface|FileInterface $configValue */
           $configValue = $configTranslate->getValueByDomainId($domainCurrentId);
         }
         else
         {
+          /** @var ConfigInterface|FileInterface $configValue */
           $configValue = $configTranslate;
         }
 
@@ -219,6 +222,7 @@ Class ConfigVariable
             "value" =>  "#INTERNAL_LINK_{$configValue->getInternalLink()}#"
           );
         }
+        $variables["{$config->getKeyname()}"]["object"] = $config->getWithDomain() ? $configValue : $config;
       }
       $variables = $this->variablesExtends($variables);
       $this->variables = $variables;
