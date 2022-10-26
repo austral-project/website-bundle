@@ -11,6 +11,7 @@
 
 namespace Austral\WebsiteBundle\EventSubscriber;
 
+use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
@@ -251,8 +252,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
   public function onResponse(HttpEventInterface $httpEvent)
   {
     $response = $httpEvent->getKernelEvent()->getResponse();
-    $responseContent = $this->container->get('austral.website.config_replace_dom')->replaceDom($response->getContent());
-    $response->setContent($responseContent);
+    if(!$response instanceof RedirectResponse)
+    {
+      $responseContent = $this->container->get('austral.website.config_replace_dom')->replaceDom($response->getContent());
+      $response->setContent($responseContent);
+    }
     $httpEvent->getKernelEvent()->setResponse($response);
   }
 
@@ -283,7 +287,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $pageEntityManager = $this->container->get("austral.entity_manager.page");
 
     $domainId = $this->domainsManagement->getCurrentDomain()->getId();
-    /** @var PageInterface $currentPage */
+    /** @var PageInterface|EntityInterface $currentPage */
     if($currentPage = $pageEntityManager->retreiveByKey("keyname", "error-{$response->getStatusCode()}", function(QueryBuilder $queryBuilder) use($domainId){
       $queryBuilder->andWhere("root.domainId = :domainId")
         ->setParameter("domainId", $domainId);
