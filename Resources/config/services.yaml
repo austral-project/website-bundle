@@ -39,6 +39,7 @@ services:
       - "@service_container"
       - "@request_stack"
       - "@event_dispatcher"
+      - "@security.token_storage"
       - "@austral.tools.debug"
     calls:
       - [ setMercure, [ "@?austral.notify.mercure" ] ]
