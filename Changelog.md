@@ -1,6 +1,16 @@
 Changelog
 =========
 
+### Version 3.1.1 (2022-12-16)
+* Fix deprecated functions for security compatibility from symfony 5.4
+* Fix domainCurrentId if null
+* Remove deprecated in compiler doctrine
+* Add redirect with uri and local attribute
+* Fix declaration in Page Entity
+* Fix tree page for page to generate UrlParameter
+* Not used replace dom service if is redirect response
+* Add object in config variable
+
 ### Version 3.1.0 (2022-09-17)
 * Updated bundles version to 3.1 for use the new Entities Interfaces
 * Multi domain
