@@ -114,8 +114,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $domain = $this->domainsManagement->getCurrentDomain();
     if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getHttpRequest()->getLanguage()))
     {
-      $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
-      $response = new RedirectResponse($urlRedirect, $redirection->getStatusCode());
+      if(preg_match("|(https?:\/\/)|", $redirection, $matches)) {
+        $response = new RedirectResponse($redirection, $redirection->getStatusCode());
+      }
+      else {
+        $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
+        $response = new RedirectResponse($urlRedirect, $redirection->getStatusCode());
+      }
+
       $httpEvent->getKernelEvent()->setResponse($response);
       return;
     }
