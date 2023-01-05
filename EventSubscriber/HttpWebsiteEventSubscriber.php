@@ -12,6 +12,7 @@
 namespace Austral\WebsiteBundle\EventSubscriber;
 
 use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\SeoBundle\Entity\Interfaces\RedirectionInterface;
 use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
@@ -112,10 +113,12 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     /** @var DomainInterface $domain */
     $domain = $this->domainsManagement->getCurrentDomain();
+
+    /** @var RedirectionInterface $redirection */
     if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getHttpRequest()->getLanguage()))
     {
-      if(preg_match("|(https?:\/\/)|", $redirection, $matches)) {
-        $response = new RedirectResponse($redirection, $redirection->getStatusCode());
+      if(preg_match("|(https?:\/\/)|", $redirection->getUrlDestination(), $matches)) {
+        $response = new RedirectResponse($redirection->getUrlDestination(), $redirection->getStatusCode());
       }
       else {
         $urlRedirect = str_replace($pathInfo, $redirection->getUrlDestination(), $requestUri);
