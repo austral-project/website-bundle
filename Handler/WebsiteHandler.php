@@ -14,6 +14,7 @@ use Austral\ContentBlockBundle\Entity\Component;
 use Austral\ContentBlockBundle\EntityManager\EditorComponentEntityManager;
 use Austral\ContentBlockBundle\Event\GuidelineEvent;
 use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\HttpHandler;
@@ -216,7 +217,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   {
     /** @var UrlParameterManagement $urlParameterManagement */
     $urlParameterManagement = $this->container->get('austral.seo.url_parameter.management');
-    $this->templateParameters->addParameters("urls", $urlParameterManagement->getUrlParametersByDomain()->getUrlParametersPathIndexed());
+    $this->templateParameters->addParameters("urls", $urlParameterManagement->getUrlParametersByDomain(DomainsManagement::DOMAIN_ID_CURRENT)->getUrlParametersPathIndexed());
     return $this;
   }
 
