@@ -10,9 +10,14 @@
 
 namespace Austral\WebsiteBundle\Listener;
 
+use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntityBundle\Event\EntityManagerEvent;
+use Austral\HttpBundle\Services\DomainsManagement;
+use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
+use Austral\WebsiteBundle\Entity\Interfaces\WebsitePageParentInterface;
+use Austral\WebsiteBundle\Entity\Page;
 use Austral\WebsiteBundle\EntityManager\PageEntityManager;
 use Doctrine\ORM\QueryBuilder;
 
@@ -30,11 +35,89 @@ class EntityManagerListener
   protected PageEntityManager $pageEntityManager;
 
   /**
+   * @var array
+   */
+  protected array $pagesParent = array();
+
+  /**
    * @param PageEntityManager $pageEntityManager
    */
   public function __construct(PageEntityManager $pageEntityManager)
   {
     $this->pageEntityManager = $pageEntityManager;
+    if(!$this->pagesParent)
+    {
+      $this->pagesParent = $this->pageEntityManager->getRepository()->selectByEntityExtends();
+    }
+  }
+
+  /**
+   * create
+   *
+   * @param EntityManagerEvent $entityManagerEvent
+   *
+   * @return void
+   */
+  public function create(EntityManagerEvent $entityManagerEvent)
+  {
+    $this->addTreePageParent($entityManagerEvent->getObject());
+  }
+
+  /**
+   * addTreePageParent
+   *
+   * @param EntityInterface $object
+   *
+   * @return void
+   */
+  public function addTreePageParent(EntityInterface $object)
+  {
+    if($object instanceof TreePageInterface && $object instanceof WebsitePageParentInterface)
+    {
+      if($websitePages = $this->getPageParent($object->getClassnameForMapping()))
+      {
+        /** @var PageInterface $pageParent */
+        foreach ($websitePages as $pageParent)
+        {
+          $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? DomainsManagement::DOMAIN_ID_MASTER);
+          $pageParent->addChildEntities($object);
+        }
+      }
+    }
+  }
+
+  /**
+   * @param $class
+   *
+   * @return array
+   */
+  protected function getPageParent($class): array
+  {
+    $websitePagesSelected = array();
+
+    /** @var PageInterface $pageParent */
+    foreach ($this->pagesParent as $pageParent)
+    {
+      if(strpos($pageParent->getEntityExtends(), ",") !== false)
+      {
+        $keyExplode = explode(",",$pageParent->getEntityExtends());
+        if(count($keyExplode)>1)
+        {
+          foreach ($keyExplode as $newKey)
+          {
+            if(trim($newKey) === $class)
+            {
+              $websitePagesSelected[] = $pageParent;
+            }
+          }
+        }
+      }
+      elseif($pageParent->getEntityExtends() === $class)
+      {
+        $websitePagesSelected[] = $pageParent;
+      }
+    }
+    return $websitePagesSelected;
   }
 
   /**

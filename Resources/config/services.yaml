@@ -22,6 +22,7 @@ services:
 
   austral.website.doctrine.listener:
     class:        Austral\WebsiteBundle\Listener\DoctrineListener
+    arguments:    ["@austral.website.entity_manager.listener"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
 
@@ -30,6 +31,7 @@ services:
     class:        Austral\WebsiteBundle\Listener\EntityManagerListener
     arguments:    ["@austral.entity_manager.page"]
     tags:
+      - { name: kernel.event_listener, event: "austral.entity_manager.create", method: create }
       - { name: kernel.event_listener, event: "austral.entity_manager.duplicate", method: duplicate }
 
 ##### Website Handler

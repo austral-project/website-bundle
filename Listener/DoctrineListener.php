@@ -11,11 +11,6 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use Austral\EntityBundle\Entity\EntityInterface;
-use Austral\HttpBundle\Services\DomainsManagement;
-use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
-use Austral\WebsiteBundle\Entity\Interfaces\WebsitePageParentInterface;
-use App\Entity\Austral\WebsiteBundle\Page;
-use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -35,15 +30,16 @@ class DoctrineListener implements EventSubscriber
   protected $name;
 
   /**
-   * @var array
+   * @var EntityManagerListener
    */
-  protected array $pagesParent = array();
+  protected EntityManagerListener $entityManagerListener;
 
   /**
    * DoctrineListener constructor.
    */
-  public function __construct()
+  public function __construct(EntityManagerListener $entityManagerListener)
   {
+    $this->entityManagerListener = $entityManagerListener;
   }
 
   /**
@@ -64,58 +60,9 @@ class DoctrineListener implements EventSubscriber
     $ea = $this->getEventAdapter($args);
     /** @var EntityInterface $object */
     $object = $ea->getObject();
-    if($object instanceof TreePageInterface && $object instanceof WebsitePageParentInterface)
-    {
-      if($websitePages = $this->getPageParent($args, $object->getClassnameForMapping()))
-      {
-        /** @var PageInterface $pageParent */
-        foreach ($websitePages as $pageParent)
-        {
-          $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? DomainsManagement::DOMAIN_ID_MASTER);
-          $pageParent->addChildEntities($object);
-        }
-      }
-    }
+    $this->entityManagerListener->addTreePageParent($object);
   }
 
-  /**
-   * @param LifecycleEventArgs $args
-   * @param $class
-   *
-   * @return array
-   */
-  protected function getPageParent(LifecycleEventArgs $args, $class): array
-  {
-    if(!$this->pagesParent)
-    {
-      $this->pagesParent = $args->getObjectManager()->getRepository(Page::class)->selectByEntityExtends();
-    }
-    $websitePagesSelected = array();
-
-    /** @var PageInterface $pageParent */
-    foreach ($this->pagesParent as $pageParent)
-    {
-      if(strpos($pageParent->getEntityExtends(), ",") !== false)
-      {
-        $keyExplode = explode(",",$pageParent->getEntityExtends());
-        if(count($keyExplode)>1)
-        {
-          foreach ($keyExplode as $newKey)
-          {
-            if(trim($newKey) === $class)
-            {
-              $websitePagesSelected[] = $pageParent;
-            }
-          }
-        }
-      }
-      elseif($pageParent->getEntityExtends() === $class)
-      {
-        $websitePagesSelected[] = $pageParent;
-      }
-    }
-    return $websitePagesSelected;
-  }
 
   /**
    * @param EventArgs $args
