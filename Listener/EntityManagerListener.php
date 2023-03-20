@@ -45,10 +45,19 @@ class EntityManagerListener
   public function __construct(PageEntityManager $pageEntityManager)
   {
     $this->pageEntityManager = $pageEntityManager;
+  }
+
+  /**
+   * initPagesParent
+   * @return $this
+   */
+  public function initPagesParent()
+  {
     if(!$this->pagesParent)
     {
       $this->pagesParent = $this->pageEntityManager->getRepository()->selectByEntityExtends();
     }
+    return $this;
   }
 
   /**
@@ -94,6 +103,7 @@ class EntityManagerListener
   protected function getPageParent($class): array
   {
     $websitePagesSelected = array();
+    $this->initPagesParent();
 
     /** @var PageInterface $pageParent */
     foreach ($this->pagesParent as $pageParent)
