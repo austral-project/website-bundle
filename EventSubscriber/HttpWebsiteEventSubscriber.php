@@ -207,12 +207,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         {
           $templateName = $currentPage->getTemplate();
         }
-        $templateParameters->addParameters("currentPage", $currentPage);
-
-        if($currentPage instanceof TreePageInterface)
-        {
-          $templateParameters->addParameters("pageParent", $currentPage->getTreePageParent($this->domainsManagement->getCurrentDomain()->getId()));
-        }
       }
       elseif($actionName = $urlParameter->getActionRelation())
       {
@@ -234,6 +228,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     }
     $templateParameters->setPath($templatePath);
     $websiteHandler->initHandler();
+    if($currentPage = $websiteHandler->getPage())
+    {
+      $templateParameters->addParameters("currentPage", $currentPage);
+      if($currentPage instanceof TreePageInterface)
+      {
+        $templateParameters->addParameters("pageParent", $currentPage->getTreePageParent($this->domainsManagement->getCurrentDomain()->getId()));
+      }
+    }
 
     if($urlRedirect = $websiteHandler->getRedirectUrl())
     {
