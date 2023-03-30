@@ -66,62 +66,11 @@ class PageAdmin extends Admin implements AdminModuleInterface
   {
     $listAdminEvent->getFilterMapper()->filter("default")
       ->add(new FilterType\StringType("name"))
-      ->add(new FilterType\StringChoiceType("status", array(
-        "choices.status.unpublished"   =>  array(
-          "value"   =>  "unpublished",
-          "styles"  =>  array(
-            "--element-choice-current-background:var(--color-main-20)",
-            "--element-choice-current-color:var(--color-main-90)",
-            "--element-choice-hover-color:var(--color-main-90)"
-          )
-        ),
-        "choices.status.draft"         =>  array(
-          "value"   =>  "draft",
-          "styles"  =>  array(
-            "--element-choice-current-background:var(--color-purple-20)",
-            "--element-choice-current-color:var(--color-purple-100)",
-            "--element-choice-hover-color:var(--color-purple-100)"
-          )
-        ),
-        "choices.status.published"     =>  array(
-          "value"   =>  "published",
-          "styles"  =>  array(
-            "--element-choice-current-background:var(--color-green-20)",
-            "--element-choice-current-color:var(--color-green-100)",
-            "--element-choice-hover-color:var(--color-green-100)"
-          )
-        )
-      )))
       ->add(new FilterType\RangeType("created", array()));
 
     $listAdminEvent->getFilterMapper()->filter("homepage")
       ->add(new FilterType\StringType("name"))
-      ->add(new FilterType\StringChoiceType("status", array(
-        "choices.status.unpublished"   =>  array(
-          "value"   =>  "unpublished",
-          "styles"  =>  array(
-            "--element-choice-current-background:var(--color-main-20)",
-            "--element-choice-current-color:var(--color-main-90)",
-            "--element-choice-hover-color:var(--color-main-90)"
-          )
-        ),
-        "choices.status.draft"         =>  array(
-          "value"   =>  "draft",
-          "styles"  =>  array(
-            "--element-choice-current-background:var(--color-purple-20)",
-            "--element-choice-current-color:var(--color-purple-100)",
-            "--element-choice-hover-color:var(--color-purple-100)"
-          )
-        ),
-        "choices.status.published"     =>  array(
-          "value"   =>  "published",
-          "styles"  =>  array(
-            "--element-choice-current-background:var(--color-green-20)",
-            "--element-choice-current-color:var(--color-green-100)",
-            "--element-choice-hover-color:var(--color-green-100)"
-          )
-        )
-      )));
+      ;
   }
 
   /**

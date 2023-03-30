@@ -46,17 +46,11 @@ use Ramsey\Uuid\Uuid;
 abstract class PageTranslate extends Entity implements PageTranslateInterface,
   EntityInterface,
   TranslateChildInterface,
-  SeoInterface,
-  RobotInterface,
-  ComponentsInterface,
-  SocialNetworkInterface
+  ComponentsInterface
 {
 
   use EntityTimestampableTrait;
   use EntityTranslateChildTrait;
-  use EntityRobotTrait;
-  use EntitySeoTrait;
-  use EntitySocialNetworkTrait;
   use EntityComponentsTrait;
   use EntityFileCropperTrait;
 

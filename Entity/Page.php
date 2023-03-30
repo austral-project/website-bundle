@@ -67,10 +67,7 @@ abstract class Page extends Entity implements PageInterface,
   EntityInterface,
   TranslateMasterInterface,
   FileInterface,
-  ComponentsInterface,
-  SeoInterface,
-  RobotInterface,
-  SocialNetworkInterface
+  ComponentsInterface
 {
   use EntityTimestampableTrait;
   use EntityFileTrait;
@@ -82,8 +79,6 @@ abstract class Page extends Entity implements PageInterface,
   use UrlParameterTrait;
   use TreePageParentTrait;
 
-  use EntityTranslateMasterRobotTrait;
-  use EntityTranslateMasterSeoTrait;
   use EntitySocialNetworkTranslateMasterTrait;
 
   /**
@@ -243,6 +238,15 @@ abstract class Page extends Entity implements PageInterface,
   public function getName(): ?string
   {
     return $this->getTranslateCurrent() ? $this->getTranslateCurrent()->getName() : null;
+  }
+
+  /**
+   * @return string|null
+   * @throws Exception
+   */
+  public function getRefH1(): ?string
+  {
+    return $this->getTranslateCurrent() ? $this->getTranslateCurrent()->getRefH1() : null;
   }
 
   /**
