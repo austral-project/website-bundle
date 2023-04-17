@@ -40,13 +40,10 @@ class PageEntityManager extends EntityManager
    */
   public function create(array $values = array()): PageInterface
   {
-    /** @var PageInterface|EntityTranslateMasterRobotTrait|TranslateMasterInterface $object */
+    /** @var PageInterface|TranslateMasterInterface $object */
     $object = parent::create($values);
     $object->setCurrentLanguage($this->currentLanguage);
     $object->createNewTranslateByLanguage();
-    $object->setInSitemap(true);
-    $object->setIsIndex(true);
-    $object->setIsFollow(true);
     return $object;
   }
 

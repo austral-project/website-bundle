@@ -39,10 +39,6 @@ class Page extends BasePage
   {
     $translate = new PageTranslate();
     $translate->setMaster($this);
-    $translate->setInSitemap(true);
-    $translate->setIsIndex(true);
-    $translate->setIsFollow(true);
-    $translate->setStatus("unpublished");
     $translate->setIsReferent(count($this->getTranslatesByLanguage()) > 0);
     $translate->setLanguage($this->getLanguageCurrent());
     $this->addTranslateByLanguage($translate);

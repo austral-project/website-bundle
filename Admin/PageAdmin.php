@@ -186,7 +186,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
               },
               $formAdminEvent->getFormMapper()->getObject()
             ),
-            "required"  =>  $domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS
+            "required"  =>  ($domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS) && !$formAdminEvent->getFormMapper()->getObject()->getIsHomepage()
           )
         ))
         ->add(Field\ChoiceField::create("isHomepage",

@@ -36,12 +36,7 @@ use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterFileCropper
 use Austral\EntityTranslateBundle\Annotation\Translate;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterComponentsTrait;
 
-use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
-use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
-use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
 use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTranslateMasterTrait;
-use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterRobotTrait;
-use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterSeoTrait;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
