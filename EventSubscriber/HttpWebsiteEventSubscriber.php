@@ -262,6 +262,13 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    */
   public function onResponse(HttpEventInterface $httpEvent)
   {
+
+    if($httpEvent->getHandler() && ($urlRedirect = $httpEvent->getHandler()->getRedirectUrl()))
+    {
+      $response = new RedirectResponse($urlRedirect, $httpEvent->getHandler()->getRedirectStatus());
+      $httpEvent->getKernelEvent()->setResponse($response);
+    }
+
     $response = $httpEvent->getKernelEvent()->getResponse();
     if(!$response instanceof RedirectResponse)
     {
