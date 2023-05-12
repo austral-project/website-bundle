@@ -178,7 +178,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     if($requestAttributes->get('_austral_page', false))
     {
-      if(!$urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), $slug, true))
+      if(!$urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), $slug, true, $httpEvent->getHttpRequest()->getLanguage()))
       {
         if(!$domain || !$domain->getOnePage())
         {
@@ -186,7 +186,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         }
         else
         {
-          $urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), "", true);
+          $urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), "", true, $httpEvent->getHttpRequest()->getLanguage());
         }
       }
 
