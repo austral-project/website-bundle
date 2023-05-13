@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /**
  * Austral Http EventSubscriber.
@@ -292,6 +293,12 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     }
     // You get the exception object from the received event
     $exception = $httpEvent->getKernelEvent()->getThrowable();
+
+    if($exception instanceof AccessDeniedException)
+    {
+      return;
+    }
+
     // Customize your response object to display the exception details
     $response = new Response();
     if ($exception instanceof HttpExceptionInterface) {
@@ -318,6 +325,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         /** @var HttpHandlerInterface|WebsiteHandlerInterface $websiteHandler */
         $websiteHandler = $this->container->get("austral.website.handler");
 
+        $websiteHandler->setDomainsManagement($this->domainsManagement);
         $websiteHandler->setTemplateParameters($templateParameters);
 
         $websiteHandler->setPage($currentPage);
