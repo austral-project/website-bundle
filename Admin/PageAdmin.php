@@ -36,6 +36,8 @@ use Austral\ListBundle\DataHydrate\DataHydrateORM;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 /**
  * Page Admin.
@@ -50,9 +52,10 @@ class PageAdmin extends Admin implements AdminModuleInterface
   public function getEvents() : array
   {
     return array(
-      FormAdminEvent::EVENT_UPDATE_BEFORE     =>  "formUpdateBefore",
-      FormAdminEvent::EVENT_END               =>  "formEnd",
-      ListAdminEvent::EVENT_END               =>  "listEnd",
+      FormAdminEvent::EVENT_AUSTRAL_FORM_VALIDATE   =>  "formValidate",
+      FormAdminEvent::EVENT_UPDATE_BEFORE           =>  "formUpdateBefore",
+      FormAdminEvent::EVENT_END                     =>  "formEnd",
+      ListAdminEvent::EVENT_END                     =>  "listEnd",
     );
   }
 
@@ -186,7 +189,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
               },
               $formAdminEvent->getFormMapper()->getObject()
             ),
-            "required"  =>  ($domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS) && !$formAdminEvent->getFormMapper()->getObject()->getIsHomepage()
+            //"required"  =>  ($domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS) && !$formAdminEvent->getFormMapper()->getObject()->getIsHomepage()
           )
         ))
         ->add(Field\ChoiceField::create("isHomepage",
@@ -299,6 +302,30 @@ class PageAdmin extends Admin implements AdminModuleInterface
         ->getSubFormMapperByKey("urlParameters")
         ->removeAllField("pathLast");
     }
+  }
+
+  /**
+   * @param FormAdminEvent $formAdminEvent
+   *
+   * @throws Exception
+   */
+  protected function formValidate(FormAdminEvent $formAdminEvent)
+  {
+
+    /** @var string|null $domainId */
+    $domainId = $formAdminEvent->getCurrentModule()->getFilterDomainId();
+
+    if(($domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS))
+    {
+      /** @var PageInterface|EntityInterface $object */
+      $object = $formAdminEvent->getFormMapper()->getObject();
+      if(!$object->getIsHomepage() && !$object->getParent())
+      {
+        $this->formIsValidate = false;
+        $formAdminEvent->getForm()->get("parent")->addError(new FormError("errors.not_null"));
+      }
+    }
+
   }
 
   /**
