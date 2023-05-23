@@ -29,6 +29,7 @@ use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\FormBundle\Field as Field;
 use Austral\ListBundle\Column as Column;
 
+use Austral\WebsiteBundle\Event\ConfigVariableFunctionEvent;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 
@@ -68,6 +69,7 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
           "choices.config.type.file"            =>  "file",
           "choices.config.type.fileText"        =>  "file-text",
           "choices.config.type.checkbox"        =>  "checkbox",
+          "choices.config.type.function-name"   =>  "function-name",
         ), array(
           "formField"   =>  array(
             "class"       =>  Field\SelectField::class
@@ -143,6 +145,7 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
             "choices.config.type.file"            =>  "file",
             "choices.config.type.fileText"        =>  "file-text",
             "choices.config.type.checkbox"        =>  "checkbox",
+            "choices.config.type.function-name"   =>  "function-name",
           ),
             array(
               "required"    =>  true,
@@ -157,6 +160,7 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
                   "file"          =>  "element-view-file",
                   "file-text"     =>  array("element-view-file", "element-view-text"),
                   "checkbox"      =>  "element-view-checkbox",
+                  "function-name" =>  "element-view-function-name",
                 ))
               )
             )
@@ -166,6 +170,13 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
 
       $formAdminEvent->getFormMapper()->addFieldset("fieldset.content")
         ->setAttr(array("class" =>  "fieldset-content-parent fieldset-by-choice fieldset-values-for-all-domains"))
+        ->add(Field\TextField::create("functionName", array("container" =>  array('class'=>"view-element-by-choices element-view-function-name"))))
+        ->add(Field\TemplateField::create(
+          "functionNameKey",
+          "@AustralWebsite/Admin/Config/function-name-key.html.twig",
+          array("container" =>  array('class'=>"view-element-by-choices element-view-function-name")),
+          array("configVariable_functionBase" =>  ConfigVariableFunctionEvent::EVENT_AUSTRAL_CONFIG_VARIABLE_FUNCTION_BASE)
+        ))
         ->add(Field\TextareaField::create("contentText", null, array("container" =>  array('class'=>"view-element-by-choices element-view-all element-view-text"))))
         ->add(Field\SelectField::create("internalLink", $pagesList, array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-internal-link"))))
         ->add(Field\SwitchField::create("contentBoolean", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-checkbox"))))

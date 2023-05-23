@@ -78,6 +78,11 @@ abstract class Config extends Entity implements ConfigInterface, EntityInterface
    */
   protected string $type;
 
+  /**
+   * @var string|null
+   * @ORM\Column(name="function_name", type="string", length=255, nullable=true )
+   */
+  protected ?string $functionName = null;
 
   /**
    * Config constructor.
@@ -240,6 +245,25 @@ abstract class Config extends Entity implements ConfigInterface, EntityInterface
   public function setWithDomain(bool $withDomain): Config
   {
     $this->withDomain = $withDomain;
+    return $this;
+  }
+
+  /**
+   * @return string|null
+   */
+  public function getFunctionName(): ?string
+  {
+    return $this->functionName;
+  }
+
+  /**
+   * @param string|null $functionName
+   *
+   * @return $this
+   */
+  public function setFunctionName(?string $functionName): Config
+  {
+    $this->functionName = $functionName;
     return $this;
   }
 

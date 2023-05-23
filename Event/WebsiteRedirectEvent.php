@@ -33,8 +33,10 @@ class WebsiteRedirectEvent extends Event
   private int $redirectStatus;
 
   /**
-   * FormEvent constructor.
+   * WebsiteRedirectEvent constructor
    *
+   * @param string|null $redirectUrl
+   * @param int $redirectStatus
    */
   public function __construct(string $redirectUrl = null, int $redirectStatus = 302)
   {

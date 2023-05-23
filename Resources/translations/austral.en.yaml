@@ -62,6 +62,8 @@ fields:
     entitled:                                   Template
   withDomain:
     entitled:                                   Value for domains
+  functionName:
+    entitled:                                   Function
 
 choices:
   config:
@@ -74,6 +76,7 @@ choices:
       file:                                     File
       fileText:                                 File & Text
       checkbox:                                 checkbox
+      function-name:                            Function
 
   templates:
     default:                                    Default

@@ -65,6 +65,18 @@ interface ConfigInterface
    */
   public function setWithDomain(bool $withDomain): ConfigInterface;
 
+  /**
+   * @return string|null
+   */
+  public function getFunctionName(): ?string;
+
+  /**
+   * @param string|null $functionName
+   *
+   * @return $this
+   */
+  public function setFunctionName(?string $functionName): ConfigInterface;
+
 }
 
     

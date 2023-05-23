@@ -67,6 +67,8 @@ fields:
     entitled:                                   Template
   withDomain:
     entitled:                                   Valeur pour les domains
+  functionName:
+    entitled:                                   Fonction
 
 choices:
   config:
@@ -79,6 +81,7 @@ choices:
       file:                                     Fichier
       fileText:                                 Fichier & Text
       checkbox:                                 Case à cocher
+      function-name:                            Fonction
 
   templates:
     default:                                    Défaut

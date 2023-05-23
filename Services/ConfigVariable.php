@@ -16,9 +16,11 @@ use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
+use Austral\WebsiteBundle\Event\ConfigVariableFunctionEvent;
 use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Austral ReplaceConfigValues Bundle.
@@ -26,6 +28,11 @@ use Doctrine\ORM\EntityManager;
  */
 Class ConfigVariable
 {
+
+  /**
+   * @var EventDispatcherInterface
+   */
+  protected EventDispatcherInterface $eventDispatcher;
 
   /**
    * @var Generator
@@ -56,12 +63,20 @@ Class ConfigVariable
    * ReplaceConfigValues constructor.
    *
    * @param RequestStack $requestStack
+   * @param EventDispatcherInterface $eventDispatcher
    * @param DomainsManagement $domainsManagement
    * @param EntityManager $entityManager
    * @param Generator $fileLinkGenerator
    */
-  public function __construct(RequestStack $requestStack, DomainsManagement $domainsManagement, EntityManager $entityManager, Generator $fileLinkGenerator)
+  public function __construct(
+    RequestStack $requestStack,
+    EventDispatcherInterface $eventDispatcher,
+    DomainsManagement $domainsManagement,
+    EntityManager $entityManager,
+    Generator $fileLinkGenerator
+  )
   {
+    $this->eventDispatcher = $eventDispatcher;
     $this->fileLinkGenerator = $fileLinkGenerator;
     $request = $requestStack->getCurrentRequest();
     $this->language = $request ? $request->getLocale() : null;
@@ -220,6 +235,17 @@ Class ConfigVariable
             "type"  =>  "internal-link",
             "key"   =>  $config->getKeyname(),
             "value" =>  "#INTERNAL_LINK_{$configValue->getInternalLink()}#"
+          );
+        }
+        elseif($config->getType() == "function-name")
+        {
+          $configVariableEvent = new ConfigVariableFunctionEvent($config);
+          $this->eventDispatcher->dispatch($configVariableEvent, ConfigVariableFunctionEvent::EVENT_AUSTRAL_CONFIG_VARIABLE_FUNCTION_BASE.".{$config->getFunctionName()}");
+          $variables["{$config->getKeyname()}"] = array(
+            "text"  =>  "{$config->__toString()} - Function name",
+            "type"  =>  "function-name",
+            "key"   =>  $config->getKeyname(),
+            "value" =>  $configVariableEvent->getValue()
           );
         }
         $variables["{$config->getKeyname()}"]["object"] = $config->getWithDomain() ? $configValue : $config;

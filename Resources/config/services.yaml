@@ -17,6 +17,11 @@ services:
     tags:
       - { name: kernel.event_subscriber }
 
+  austral.website.config.variable.event_subscriber:
+    class:        Austral\WebsiteBundle\EventSubscriber\ConfigVariableFunctionEventSubscriber
+    tags:
+      - { name: kernel.event_subscriber }
+
 
 ##### Website Listener
 
@@ -54,7 +59,12 @@ services:
 ##### Website Services
   austral.website.config_variable:
     class:          Austral\WebsiteBundle\Services\ConfigVariable
-    arguments:      ["@request_stack",  "@austral.http.domains.management", "@doctrine.orm.entity_manager", "@austral.entity_file.link.generator"]
+    arguments:
+      - "@request_stack"
+      - "@event_dispatcher"
+      - "@austral.http.domains.management"
+      - "@doctrine.orm.entity_manager"
+      - "@austral.entity_file.link.generator"
 
   austral.website.config_replace_dom:
     class:          Austral\WebsiteBundle\Services\ConfigReplaceDom
