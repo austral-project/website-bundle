@@ -110,9 +110,9 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
     /** @var DomainsManagement $domainsManagement */
     $domainsManagement = $this->container->get('austral.http.domains.management');
 
-    $formAdminEvent->getFormMapper()
-
-      ->addFieldset("fieldset.right")
+    if($domainsManagement->getEnabledDomainWithoutVirtual())
+    {
+      $formAdminEvent->getFormMapper()->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
         ->add(Field\ChoiceField::create("withDomain",
           array(
@@ -123,17 +123,16 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
               "data-view-by-choices-parent"   =>  ".form-container",
               "data-view-by-choices-children" =>  ".fieldset-by-choice",
               'data-view-by-choices' =>  json_encode(array(
-                true           =>  "fieldset-values-by-domain",
-                false          =>  "fieldset-values-for-all-domains"
+                1           =>  "fieldset-values-by-domain",
+                0           =>  "fieldset-values-for-all-domains"
               ))
             ),
 
           ))
         )
-      ->end()
-
-
-      ->addFieldset("fieldset.generalInformation")
+      ->end();
+    }
+    $formAdminEvent->getFormMapper()->addFieldset("fieldset.generalInformation")
         ->add(Field\TextField::create("name"))
         ->add(Field\TextField::create("keyname"))
         ->add(Field\SelectField::create("type", array(
