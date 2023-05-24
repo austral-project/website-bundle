@@ -126,6 +126,7 @@ Class ConfigReplaceDom
    */
   protected function replaceByConfig(string $dom): string
   {
+    $dom = preg_replace('/<span style="color: inherit;" data-tag-value="%(.*)%">(.*)<\/span>/', "<span class='config-element element_$1'>$2</span>", $dom);
     preg_match_all('|\[\[(.*)\]\]|iuU', $dom, $matchs);
     $matchContentValues = AustralTools::getValueByKey($matchs, 1, array());
     if(count($matchContentValues))
