@@ -15,14 +15,7 @@ use Austral\ContentBlockBundle\Entity\Traits\EntityComponentsTrait;
 use Austral\EntityFileBundle\Annotation as AustralFile;
 use Austral\EntityFileBundle\Entity\Traits\EntityFileCropperTrait;
 use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
-use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
-use Austral\WebsiteBundle\Entity\Traits\EntitySocialNetworkTrait;
-
-use Austral\SeoBundle\Entity\Traits\EntityRobotTrait;
-use Austral\SeoBundle\Entity\Traits\EntitySeoTrait;
-use Austral\EntityBundle\Entity\Interfaces\RobotInterface;
-use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 
 use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateChildTrait;
