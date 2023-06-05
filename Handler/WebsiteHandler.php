@@ -208,9 +208,11 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
     $componentObject = $this->container->get('austral.entity_manager.component')->create();
 
     $guidelineEvent = new GuidelineEvent($this->request->query->get('container', "default-0"), "Front");
+
     $guidelineEvent->setComponentObject($componentObject)
       ->setEditorComponents($editorComponents)
-      ->setDefaultObjectPage($this->container->get('austral.entity_manager.page')->create());
+      ->setDefaultObjectPage($this->container->get('austral.entity_manager.page')->create())
+      ->setGuidelineFormValues((array) $this->request->request->get('guideline', array()));
     $this->dispatcher->dispatch($guidelineEvent, GuidelineEvent::EVENT_AUSTRAL_CONTENT_BLOCK_GUIDELINE_INIT);
 
     $page = $this->container->get('austral.entity_manager.page')->create();
