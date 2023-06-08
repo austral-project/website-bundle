@@ -68,7 +68,7 @@ services:
 
   austral.website.config_replace_dom:
     class:          Austral\WebsiteBundle\Services\ConfigReplaceDom
-    arguments:      ["@austral.website.config_variable", "@austral.http.domains.management", "@austral.seo.url_parameter.management", "@router"]
+    arguments:      ["@austral.website.config_variable", "@austral.http.domains.management", "@austral.seo.url_parameter.management", "@austral.seo.routing"]
 
 ##### Entities Manager #####
 

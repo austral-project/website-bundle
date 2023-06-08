@@ -11,6 +11,7 @@
 namespace Austral\WebsiteBundle\Services;
 
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
+use Austral\SeoBundle\Routing\AustralRouting;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\ToolsBundle\AustralTools;
@@ -40,22 +41,22 @@ Class ConfigReplaceDom
   protected UrlParameterManagement $urlParameterManagement;
 
   /**
-   * @var Router
+   * @var AustralRouting
    */
-  protected Router $router;
+  protected AustralRouting $australRouting;
 
   /**
    * @param DomainsManagement $domainsManagement
    * @param ConfigVariable $configVariable
    * @param UrlParameterManagement $urlParameterManagement
-   * @param Router $router
+   * @param AustralRouting $australRouting
    */
-  public function __construct(ConfigVariable $configVariable, DomainsManagement $domainsManagement, UrlParameterManagement $urlParameterManagement, Router $router)
+  public function __construct(ConfigVariable $configVariable, DomainsManagement $domainsManagement, UrlParameterManagement $urlParameterManagement, AustralRouting $australRouting)
   {
     $this->domainsManagement = $domainsManagement;
     $this->configVariables = $configVariable;
     $this->urlParameterManagement = $urlParameterManagement;
-    $this->router = $router;
+    $this->australRouting = $australRouting;
   }
 
   /**
@@ -213,7 +214,7 @@ Class ConfigReplaceDom
           /** @var UrlParameterInterface $urlParameter */
           if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id))
           {
-            $path = $this->router->generate("austral_website_page", array("slug"=>$urlParameter->getPath()), $referenceType);
+            $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), $referenceType);
             if($this->domainsManagement->getCurrentDomain()->getId() !== $urlParameter->getDomainId())
             {
               $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
