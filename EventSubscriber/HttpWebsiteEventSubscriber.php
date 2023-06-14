@@ -131,7 +131,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       return;
     }
     $host = $httpEvent->getKernelEvent()->getRequest()->headers->get('host');
-
     $slug = $requestAttributes->get('slug', null);
 
     if(!$domain)
@@ -169,6 +168,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");
+
+    if($this->container->has('austral.graphic_items.management')) {
+      $this->container->get('austral.graphic_items.management')->init();
+    }
 
     /** @var HttpHandlerInterface|WebsiteHandlerInterface $websiteHandler */
     $websiteHandler = $this->container->get("austral.website.handler");
