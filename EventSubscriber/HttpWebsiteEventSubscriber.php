@@ -11,6 +11,7 @@
 
 namespace Austral\WebsiteBundle\EventSubscriber;
 
+use Austral\ContentBlockBundle\Services\ContentBlockContainer;
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\SeoBundle\Entity\Interfaces\RedirectionInterface;
 use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
@@ -165,6 +166,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     /** @var UrlParameterManagement $urlParameterManagement */
     $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")->initialize();
+
+    /** @var ContentBlockContainer $contentBlockContainer */
+    $contentBlockContainer = $this->container->get("austral.content_block.content_block_container");
+    $contentBlockContainer->initComponentsByObjectsIds();
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");
