@@ -50,6 +50,11 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   protected ?UrlParameterInterface $urlParameter = null;
 
   /**
+   * @var array
+   */
+  protected array $libraries = array();
+
+  /**
    * @var ConfigVariable
    */
   protected ConfigVariable $configVariable;
@@ -125,10 +130,10 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
     }
 
-    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy("keyname", $this->domainsManagement->getCurrentDomain()->getId()))
+    if($this->libraries)
     {
       /** @var LibraryInterface|EntityComponentsTrait $library */
-      foreach($libraries as $library)
+      foreach($this->libraries as $library)
       {
         if($library->getIsEnabled())
         {
@@ -136,8 +141,9 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
           $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
         }
       }
+      $this->templateParameters->addParameters("libraries", $this->libraries);
     }
-    $this->templateParameters->addParameters("libraries", $libraries);
+
     $method = "initPageEntity{$this->page->getClassname()}";
     if(method_exists($this, $method))
     {
@@ -370,6 +376,25 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   public function getPage(): ?EntityInterface
   {
     return $this->page;
+  }
+
+  /**
+   * @return array
+   */
+  public function getLibraries(): array
+  {
+    return $this->libraries;
+  }
+
+  /**
+   * @param array $libraries
+   *
+   * @return $this
+   */
+  public function setLibraries(array $libraries): WebsiteHandler
+  {
+    $this->libraries = $libraries;
+    return $this;
   }
 
   /**

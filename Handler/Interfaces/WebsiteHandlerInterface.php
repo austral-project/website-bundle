@@ -62,6 +62,18 @@ interface WebsiteHandlerInterface
   public function getPage(): ?EntityInterface;
 
   /**
+   * @return array
+   */
+  public function getLibraries(): array;
+
+  /**
+   * @param array $libraries
+   *
+   * @return $this
+   */
+  public function setLibraries(array $libraries): WebsiteHandlerInterface;
+
+  /**
    * @param UrlParameterInterface|EntityInterface|null $urlParameter
    *
    * @return $this

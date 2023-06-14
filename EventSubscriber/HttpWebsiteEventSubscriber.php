@@ -167,10 +167,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var UrlParameterManagement $urlParameterManagement */
     $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")->initialize();
 
-    /** @var ContentBlockContainer $contentBlockContainer */
-    $contentBlockContainer = $this->container->get("austral.content_block.content_block_container");
-    $contentBlockContainer->initComponentsByObjectsIds();
-
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");
 
@@ -182,6 +178,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $handlerMethod = $requestAttributes->get('_handler_method', null);
     $templateName = "default";
 
+    $contentBlockContainerObjects = array();
     if($requestAttributes->get('_austral_page', false))
     {
       if(!$urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), $slug, true, $httpEvent->getHttpRequest()->getLanguage()))
@@ -207,6 +204,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $websiteHandler->setUrlParameter($urlParameter);
       if($currentPage = $urlParameter->getObject())
       {
+        $contentBlockContainerObjects[] = $currentPage;
         $websiteHandler->setPage($currentPage);
         $handlerMethod = $handlerMethod ? : "page";
         if(method_exists($currentPage, "getTemplate"))
@@ -223,6 +221,19 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     {
       $templateName = $handlerMethod;
     }
+
+    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy("keyname", $this->domainsManagement->getCurrentDomain()->getId()))
+    {
+      $websiteHandler->setLibraries($libraries);
+      foreach ($libraries as $library)
+      {
+        $contentBlockContainerObjects[] = $library;
+      }
+    }
+
+    /** @var ContentBlockContainer $contentBlockContainer */
+    $contentBlockContainer = $this->container->get("austral.content_block.content_block_container");
+    $contentBlockContainer->initComponentsByObjectsIds($contentBlockContainerObjects);
 
     if($handlerMethod)
     {
