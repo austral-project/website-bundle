@@ -124,23 +124,11 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   protected function page(): WebsiteHandler
   {
     $this->pageBefore();
-    if($this->page instanceof ComponentsInterface)
-    {
-      $contentBlockEvent = new ContentBlockEvent($this->page, "Front");
-      $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
-    }
+    $this->blockComponentsDispatchEvent(ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
+    $this->blockComponentsDispatchEvent(ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
 
     if($this->libraries)
     {
-      /** @var LibraryInterface|EntityComponentsTrait $library */
-      foreach($this->libraries as $library)
-      {
-        if($library->getIsEnabled())
-        {
-          $contentBlockEvent = new ContentBlockEvent($library, "Front");
-          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
-        }
-      }
       $this->templateParameters->addParameters("libraries", $this->libraries);
     }
 
@@ -173,6 +161,26 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
 
   }
 
+  protected function blockComponentsDispatchEvent($eventName)
+  {
+    if($this->libraries)
+    {
+      /** @var LibraryInterface|EntityComponentsTrait $library */
+      foreach($this->libraries as $library)
+      {
+        if($library->getIsEnabled())
+        {
+          $contentBlockEvent = new ContentBlockEvent($library, "Front");
+          $this->dispatcher->dispatch($contentBlockEvent, $eventName);
+        }
+      }
+    }
+    if($this->page instanceof ComponentsInterface)
+    {
+      $contentBlockEvent = new ContentBlockEvent($this->page, "Front");
+      $this->dispatcher->dispatch($contentBlockEvent, $eventName);
+    }
+  }
 
   /**
    * @return $this
