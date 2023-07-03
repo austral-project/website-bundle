@@ -160,14 +160,21 @@ Class ConfigReplaceDom
       {
         $keyObject = str_replace(array("%"), "", $value);
         $noSpan = true;
+        $nl2br = false;
         if(strpos($value, "_span") !== false)
         {
           $noSpan = false;
           $keyObject = str_replace("_span", "", $keyObject);
         }
+        if(strpos($value, "_nl2br") !== false)
+        {
+          $nl2br = true;
+          $keyObject = str_replace("_nl2br", "", $keyObject);
+        }
 
         if($variableReplace = AustralTools::getValueByKey($variables, $keyObject, null))
         {
+          $variableReplace = $nl2br ? nl2br($variableReplace) : $variableReplace;
           $replaceValues[$value] = $noSpan ? $variableReplace : sprintf("<span class='config-element element_%s'>%s</span>", AustralTools::strip($keyObject), $variableReplace);
         }
         else
