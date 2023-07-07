@@ -246,7 +246,8 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     {
       $templatePath = $this->configuration->get("templates.default.path");
     }
-    $templateParameters->setPath($templatePath);
+    $templateParameters->setName($templateName)
+      ->setPath($templatePath);
     $websiteHandler->initHandler();
     if($currentPage = $websiteHandler->getPage())
     {
