@@ -60,6 +60,11 @@ Class ConfigVariable
   protected array $variables = array();
 
   /**
+   * @var array
+   */
+  protected array $variablesAdded = array();
+
+  /**
    * ReplaceConfigValues constructor.
    *
    * @param RequestStack $requestStack
@@ -103,7 +108,7 @@ Class ConfigVariable
   {
     if(!$this->variables)
     {
-      $variables = array();
+      $variables = $this->variablesAdded;
 
       $domainCurrentId = null;
       if($this->domainsManagement->getEnabledDomainWithoutVirtual())
@@ -291,6 +296,31 @@ Class ConfigVariable
       "value",
       $default
     );
+  }
+
+  public function addTextVariable($key, $value)
+  {
+    if($this->variables)
+    {
+      if(!array_key_exists($key, $this->variables))
+      {
+        $this->variables[$key] = array(
+          "text"  =>  $key,
+          "type"  =>  "text",
+          "key"   =>  $key,
+          "value" =>  nl2br($value)
+        );
+      }
+    }
+    else
+    {
+        $this->variablesAdded[$key] = array(
+          "text"  =>  $key,
+          "type"  =>  "text",
+          "key"   =>  $key,
+          "value" =>  nl2br($value)
+        );
+    }
   }
 
   /**
