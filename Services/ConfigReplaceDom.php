@@ -221,7 +221,7 @@ Class ConfigReplaceDom
           /** @var UrlParameterInterface $urlParameter */
           if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id))
           {
-            $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), $referenceType);
+            $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), "current", $referenceType);
             if($this->domainsManagement->getCurrentDomain()->getId() !== $urlParameter->getDomainId())
             {
               $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
