@@ -113,7 +113,7 @@ Class ConfigVariable
       $domainCurrentId = null;
       if($this->domainsManagement->getEnabledDomainWithoutVirtual())
       {
-        $domainCurrentId = $this->domainsManagement->getCurrentDomain()->getId();
+        $domainCurrentId = $this->domainsManagement->getCurrentDomain() ? $this->domainsManagement->getCurrentDomain()->getId() : null;
       }
       $configsAll = $this->entityManager->getRepository("Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface")->selectAllByIndexKeyname($this->language, $domainCurrentId);
 
