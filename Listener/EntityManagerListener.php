@@ -88,8 +88,16 @@ class EntityManagerListener
         /** @var PageInterface $pageParent */
         foreach ($websitePages as $pageParent)
         {
-          $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? DomainsManagement::DOMAIN_ID_MASTER);
-          $pageParent->addChildEntities($object);
+          $addAccepted = true;
+          if(method_exists($object, "checkTreePageParent"))
+          {
+            $addAccepted = $object->checkTreePageParent($pageParent);
+          }
+          if($addAccepted)
+          {
+            $object->addTreePageParent($pageParent, $pageParent->getDomainId() ?? DomainsManagement::DOMAIN_ID_MASTER);
+            $pageParent->addChildEntities($object);
+          }
         }
       }
     }
