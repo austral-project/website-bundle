@@ -10,7 +10,9 @@
 
 namespace Austral\WebsiteBundle\Entity;
 
+use Austral\EntityBundle\Entity\Interfaces\FileInterface;
 use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
@@ -39,9 +41,10 @@ use Ramsey\Uuid\Uuid;
  * @abstract
  * @ORM\MappedSuperclass
  */
-abstract class ConfigTranslate extends Entity implements ConfigTranslateInterface, EntityInterface, TranslateChildInterface
+abstract class ConfigTranslate extends Entity implements ConfigTranslateInterface, EntityInterface, FileInterface, TranslateChildInterface
 {
 
+  use EntityFileTrait;
   use EntityTranslateChildTrait;
   use EntityTimestampableTrait;
 
