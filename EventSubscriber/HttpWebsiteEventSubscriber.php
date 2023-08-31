@@ -184,9 +184,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $contentBlockContainerObjects = array();
     if($requestAttributes->get('_austral_page', false))
     {
+
+      $this->debug ? $this->debug->stopWatchStart("austral.url_parameter.retreive", $this->debugContainer) : null;
       if(!$urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), $slug, true, $httpEvent->getHttpRequest()->getLanguage()))
       {
-        if(!$domain || !$domain->getOnePage())
+        if(!$domain->getOnePage())
         {
           $websiteHandler->pageNotFound();
         }
@@ -195,6 +197,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
           $urlParameter = $urlParameterManagement->retreiveUrlParameterByDomainIdAndSlug($domain->getId(), "", true, $httpEvent->getHttpRequest()->getLanguage());
         }
       }
+      $this->debug ? $this->debug->stopWatchStop("austral.url_parameter.retreive") : null;
 
       if($urlParameter->getStatus() !== UrlParameterInterface::STATUS_PUBLISHED)
       {
