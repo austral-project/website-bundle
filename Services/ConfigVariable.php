@@ -298,7 +298,14 @@ Class ConfigVariable
     );
   }
 
-  public function addTextVariable($key, $value)
+  /**
+   * addTextVariable
+   *
+   * @param string $key
+   * @param string $value
+   * @return void
+   */
+  public function addTextVariable(string $key, string $value)
   {
     if($this->variables)
     {
@@ -314,12 +321,12 @@ Class ConfigVariable
     }
     else
     {
-        $this->variablesAdded[$key] = array(
-          "text"  =>  $key,
-          "type"  =>  "text",
-          "key"   =>  $key,
-          "value" =>  nl2br($value)
-        );
+      $this->variablesAdded[$key] = array(
+        "text"  =>  $key,
+        "type"  =>  "text",
+        "key"   =>  $key,
+        "value" =>  nl2br($value)
+      );
     }
   }
 
