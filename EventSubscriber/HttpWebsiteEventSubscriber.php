@@ -13,9 +13,14 @@ namespace Austral\WebsiteBundle\EventSubscriber;
 
 use Austral\ContentBlockBundle\Services\ContentBlockContainer;
 use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\EntityBundle\ORM\AustralQueryBuilder;
+use Austral\EntityBundle\ORM\QueryConditionInterface;
+use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\RedirectionInterface;
 use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
+use Austral\SeoBundle\ORM\QueryConditionUrlParameterDomain;
+use Austral\SeoBundle\ORM\QueryConditionUrlParameterStatus;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\Interfaces\HttpHandlerInterface;
 use Austral\HttpBundle\Template\Interfaces\HttpTemplateParametersInterface;
@@ -25,6 +30,7 @@ use Austral\HttpBundle\EventSubscriber\HttpEventSubscriber;
 
 
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
+use Austral\WebsiteBundle\Entity\Page;
 use Austral\WebsiteBundle\EntityManager\PageEntityManager;
 use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
@@ -334,11 +340,14 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     /** @var PageEntityManager $pageEntityManager */
     $pageEntityManager = $this->container->get("austral.entity_manager.page");
 
-    $domainId = $this->domainsManagement->getCurrentDomain()->getId();
+    $domainIds = array(
+      DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS,
+      $this->domainsManagement->getCurrentDomain(true)->getId()
+    );
     /** @var PageInterface|EntityInterface $currentPage */
-    if($currentPage = $pageEntityManager->retreiveByKey("keyname", "error-{$response->getStatusCode()}", function(QueryBuilder $queryBuilder) use($domainId){
-      $queryBuilder->andWhere("root.domainId = :domainId")
-        ->setParameter("domainId", $domainId);
+    if($currentPage = $pageEntityManager->retreiveByKey("keyname", "error-{$response->getStatusCode()}", function(AustralQueryBuilder $australQueryBuilder) use($domainIds, $pageEntityManager){
+      $australQueryBuilder->queryCondition(new QueryConditionUrlParameterStatus($pageEntityManager->getClass(), "root", array(UrlParameterInterface::STATUS_PUBLISHED), QueryConditionInterface::AND_WHERE));
+      $australQueryBuilder->queryCondition(new QueryConditionUrlParameterDomain($pageEntityManager->getClass(), "root", $domainIds, QueryConditionInterface::AND_WHERE));
     }))
     {
       try {
