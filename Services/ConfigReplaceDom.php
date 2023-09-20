@@ -141,7 +141,7 @@ Class ConfigReplaceDom
         }
       }
     }
-    preg_match_all('|(%\S+%)|iuU', $dom, $matchs);
+    preg_match_all('|(%[a-zA-s-._]+%)|iuU', $dom, $matchs);
     $matchContentValues = AustralTools::getValueByKey($matchs, 1, array());
     $values = array();
     if(count($matchContentValues))
