@@ -376,6 +376,21 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
           $templatePath = $this->configuration->get("templates.default.path");
         }
         $templateParameters->setPath($templatePath);
+
+        $contentBlockContainerObjects = array();
+        if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy("keyname", $this->domainsManagement->getCurrentDomain()->getId()))
+        {
+          $websiteHandler->setLibraries($libraries);
+          foreach ($libraries as $library)
+          {
+            $contentBlockContainerObjects[] = $library;
+          }
+        }
+
+        /** @var ContentBlockContainer $contentBlockContainer */
+        $contentBlockContainer = $this->container->get("austral.content_block.content_block_container");
+        $contentBlockContainer->initComponentsByObjectsIds($contentBlockContainerObjects);
+
         $websiteHandler->initHandler();
 
         $twigParameters = $websiteHandler->getTemplateParameters()->__serialize();
