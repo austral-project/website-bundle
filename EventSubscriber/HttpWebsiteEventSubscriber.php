@@ -30,7 +30,6 @@ use Austral\HttpBundle\EventSubscriber\HttpEventSubscriber;
 
 
 use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
-use Austral\WebsiteBundle\Entity\Page;
 use Austral\WebsiteBundle\EntityManager\PageEntityManager;
 use Austral\WebsiteBundle\Event\WebsiteHttpEvent;
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
@@ -38,7 +37,6 @@ use Austral\WebsiteBundle\Template\TemplateParameters;
 
 use Doctrine\ORM\NonUniqueResultException;
 
-use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
@@ -305,6 +303,17 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $responseContent = $this->container->get('austral.website.config_replace_dom')->replaceDom($response->getContent());
       $response->setContent($responseContent);
     }
+
+    if($this->container->has('austral.cache.http_cache_enabled_checker'))
+    {
+      /** @var UrlParameterInterface $urlParameter */
+      if($urlParameter = $httpEvent->getHandler()->getUrlParameter())
+      {
+        $this->container->get('austral.cache.http_cache_enabled_checker')
+          ->setEnabledByUrl($urlParameter->getInCacheEnabled());
+      }
+    }
+
     $httpEvent->getKernelEvent()->setResponse($response);
   }
 
