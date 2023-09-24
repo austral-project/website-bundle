@@ -15,7 +15,7 @@
   "require": {
     "php":                                      "^7.4 || ^8.0",
 
-    "austral/tools-bundle":                     "^3.0",
+    "austral/tools-bundle":                     "^3.1",
     "austral/http-bundle":                      "^3.1",
     "austral/seo-bundle":                       "^3.1",
     "austral/entity-translate-bundle":          "^3.1",

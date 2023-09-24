@@ -113,7 +113,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
 
     if($httpEvent->getKernelEvent()->getRequest()->attributes->has("_locale"))
     {
-      $pathInfo = str_replace($httpEvent->getKernelEvent()->getRequest()->attributes->get("_locale"), null, $pathInfo);
+      $pathInfo = str_replace($httpEvent->getKernelEvent()->getRequest()->attributes->get("_locale"), "", $pathInfo);
       $pathInfo = ltrim($pathInfo, "/");
     }
 

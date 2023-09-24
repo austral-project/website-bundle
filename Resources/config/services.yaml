@@ -43,12 +43,12 @@ services:
   austral.website.handler:
     class:        App\Handler\WebsiteHandler
     arguments:
-      - "@service_container"
       - "@request_stack"
       - "@event_dispatcher"
       - "@security.token_storage"
       - "@austral.tools.debug"
     calls:
+      - [ setContainer, [ "@service_container" ] ]
       - [ setMercure, [ "@?austral.notify.mercure" ] ]
       - [ setConfigVariable, [ "@austral.website.config_variable" ] ]
 
