@@ -4,6 +4,7 @@ services:
     autoconfigure: true
     public:        true
 
+
 ##### Website Event Subscriber Kernel
   austral.website.redirect.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\WebsiteRedirectSubscriber
@@ -53,10 +54,12 @@ services:
       - [ setConfigVariable, [ "@austral.website.config_variable" ] ]
 
 ##### Website Template
+  Austral\WebsiteBundle\Template\TemplateParameters: "@austral.website.template"
   austral.website.template:
     class:        Austral\WebsiteBundle\Template\TemplateParameters
 
 ##### Website Services
+  Austral\WebsiteBundle\Services\ConfigVariable: "@austral.website.config_variable"
   austral.website.config_variable:
     class:          Austral\WebsiteBundle\Services\ConfigVariable
     arguments:
@@ -66,6 +69,7 @@ services:
       - "@doctrine.orm.entity_manager"
       - "@austral.entity_file.link.generator"
 
+  Austral\WebsiteBundle\Services\ConfigReplaceDom: "@austral.website.config_replace_dom"
   austral.website.config_replace_dom:
     class:          Austral\WebsiteBundle\Services\ConfigReplaceDom
     arguments:      ["@austral.website.config_variable", "@austral.http.domains.management", "@austral.seo.url_parameter.management", "@austral.seo.routing"]
@@ -73,26 +77,31 @@ services:
 ##### Entities Manager #####
 
   ##### Config Entity Manager
+  Austral\WebsiteBundle\EntityManager\ConfigEntityManager: "@austral.entity_manager.config"
   austral.entity_manager.config:
     class:          Austral\WebsiteBundle\EntityManager\ConfigEntityManager
     arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.config.class%" ]
 
   ##### Page Entity Manager
+  Austral\WebsiteBundle\EntityManager\PageEntityManager: "@austral.entity_manager.page"
   austral.entity_manager.page:
     class:          Austral\WebsiteBundle\EntityManager\PageEntityManager
     arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.page.class%" ]
 
   ##### Tracking Entity Manager
+  Austral\WebsiteBundle\EntityManager\TrackingEntityManager: "@austral.entity_manager.tracking"
   austral.entity_manager.tracking:
     class:          Austral\WebsiteBundle\EntityManager\TrackingEntityManager
     arguments:      [ "@doctrine.orm.entity_manager",  "@event_dispatcher", "%austral.entity.tracking.class%" ]
 
 ##### Parameters #####
+  Austral\WebsiteBundle\Configuration\WebsiteConfiguration: "@austral.website.config"
   austral.website.config:
     class:          Austral\WebsiteBundle\Configuration\WebsiteConfiguration
     arguments:      ["%austral_website_config%"]
 
 ##### Form Type #####
+  Austral\WebsiteBundle\Form\Type\ValueByDomainFormType: "@austral.website.config_value_by_domain.form_type"
   austral.website.config_value_by_domain.form_type:
     class:        Austral\WebsiteBundle\Form\Type\ValueByDomainFormType
     arguments:    [ "@security.authorization_checker" ]
