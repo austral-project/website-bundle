@@ -6,18 +6,21 @@ services:
 
 
 ##### Website Event Subscriber Kernel
+  Austral\WebsiteBundle\EventSubscriber\WebsiteRedirectSubscriber:  "@austral.website.redirect.event_subscriber"
   austral.website.redirect.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\WebsiteRedirectSubscriber
     arguments:    ["@austral.website.handler"]
     tags:
       - { name: kernel.event_subscriber }
 
+  Austral\WebsiteBundle\EventSubscriber\HttpWebsiteEventSubscriber: "@austral.website.http.event_subscriber"
   austral.website.http.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\HttpWebsiteEventSubscriber
     arguments:    [ "@service_container", "@austral.website.config", "@austral.http.domains.management", "@austral.tools.debug" ]
     tags:
       - { name: kernel.event_subscriber }
 
+  Austral\WebsiteBundle\EventSubscriber\ConfigVariableFunctionEventSubscriber:  "@austral.website.config.variable.event_subscriber"
   austral.website.config.variable.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\ConfigVariableFunctionEventSubscriber
     tags:
@@ -26,6 +29,7 @@ services:
 
 ##### Website Listener
 
+  Austral\WebsiteBundle\Listener\DoctrineListener:  "@austral.website.doctrine.listener"
   austral.website.doctrine.listener:
     class:        Austral\WebsiteBundle\Listener\DoctrineListener
     arguments:    ["@austral.website.entity_manager.listener"]
@@ -33,6 +37,7 @@ services:
       - { name: doctrine.event_subscriber, connection: default }
 
 
+  Austral\WebsiteBundle\Listener\EntityManagerListener: "@austral.website.entity_manager.listener"
   austral.website.entity_manager.listener:
     class:        Austral\WebsiteBundle\Listener\EntityManagerListener
     arguments:    ["@austral.entity_manager.page"]
@@ -41,6 +46,7 @@ services:
       - { name: kernel.event_listener, event: "austral.entity_manager.duplicate", method: duplicate }
 
 ##### Website Handler
+  App\Handler\WebsiteHandler: "@austral.website.handler"
   austral.website.handler:
     class:        App\Handler\WebsiteHandler
     arguments:
