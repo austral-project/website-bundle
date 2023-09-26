@@ -172,8 +172,9 @@ Class ConfigReplaceDom
           $keyObject = str_replace("_nl2br", "", $keyObject);
         }
 
-        if($variableReplace = AustralTools::getValueByKey($variables, $keyObject, null))
+        if(array_key_exists($keyObject, $variables))
         {
+          $variableReplace = AustralTools::getValueByKey($variables, $keyObject, "");
           $variableReplace = $nl2br ? nl2br($variableReplace) : $variableReplace;
           $replaceValues[$value] = $noSpan ? $variableReplace : sprintf("<span class='config-element element_%s'>%s</span>", AustralTools::strip($keyObject), $variableReplace);
         }

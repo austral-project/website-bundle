@@ -140,7 +140,7 @@ Class ConfigVariable
             "text"  =>  "{$config->__toString()} - Text",
             "type"  =>  "text",
             "key"   =>  "{$config->getKeyname()}.text",
-            "value" =>  nl2br($configValue->getContentText())
+            "value" =>  $configValue->getContentText() ? nl2br($configValue->getContentText()) : " "
           );
           $variables["{$config->getKeyname()}.boolean"] = array(
             "text"  =>  "{$config->__toString()} - Boolean",
@@ -173,7 +173,7 @@ Class ConfigVariable
             "text"  =>  $config->__toString(),
             "type"  =>  "text",
             "key"   =>  $config->getKeyname(),
-            "value" =>  nl2br($configValue->getContentText())
+            "value" =>  $configValue->getContentText() ? nl2br($configValue->getContentText()) : " "
           );
         }
         elseif($config->getType() == "image")
@@ -191,7 +191,7 @@ Class ConfigVariable
             "text"  =>  "{$config->__toString()} - Text",
             "type"  =>  "text",
             "key"   =>  "{$config->getKeyname()}.text",
-            "value" =>  nl2br($configValue->getContentText())
+            "value" =>  $configValue->getContentText() ? nl2br($configValue->getContentText()) : " "
           );
           $variables["{$config->getKeyname()}.image"] = array(
             "text"  =>  "{$config->__toString()} - Picture",
@@ -215,7 +215,7 @@ Class ConfigVariable
             "text"  =>  "{$config->__toString()} - Text",
             "type"  =>  "text",
             "key"   =>  "{$config->getKeyname()}.text",
-            "value" =>  nl2br($configValue->getContentText())
+            "value" =>  $configValue->getContentText() ? nl2br($configValue->getContentText()) : " "
           );
           $variables["{$config->getKeyname()}.file"] = array(
             "text"  =>  "{$config->__toString()} - File",
