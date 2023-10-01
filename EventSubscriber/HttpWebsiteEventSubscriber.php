@@ -290,30 +290,28 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    */
   public function onResponse(HttpEventInterface $httpEvent)
   {
-
     if($httpEvent->getHandler() && ($urlRedirect = $httpEvent->getHandler()->getRedirectUrl()))
     {
       $response = new RedirectResponse($urlRedirect, $httpEvent->getHandler()->getRedirectStatus());
       $httpEvent->getKernelEvent()->setResponse($response);
     }
-
     $response = $httpEvent->getKernelEvent()->getResponse();
     if(!$response instanceof RedirectResponse)
     {
       $responseContent = $this->container->get('austral.website.config_replace_dom')->replaceDom($response->getContent());
       $response->setContent($responseContent);
-    }
 
-    if($this->container->has('austral.cache.http_cache_enabled_checker'))
-    {
-      /** @var UrlParameterInterface $urlParameter */
-      if($urlParameter = $httpEvent->getHandler()->getUrlParameter())
+      if($this->container->has('austral.cache.http_cache_enabled_checker') && $httpEvent->getHandler())
       {
-        $this->container->get('austral.cache.http_cache_enabled_checker')
-          ->setEnabledByUrl($urlParameter->getInCacheEnabled());
+        /** @var UrlParameterInterface $urlParameter */
+        if($urlParameter = $httpEvent->getHandler()->getUrlParameter())
+        {
+          $this->container->get('austral.cache.http_cache_enabled_checker')
+            ->setEnabledByUrl($urlParameter->getInCacheEnabled());
+        }
       }
-    }
 
+    }
     $httpEvent->getKernelEvent()->setResponse($response);
   }
 
