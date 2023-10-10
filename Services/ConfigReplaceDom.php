@@ -219,10 +219,18 @@ Class ConfigReplaceDom
         if(strpos($linkKeyAndId, "_") !== false || strpos($linkKeyAndId, ":") !== false)
         {
           list($linkKey, $id) = $this->decodeInternalLink($linkKeyAndId);
+
           /** @var UrlParameterInterface $urlParameter */
           if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id))
           {
-            $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), "current", $referenceType);
+            if(!$urlParameter->getPathLast())
+            {
+              $path = $this->australRouting->generate("austral_website_homepage", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
+            }
+            else
+            {
+              $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
+            }
             if($this->domainsManagement->getCurrentDomain()->getId() !== $urlParameter->getDomainId())
             {
               $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
