@@ -173,7 +173,10 @@ class PageAdmin extends Admin implements AdminModuleInterface
                 ->where("root.id != :pageId")
                 ->setParameter("pageId", $formAdminEvent->getFormMapper()->getObject()->getId())
                 ->leftJoin("root.translates", "translates")->addSelect("translates")
-                ->leftJoin("root.parent", "parent")
+                ->leftJoin("root.parent", "parent")->addSelect("parent")
+                ->leftJoin("root.translates", "parentTranslates")->addSelect("parentTranslates")
+                ->leftJoin("root.children", "children")->addSelect("children")
+                ->leftJoin("children.translates", "childrenTranslates")->addSelect("childrenTranslates")
                 ->orderBy('parent.id', 'DESC')
                 ->addOrderBy('translates.name', 'ASC');
               if($domainId) {

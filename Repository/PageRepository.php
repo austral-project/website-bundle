@@ -94,6 +94,20 @@ class PageRepository extends EntityRepository
     {
       $queryBuilder->leftJoin('root.translates', 'translates')->addSelect('translates');
     }
+    if($name === "retreive-by-key")
+    {
+      $queryBuilder->leftJoin('root.children', 'children')->addSelect('children');
+      $queryBuilder->leftJoin('children.translates', 'childrenTranslates')->addSelect('childrenTranslates');
+
+      $queryBuilder->leftJoin('children.children', 'children2')->addSelect('children2');
+      $queryBuilder->leftJoin('children2.translates', 'children2Translates')->addSelect('children2Translates');
+
+      $queryBuilder->leftJoin('children2.children', 'children3')->addSelect('children3');
+      $queryBuilder->leftJoin('children3.translates', 'children3Translates')->addSelect('children3Translates');
+
+      $queryBuilder->leftJoin('children3.children', 'children4')->addSelect('children4');
+      $queryBuilder->leftJoin('children4.translates', 'children4Translates')->addSelect('children4Translates');
+    }
     return $queryBuilder;
   }
 
