@@ -59,13 +59,21 @@ class FormListener
         if($templateParameters["isChoice"])
         {
           $templates["choices.templates.{$key}"] = $key;
+          $templateChoice[$key] = "template-choice-toggle-{$key}";
         }
       }
       $formEvent->getFormMapper()->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
         ->add(Field\SelectField::create("template",
             $templates,
-            array("required"=>true)
+            array(
+              "required"    =>  true,
+              "attr"        =>  array(
+                "data-view-by-choices-parent" =>  ".form-container",
+                "data-view-by-choices-children" =>  ".template-choice-toggle",
+                'data-view-by-choices' =>  json_encode($templateChoice)
+              )
+            )
           )
         )
       ->end();
