@@ -81,7 +81,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     $currentLocal = null;
 
     /** @var DomainInterface $currentDomain */
-    $currentDomain = $this->domainsManagement->getCurrentDomain();
+    $currentDomain = $this->domainsManagement->getCurrentDomain(false);
 
     if($currentDomain && $currentDomain->getLanguage()) {
       $currentLocal = $currentDomain->getLanguage();
