@@ -168,7 +168,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     }
 
     /** @var UrlParameterManagement $urlParameterManagement */
-    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")->initialize();
+    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")->setCurrentLanguage($domain->getCurrentLanguage())->initialize();
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");
@@ -232,7 +232,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $templateName = $handlerMethod;
     }
 
-    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy("keyname", $this->domainsManagement->getCurrentDomain()->getId()))
+    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy("keyname", $domain->getIsTranslate() ? $domain->getMaster()->getId() : $domain->getId()))
     {
       $websiteHandler->setLibraries($libraries);
       foreach ($libraries as $library)
