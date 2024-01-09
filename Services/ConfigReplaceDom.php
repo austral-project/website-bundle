@@ -231,10 +231,21 @@ Class ConfigReplaceDom
             {
               $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
             }
-            if($this->domainsManagement->getCurrentDomain()->getId() !== $urlParameter->getDomainId())
+            $addScheme = false;
+            $currentDomain = $this->domainsManagement->getCurrentDomain();
+            if($currentDomain->getIsTranslate())
+            {
+              $currentDomain = $currentDomain->getMaster();
+            }
+            if($currentDomain->getId() !== $urlParameter->getDomainId())
+            {
+              $addScheme = true;
+            }
+            if($addScheme)
             {
               $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
             }
+
             $replaceValues[$value] = $path;
           }
 
