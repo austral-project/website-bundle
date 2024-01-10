@@ -1,0 +1,37 @@
+month:
+  min:
+    jan:    jan
+    feb:    feb
+    mar:    mar
+    apr:    apr
+    may:    may
+    jun:    jun
+    jul:    jul.
+    aug:    aug
+    sep:    sep.
+    oct:    oct.
+    nov:    nov.
+    dec:    dec.
+  full:
+    jan:    january
+    feb:    february
+    mar:    march
+    apr:    april
+    may:    may
+    jun:    june
+    jul:    july
+    aug:    august
+    sep:    september
+    oct:    october
+    nov:    november
+    dec:    december
+
+day:
+  full:
+    monday:     monday
+    tuesday:    tuesday
+    wednesday:  wednesday
+    thursday:   thursday
+    friday:     friday
+    saturday:   saturday
+    sunday:     sunday
