@@ -361,6 +361,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
         $templateParameters = $this->container->get("austral.website.template");
 
+        $templateParameters->setName("error");
         /** @var HttpHandlerInterface|WebsiteHandlerInterface $websiteHandler */
         $websiteHandler = $this->container->get("austral.website.handler");
 
