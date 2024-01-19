@@ -95,6 +95,7 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
       ->addColumn(new Column\Value("name"))
       ->addColumn(new Column\Value("keyname"))
       ->addColumn(new Column\Value("contentText"))
+      ->addColumn(new Column\Languages())
       ->addColumn(new Column\Date("updated", null, "d/m/Y"));
   }
 
