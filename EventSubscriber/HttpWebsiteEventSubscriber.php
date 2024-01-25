@@ -37,9 +37,11 @@ use Austral\WebsiteBundle\Template\TemplateParameters;
 
 use Doctrine\ORM\NonUniqueResultException;
 
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -296,7 +298,10 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $httpEvent->getKernelEvent()->setResponse($response);
     }
     $response = $httpEvent->getKernelEvent()->getResponse();
-    if(!$response instanceof RedirectResponse)
+    if(!$response instanceof RedirectResponse
+      && !$response instanceof BinaryFileResponse
+      && !$response instanceof StreamedResponse
+    )
     {
       $responseContent = $this->container->get('austral.website.config_replace_dom')->replaceDom($response->getContent());
       $response->setContent($responseContent);
