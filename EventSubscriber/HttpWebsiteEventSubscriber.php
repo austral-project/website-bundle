@@ -119,11 +119,20 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $pathInfo = ltrim($pathInfo, "/");
     }
 
+
+    $domainToRedirect = null;
     /** @var DomainInterface $domain */
-    $domain = $this->domainsManagement->getCurrentDomain();
+    if($domain = $this->domainsManagement->getCurrentDomain())
+    {
+      $domainToRedirect = $domain;
+      if($domainToRedirect->getIsTranslate())
+      {
+        $domainToRedirect = $domain->getMaster();
+      }
+    }
 
     /** @var RedirectionInterface $redirection */
-    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domain ? $domain->getId() : null, $httpEvent->getHttpRequest()->getLanguage()))
+    if($redirection = $this->container->get('austral.entity_manager.redirection')->retreiveByUrlSource($pathInfo , $domainToRedirect?->getId(), $httpEvent->getHttpRequest()->getLanguage()))
     {
       if(preg_match("|(https?:\/\/)|", $redirection->getUrlDestination(), $matches)) {
         $response = new RedirectResponse($redirection->getUrlDestination(), $redirection->getStatusCode());
