@@ -30,6 +30,7 @@ use Austral\ContentBlockBundle\Event\ContentBlockEvent;
 use Austral\EntityBundle\Entity\EntityInterface;
 
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -161,6 +162,24 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
 
   }
 
+  /**
+   * executeResponse
+   *
+   * @param Response $response
+   * @return WebsiteHandlerInterface
+   */
+  public function executeResponse(Response $response): WebsiteHandlerInterface
+  {
+    return $this;
+  }
+
+  /**
+   * blockComponentsDispatchEvent
+   *
+   * @param $eventName
+   * @return void
+   * @throws \Exception
+   */
   protected function blockComponentsDispatchEvent($eventName)
   {
     if($this->libraries)

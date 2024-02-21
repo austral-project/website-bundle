@@ -307,6 +307,12 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $httpEvent->getKernelEvent()->setResponse($response);
     }
     $response = $httpEvent->getKernelEvent()->getResponse();
+    if($httpEvent->getHandler())
+    {
+      $httpEvent->getHandler()->executeResponse($response);
+    }
+
+
     if(!$response instanceof RedirectResponse
       && !$response instanceof BinaryFileResponse
       && !$response instanceof StreamedResponse

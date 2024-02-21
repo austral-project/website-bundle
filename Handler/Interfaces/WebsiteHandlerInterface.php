@@ -15,6 +15,7 @@ use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\NotifyBundle\Mercure\Mercure;
 use Austral\WebsiteBundle\Services\ConfigVariable;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Austral Website Handler Interface.
@@ -41,6 +42,14 @@ interface WebsiteHandlerInterface
    * @return $this
    */
   public function initHandler(): WebsiteHandlerInterface;
+
+  /**
+   * executeResponse
+   *
+   * @param Response $response
+   * @return WebsiteHandlerInterface
+   */
+  public function executeResponse(Response $response): WebsiteHandlerInterface;
 
   /**
    * @param string $handlerMethod
