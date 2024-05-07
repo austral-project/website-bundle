@@ -247,7 +247,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
           )
         ))
         ->addGroup("generalInformations")
-          ->addGroup("generalInformations")
+          ->addGroup("generalInformationsSummary")
             ->setDirection(GroupFields::DIRECTION_COLUMN)
             ->setStyle(GroupFields::STYLE_NONE)
             ->setSize(GroupFields::SIZE_COL_6)
