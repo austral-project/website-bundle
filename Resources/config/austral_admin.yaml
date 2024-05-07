@@ -60,3 +60,6 @@ parameters:
           route:                  "config"
           class:                  "%austral.admin.class.config.class%"
           translate:              "female_c"
+          downloadFormats:
+            - csv
+            - xlsx

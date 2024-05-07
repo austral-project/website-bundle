@@ -11,12 +11,15 @@
 namespace Austral\WebsiteBundle\Admin;
 
 use App\Entity\Austral\WebsiteBundle\ConfigValueByDomain;
+use Austral\AdminBundle\Admin\Event\DownloadAdminEvent;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
+use Austral\EntityBundle\ORM\AustralQueryBuilder;
 use Austral\FormBundle\Mapper\Fieldset;
 use Austral\FormBundle\Mapper\FormMapper;
 use Austral\HttpBundle\Entity\Domain;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\ListBundle\DataHydrate\DataHydrateORM;
+use Austral\WebsiteBundle\Entity\Config;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 
 use Austral\FilterBundle\Filter\Type as FilterType;
@@ -97,6 +100,31 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
       ->addColumn(new Column\Value("contentText"))
       ->addColumn(new Column\Languages())
       ->addColumn(new Column\Date("updated", null, "d/m/Y"));
+  }
+
+
+  /**
+   * @param DownloadAdminEvent $downloadAdminEvent
+   */
+  public function configurationDownload(DownloadAdminEvent $downloadAdminEvent)
+  {
+    $translator = $this->translator;
+    $downloadAdminEvent->getListMapper()
+      ->buildDataHydrate(function(DataHydrateORM $dataHydrate) {
+        $dataHydrate->addQueryBuilderPaginatorClosure(function(AustralQueryBuilder $queryBuilder) {
+          return $queryBuilder->orderBy("root.created", "DESC");
+        });
+      })
+      ->addColumn(new Column\Value("name"))
+      ->addColumn(new Column\Value("keyname"))
+      ->addColumn(new Column\Value("type", null, array(
+        "getter"  =>  function(Config $object) use($translator){
+          return $translator->trans("choices.config.type.{$object->getType()}", array(), "austral");
+        }
+      )))
+      ->addColumn(new Column\Value("contentText"))
+      ->addColumn(new Column\Value("language"))
+    ;
   }
 
   /**
