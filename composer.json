@@ -13,7 +13,7 @@
     }
   ],
   "require": {
-    "php":                                      "^7.4 || ^8.0",
+    "php":                                    "^8.0 || ^8.1 || ^8.2",
 
     "austral/tools-bundle":                     "^3.1",
     "austral/http-bundle":                      "^3.1",
@@ -22,7 +22,7 @@
     "austral/content-block-bundle":             "^3.1",
     "austral/entity-file-bundle":               "^3.1",
 
-    "symfony/config":                           "^5.3|^5.4",
+    "symfony/config":                           "^5.3 || ^5.4 || ^6.4",
     "martin-georgiev/postgresql-for-doctrine":  "^1.2"
   },
   "require-dev": {
