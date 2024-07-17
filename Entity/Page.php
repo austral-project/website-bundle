@@ -74,8 +74,6 @@ abstract class Page extends Entity implements PageInterface,
   use UrlParameterTrait;
   use TreePageParentTrait;
 
-  use EntitySocialNetworkTranslateMasterTrait;
-
   /**
    * @var string
    * @ORM\Column(name="id", type="string", length=40)
