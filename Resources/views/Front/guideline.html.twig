@@ -1,13 +1,24 @@
-{% for containerComponent in components %}
-  <div class="container theme-{{ containerComponent.keyname }}">
-    {% for component in containerComponent.children %}
-      {% if component.type == "library" %}
-        {% if libraries[component.keyname] is defined %}
-          {%  include libraries[component.keyname].templatePath ?? "Front/Libraries/default.html.twig" with {library: libraries[component.keyname]} %}
-        {% endif %}
-      {% else %}
-        {% include [component.templatePath, "Dev/componentsNotFound.html.twig"] %}
-      {% endif %}
-    {% endfor %}
+{% extends 'Front/Layout/layout.html.twig' %}
+{% block body_class %}{{ currentPage.bodyClass|default("") }}{% endblock %}
+{% block content_body_side %}
+
+{% set isGuideline = true %}
+<div class="guidelines-by-categ">
+ {% for categ, guidelines in guidelinesByCateg %}
+  <div class="guideline-by-categ-{{ categ }}">
+    <span class="title">{{ ("choices.editor_component.guidelineCategory."~categ)|trans({}, "austral") }}</span>
+    <div class="guidelines-container">
+      {% for guideline in guidelines %}
+        <div class="guideline-content">
+          {% include "Front/Components/_components.html.twig" with {templateName: "master", componentsTemplate: guideline.componentsTemplate["master"]} %}
+        </div>
+      {% endfor %}
+    </div>
   </div>
-{% endfor %}
+  
+  
+  {% endfor %}
+</div>
+
+
+{% endblock %}

@@ -10,6 +10,7 @@
  
 namespace Austral\WebsiteBundle\Handler;
 
+use App\Entity\Austral\ContentBlockBundle\Guideline;
 use Austral\ContentBlockBundle\Entity\Component;
 use Austral\ContentBlockBundle\EntityManager\EditorComponentEntityManager;
 use Austral\ContentBlockBundle\Event\GuidelineEvent;
@@ -207,6 +208,13 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
    */
   protected function guideline(): WebsiteHandler
   {
+    if(!$this->isGranted("ROLE_ADMIN_ACCESS"))
+    {
+      $this->redirectUrl = $this->generateUrl("app_homepage");
+      return $this;
+    }
+
+
     $this->templateParameters->addParameters("robots", array(
       "index"           =>  false,
       "follow"          =>  false,
@@ -219,41 +227,46 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       "canonical"       =>  "",
     ));
 
-    if($libraries = $this->container->get('austral.entity_manager.library')->selectAllIndexBy())
-    {
-      /** @var LibraryInterface|EntityComponentsTrait $library */
-      foreach($libraries as $library)
-      {
-        if($library->getIsEnabled())
-        {
-          $contentBlockEvent = new ContentBlockEvent($library, "Front");
-          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
-        }
-      }
-      $this->templateParameters->addParameters("libraries", $libraries);
-    }
-
-    /** @var EditorComponentEntityManager $editorComponent */
-    $editorComponentManager = $this->container->get('austral.entity_manager.editor_component');
-    $editorComponents = $editorComponentManager->selectAllEnabled();
-
-    /** @var Component $componentObject */
-    $componentObject = $this->container->get('austral.entity_manager.component')->create();
-
-    $guidelineEvent = new GuidelineEvent($this->request->query->get('container', "default-0"), "Front");
-
-    $guidelineEvent->setComponentObject($componentObject)
-      ->setEditorComponents($editorComponents)
-      ->setDefaultObjectPage($this->container->get('austral.entity_manager.page')->create())
-      ->setGuidelineFormValues((array) $this->request->request->get('guideline', array()));
-    $this->dispatcher->dispatch($guidelineEvent, GuidelineEvent::EVENT_AUSTRAL_CONTENT_BLOCK_GUIDELINE_INIT);
-
     $page = $this->container->get('austral.entity_manager.page')->create();
     $page->setKeyname("guideline");
     $this->templateParameters->addParameters("currentPage", $page);
     $this->page = $page;
-    $this->templateParameters->addParameters("components", $guidelineEvent->getFinalComponents());
-    $this->templateParameters->addParameters("containers", $guidelineEvent->getContainers());
+
+    if($this->libraries)
+    {
+      /** @var LibraryInterface|EntityComponentsTrait $library */
+      foreach($this->libraries as $library)
+      {
+        if($library->getIsEnabled())
+        {
+          $contentBlockEvent = new ContentBlockEvent($library, "Front");
+          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
+          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
+        }
+      }
+    }
+
+
+    $guidelines = $this->container->get('austral.entity_manager.guideline')->selectAllIndexBy("id");
+    $guidelinesByCateg = array();
+    foreach($this->container->get('austral.content_block.config')->get("editor_component.guideline_categories") as $value)
+    {
+      $guidelinesByCateg[$value] = array();
+    }
+
+    /** @var Guideline $guideline */
+    foreach($guidelines as $guideline)
+    {
+      if(!array_key_exists($guideline->getCategory(), $guidelinesByCateg))
+      {
+        $guidelinesByCateg[$guideline->getCategory()] = array();
+      }
+      $contentBlockEvent = new ContentBlockEvent($guideline, "Front");
+      $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
+      $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
+      $guidelinesByCateg[$guideline->getCategory()][] = $guideline;
+    }
+    $this->templateParameters->addParameters("guidelinesByCateg", $guidelinesByCateg);
     $this->init();
     return $this;
   }
