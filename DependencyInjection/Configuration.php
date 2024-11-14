@@ -87,6 +87,10 @@ class Configuration implements ConfigurationInterface
           "isChoice"        =>  false,
           "path"            =>  "@AustralWebsite/Front/guideline.html.twig"
         ),
+        "guidelineElements"       =>  array(
+          "isChoice"        =>  false,
+          "path"            =>  "@AustralWebsite/Front/guideline-elements.html.twig"
+        ),
         "robots"          =>  array(
           "isChoice"        =>  false,
           "path"            =>  "@AustralWebsite/Front/robots.txt.twig"

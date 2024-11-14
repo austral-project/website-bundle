@@ -14,6 +14,14 @@ austral_website_homepage:
     _austral_page:          true
 
 ##### Guidelines
+austral_website_guideline_element:
+  path:     /_guideline/elements
+  controller: App\Controller\MainController::guideline
+  defaults:
+    _austral_http_event:    Austral\WebsiteBundle\Event\WebsiteHttpEvent
+    _handler_method:        guidelineElements
+
+##### Guidelines
 austral_website_guideline:
   path:     /_guideline
   controller: App\Controller\MainController::guideline
