@@ -230,38 +230,6 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
     $page->setKeyname("guideline");
     $this->templateParameters->addParameters("currentPage", $page);
     $this->page = $page;
-    $this->init();
-    return $this;
-  }
-
-  /**
-   * @return $this
-   * @throws \Exception
-   */
-  protected function guidelineElements(): WebsiteHandler
-  {
-    if(!$this->isGranted("ROLE_ADMIN_ACCESS"))
-    {
-      $this->redirectUrl = $this->generateUrl("app_homepage");
-      return $this;
-    }
-
-    $this->templateParameters->addParameters("robots", array(
-      "index"           =>  false,
-      "follow"          =>  false,
-      "status"          =>  false,
-    ));
-
-    $this->templateParameters->addParameters("seo", array(
-      "title"           =>  "Austral - Guideline",
-      "description"     =>  "",
-      "canonical"       =>  "",
-    ));
-
-    $page = $this->container->get('austral.entity_manager.page')->create();
-    $page->setKeyname("guideline");
-    $this->templateParameters->addParameters("currentPage", $page);
-    $this->page = $page;
 
     if($this->libraries)
     {
@@ -279,7 +247,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
 
     $guidelines = $this->container->get('austral.entity_manager.guideline')->selectAllIndexBy("id");
     $guidelinesByCateg = array();
-    foreach($this->container->get('austral.content_block.config')->get("editor_component.guideline_categories") as $value)
+    foreach($this->container->get('austral.content_block.config')->get("guideline.categories") as $value)
     {
       $guidelinesByCateg[$value] = array();
     }
