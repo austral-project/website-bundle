@@ -4,11 +4,11 @@
   {% set withoutStructure = true %}
   <div class="guidelines-by-categ">
     {% for categ, guidelines in guidelinesByCateg %}
-      <div class="guideline-by-categ-{{ categ }}">
+      <div class="guideline-by-categ guideline-by-categ-{{ categ }}">
         <span class="title">{{ ("choices.editor_component.guidelineCategory."~categ)|trans({}, "austral") }}</span>
         <div class="guidelines-container">
           {% for guideline in guidelines %}
-            <div class="guideline-content">
+            <div id="guideline-{{ guideline.id }}" class="guideline-content">
               {% include "Front/Components/_components.html.twig" with {templateName: "master", componentsTemplate: guideline.componentsTemplate["master"]} %}
             </div>
           {% endfor %}

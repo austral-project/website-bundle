@@ -10,10 +10,8 @@
  
 namespace Austral\WebsiteBundle\Handler;
 
+use App\Entity\Austral\ContentBlockBundle\Component;
 use App\Entity\Austral\ContentBlockBundle\Guideline;
-use Austral\ContentBlockBundle\Entity\Component;
-use Austral\ContentBlockBundle\EntityManager\EditorComponentEntityManager;
-use Austral\ContentBlockBundle\Event\GuidelineEvent;
 use Austral\EntityBundle\Entity\Interfaces\FileInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
@@ -214,6 +212,16 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       return $this;
     }
 
+    if($this->container->has('austral.notify.mercure'))
+    {
+      /** @var Mercure $mercure */
+      $mercure = $this->container->get('austral.notify.mercure');
+      $mercure->addSubscribe("guidelines");
+      $mercureParameters["url"] = $mercure->getHub()->getPublicUrl();
+      $mercureParameters["subscribes"] = $mercure->getSubscribes();
+      $this->templateParameters->addParameters("mercure", $mercureParameters);
+    }
+
     $this->templateParameters->addParameters("robots", array(
       "index"           =>  false,
       "follow"          =>  false,
@@ -233,7 +241,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
 
     if($this->libraries)
     {
-      /** @var LibraryInterface|EntityComponentsTrait $library */
+      /** @var LibraryInterface|ComponentsInterface $library */
       foreach($this->libraries as $library)
       {
         if($library->getIsEnabled())
@@ -261,6 +269,37 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       }
       $contentBlockEvent = new ContentBlockEvent($guideline, "Front");
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
+
+      $guidelinesParameters = $this->getSession()->get("guidelines-parameters");
+      if($guidelinesParameters && array_key_exists($guideline->getId(), $guidelinesParameters))
+      {
+        $guidelineParameters = $guidelinesParameters[$guideline->getId()];
+        $componentByContainers = $guideline->getComponents();
+        foreach($componentByContainers as $components)
+        {
+          /** @var Component $component */
+          foreach($components as $component)
+          {
+            foreach($guidelineParameters as $key => $value)
+            {
+              if($key === "theme")
+              {
+                $component->setThemeId($value);
+              }
+              if($key === "option")
+              {
+                $component->setOptionId($value);
+              }
+              if($key === "layout")
+              {
+                $component->setLayoutId($value);
+              }
+            }
+          }
+        }
+
+
+      }
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
       $guidelinesByCateg[$guideline->getCategory()][] = $guideline;
     }
