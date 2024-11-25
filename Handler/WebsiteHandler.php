@@ -239,20 +239,6 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
     $this->templateParameters->addParameters("currentPage", $page);
     $this->page = $page;
 
-    if($this->libraries)
-    {
-      /** @var LibraryInterface|ComponentsInterface $library */
-      foreach($this->libraries as $library)
-      {
-        if($library->getIsEnabled())
-        {
-          $contentBlockEvent = new ContentBlockEvent($library, "Front");
-          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
-          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
-        }
-      }
-    }
-
     $guidelines = $this->container->get('austral.entity_manager.guideline')->selectAllIndexBy("id");
     $guidelinesByCateg = array();
     foreach($this->container->get('austral.content_block.config')->get("guideline.categories") as $value)
@@ -268,6 +254,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
         $guidelinesByCateg[$guideline->getCategory()] = array();
       }
       $contentBlockEvent = new ContentBlockEvent($guideline, "Front");
+      $contentBlockEvent->setIsGuidelineBuild(true);
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
 
       $guidelinesParameters = $this->getSession()->get("guidelines-parameters");
@@ -297,11 +284,26 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
             }
           }
         }
-
-
       }
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
       $guidelinesByCateg[$guideline->getCategory()][] = $guideline;
+    }
+
+    if($this->libraries)
+    {
+      $guidelinesByCateg["library"] = array();
+      /** @var LibraryInterface|ComponentsInterface $library */
+      foreach($this->libraries as $library)
+      {
+        if($library->getIsEnabled())
+        {
+          $contentBlockEvent = new ContentBlockEvent($library, "Front");
+          $contentBlockEvent->setIsGuidelineBuild(true);
+          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
+          $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
+          $guidelinesByCateg["library"][] = $library;
+        }
+      }
     }
     $this->templateParameters->addParameters("guidelinesByCateg", $guidelinesByCateg);
     $this->init();
