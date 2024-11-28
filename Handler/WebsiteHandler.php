@@ -12,6 +12,7 @@ namespace Austral\WebsiteBundle\Handler;
 
 use App\Entity\Austral\ContentBlockBundle\Component;
 use App\Entity\Austral\ContentBlockBundle\Guideline;
+use Austral\ContentBlockBundle\Event\GuidelineEvent;
 use Austral\EntityBundle\Entity\Interfaces\FileInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
@@ -68,6 +69,11 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
    * @var string|null
    */
   protected ?string $handlerMethod = null;
+
+  /**
+   * @var boolean
+   */
+  protected bool $isGuideline = false;
 
   /**
    * @param ConfigVariable $configVariable
@@ -206,6 +212,7 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
    */
   protected function guideline(): WebsiteHandler
   {
+    $this->isGuideline = true;
     if(!$this->isGranted("ROLE_ADMIN_ACCESS"))
     {
       $this->redirectUrl = $this->generateUrl("app_homepage");
@@ -240,18 +247,18 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
     $this->page = $page;
 
     $guidelines = $this->container->get('austral.entity_manager.guideline')->selectAllIndexBy("id");
-    $guidelinesByCateg = array();
+    $guidelinesByCategory = array();
     foreach($this->container->get('austral.content_block.config')->get("guideline.categories") as $value)
     {
-      $guidelinesByCateg[$value] = array();
+      $guidelinesByCategory[$value] = array();
     }
 
     /** @var Guideline $guideline */
     foreach($guidelines as $guideline)
     {
-      if(!array_key_exists($guideline->getCategory(), $guidelinesByCateg))
+      if(!array_key_exists($guideline->getCategory(), $guidelinesByCategory))
       {
-        $guidelinesByCateg[$guideline->getCategory()] = array();
+        $guidelinesByCategory[$guideline->getCategory()] = array();
       }
       $contentBlockEvent = new ContentBlockEvent($guideline, "Front");
       $contentBlockEvent->setIsGuidelineBuild(true);
@@ -286,12 +293,12 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
         }
       }
       $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
-      $guidelinesByCateg[$guideline->getCategory()][] = $guideline;
+      $guidelinesByCategory[$guideline->getCategory()][] = $guideline;
     }
 
     if($this->libraries)
     {
-      $guidelinesByCateg["library"] = array();
+      $guidelinesByCategory["library"] = array();
       /** @var LibraryInterface|ComponentsInterface $library */
       foreach($this->libraries as $library)
       {
@@ -301,12 +308,27 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
           $contentBlockEvent->setIsGuidelineBuild(true);
           $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_INIT);
           $this->dispatcher->dispatch($contentBlockEvent, ContentBlockEvent::EVENT_AUSTRAL_CONTENT_BLOCK_COMPONENTS_HYDRATE);
-          $guidelinesByCateg["library"][] = $library;
+          if(!$library->getIsNavigationMenu())
+          {
+            $guidelinesByCategory["library"][] = $library;
+          }
         }
       }
+      if(!count($guidelinesByCategory["library"]))
+      {
+        unset($guidelinesByCategory["library"]);
+      }
+      $this->templateParameters->addParameters("libraries", $this->libraries);
     }
-    $this->templateParameters->addParameters("guidelinesByCateg", $guidelinesByCateg);
+    $guidelineEvent = new GuidelineEvent();
+    $this->dispatcher->dispatch($guidelineEvent, GuidelineEvent::EVENT_AUSTRAL_GUIDELINE_EXTEND);
+
+    $this->templateParameters->addParameters("withoutStructure", true);
+    $this->templateParameters->addParameters("guidelinesByCategory", $guidelinesByCategory);
+    $this->templateParameters->addParameters("guidelinesExtendByCategory", $guidelineEvent->getGuidelinesExtendByCategory());
+    $this->pageBefore();
     $this->init();
+    $this->pageAfter();
     return $this;
   }
 
