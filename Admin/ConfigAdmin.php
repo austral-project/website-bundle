@@ -14,6 +14,7 @@ use App\Entity\Austral\WebsiteBundle\ConfigValueByDomain;
 use Austral\AdminBundle\Admin\Event\DownloadAdminEvent;
 use Austral\AdminBundle\Admin\Event\FilterEventInterface;
 use Austral\EntityBundle\ORM\AustralQueryBuilder;
+use Austral\FormBundle\Mapper\Base\MapperElementInterface;
 use Austral\FormBundle\Mapper\Fieldset;
 use Austral\FormBundle\Mapper\FormMapper;
 use Austral\HttpBundle\Entity\Domain;
@@ -33,6 +34,7 @@ use Austral\FormBundle\Field as Field;
 use Austral\ListBundle\Column as Column;
 
 use Austral\WebsiteBundle\Event\ConfigVariableFunctionEvent;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 
@@ -206,8 +208,8 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
           array("configVariable_functionBase" =>  ConfigVariableFunctionEvent::EVENT_AUSTRAL_CONFIG_VARIABLE_FUNCTION_BASE)
         ))
         ->add(Field\TextareaField::create("contentText", null, array("container" =>  array('class'=>"view-element-by-choices element-view-all element-view-text"))))
-        ->add(Field\SelectField::create("internalLink", $pagesList, array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-internal-link"))))
         ->add(Field\SwitchField::create("contentBoolean", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-checkbox"))))
+        ->add(Field\TextField::create("internalLink", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-internal-link"))))
         ->add(Field\UploadField::create("image", array("container"  =>  array('class'=>"view-element-by-choices element-view-all element-view-image"))))
         ->add(Field\UploadField::create("file", array(
             "container"   =>  array('class'=>"view-element-by-choices element-view-all element-view-file"),
@@ -216,11 +218,57 @@ class ConfigAdmin extends Admin implements AdminModuleInterface
         ))
       ->end();
 
+      $groupInternalLink = $formAdminEvent->getFormMapper()->addFieldset("fieldset.content")
+        ->addGroup("internalLink")
+        ->setAttr(array("class" =>  ""));
+      $this->addLink($groupInternalLink, "internalLink");
+
       if($domainsManagement->getEnabledDomainWithoutVirtual())
       {
         $this->addFieldValuesByDomain($formAdminEvent->getFormMapper(), $domainsManagement);
       }
 
+  }
+
+  /**
+   * @param MapperElementInterface $mapperElement
+   * @param null $fieldname
+   *
+   * @throws Exception
+   */
+  protected function addLink(MapperElementInterface $mapperElement, $fieldname = null)
+  {
+    $popin = $mapperElement->addPopin("popup-config-link-editor", $fieldname, array(
+      "button"  =>  array(
+        "entitled"      =>  "",
+        "picto"         =>  "austral-picto-link",
+        "class"         =>  "button-picto",
+        "data"          =>  array(
+          "data-check-value"  =>  json_encode(array(
+            "*[data-popin-update-input='field-link-choice']",
+          ))
+        )
+      ),
+      "popin"  =>  array(
+        "id"            =>  "master",
+        "class"         =>  "little",
+        "template"      =>  "linkEditor",
+      )
+    ));
+    $popin->add(Field\SymfonyField::create("linkEntityKey", TextType::class, array(
+      "entitled"    =>  false,
+      "attr"        =>  array(
+        "autocomplete"            => "off",
+        "data-popin-update-input" => "field-link-choice",
+        "data-popin-update-value" => "field-link-choice-name",
+      ),
+      "getter"    =>  function(Config $config){
+        return $config->getInternalLink();
+      },
+      "setter"    =>  function(Config $config, $value) {
+        return $config->setInternalLink($value);
+      }
+    )));
   }
 
 

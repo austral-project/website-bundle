@@ -267,4 +267,27 @@ abstract class Config extends Entity implements ConfigInterface, EntityInterface
     return $this;
   }
 
+  /**
+   * @return string|null
+   * @throws Exception
+   */
+  public function getInternalLink(): ?string
+  {
+    return $this->getTranslateCurrent() ? $this->getTranslateCurrent()->getInternalLink() : null;
+  }
+
+  /**
+   * @param string|null $value
+   * @return Config
+   * @throws Exception
+   */
+  public function setInternalLink(?string $value): Config
+  {
+    if($currentTranslate = $this->getTranslateCurrent())
+    {
+      $currentTranslate->setInternalLink($value);
+    }
+    return $this;
+  }
+
 }
