@@ -369,10 +369,16 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
   {
     if(!$this->templateParameters->hasParameter("seo"))
     {
+      $canonical = $this->urlParameter && $this->urlParameter->getSeoCanonical() ? $this->urlParameter->getSeoCanonical() : null;
+      if($canonical && !str_contains($canonical, "://"))
+      {
+        $canonical = trim($canonical, "/");
+        $canonical = $this->generateUrl("austral_website_page", array("slug" => $canonical), UrlGeneratorInterface::ABSOLUTE_URL);
+      }
       $this->templateParameters->addParameters("seo", array(
         "title"           =>  $this->urlParameter && $this->urlParameter->getSeoTitle() ? $this->urlParameter->getSeoTitle() : ($page ? $page->__toString() : ""),
         "description"     =>  $this->urlParameter && $this->urlParameter->getSeoDescription() ? $this->urlParameter->getSeoDescription() : ($page ? $page->__toString() : ""),
-        "canonical"       =>  $this->urlParameter && $this->urlParameter->getSeoCanonical() ? $this->urlParameter->getSeoCanonical() : null,
+        "canonical"       =>  $canonical,
       ));
     }
     return $this;
