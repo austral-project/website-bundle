@@ -188,8 +188,18 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       $this->container->get('austral.graphic_items.management')->init();
     }
 
-    /** @var HttpHandlerInterface|WebsiteHandlerInterface $websiteHandler */
-    $websiteHandler = $this->container->get("austral.website.handler");
+    $handlerName = $handlerNameDefault = "austral.website.handler";
+    if(array_key_exists("_handler", $requestAttributes->get('_route_params', array())))
+    {
+      $handlerName = $requestAttributes->get('_route_params', array())["_handler"];
+      if(!$this->container->has($handlerName))
+      {
+        $handlerName = $handlerNameDefault;
+      }
+    }
+
+    /** @var HttpHandlerInterface $websiteHandler */
+    $websiteHandler = $this->container->get($handlerName);
     $websiteHandler->setDomainsManagement($this->domainsManagement);
     $websiteHandler->setTemplateParameters($templateParameters);
 
