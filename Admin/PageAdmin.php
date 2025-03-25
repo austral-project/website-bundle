@@ -162,6 +162,21 @@ class PageAdmin extends Admin implements AdminModuleInterface
   {
     /** @var string|null $domainId */
     $domainId = $formAdminEvent->getCurrentModule()->getFilterDomainId();
+
+    if(!$formAdminEvent->getFormMapper()->getObject()->getParent())
+    {
+      $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKey("isHomepage", true, function(QueryBuilder $queryBuilder) use($domainId) {
+        if($domainId) {
+          $queryBuilder->andWhere("root.domainId = :domainId")
+            ->setParameter("domainId", $domainId);
+        }
+      });
+      if($parentDefault)
+      {
+        $formAdminEvent->getFormMapper()->getObject()->setParent($parentDefault);
+      }
+    }
+
     $formAdminEvent->getFormMapper()
       ->addFieldset("fieldset.right")
         ->setPositionName(Fieldset::POSITION_RIGHT)
@@ -177,8 +192,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
                 ->leftJoin("root.translates", "parentTranslates")->addSelect("parentTranslates")
                 ->leftJoin("root.children", "children")->addSelect("children")
                 ->leftJoin("children.translates", "childrenTranslates")->addSelect("childrenTranslates")
-                ->orderBy('parent.id', 'DESC')
-                ->addOrderBy('translates.name', 'ASC');
+                ->orderBy('translates.name', 'ASC');
               if($domainId) {
                 $queryBuilder->andWhere("root.domainId = :domainId")
                   ->setParameter("domainId", $domainId);
@@ -361,15 +375,25 @@ class PageAdmin extends Admin implements AdminModuleInterface
       $initDefaultParent = true;
     }
 
+    if($object->getIsHomepage())
+    {
+      $object->setParent(null);
+    }
+
     /** @var string|null $domainId */
     $domainId = $formAdminEvent->getCurrentModule()->getFilterDomainId();
     if($initDefaultParent && !$object->getIsHomepage() && $domainId !== DomainsManagement::DOMAIN_ID_FOR_ALL_DOMAINS)
     {
-      $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKeyname("homepage", function(QueryBuilder $queryBuilder) use($domainId) {
-        $queryBuilder->andWhere("root.domainId = :domainId")
-          ->setParameter("domainId", $domainId);
+      $parentDefault = $this->container->get("austral.entity_manager.page")->retreiveByKey("isHomepage", true, function(QueryBuilder $queryBuilder) use($domainId) {
+        if($domainId) {
+          $queryBuilder->andWhere("root.domainId = :domainId")
+            ->setParameter("domainId", $domainId);
+        }
       });
-      $object->setParent($parentDefault);
+      if($parentDefault)
+      {
+        $object->setParent($parentDefault);
+      }
     }
   }
 
