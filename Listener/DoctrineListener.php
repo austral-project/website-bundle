@@ -11,6 +11,7 @@
 namespace Austral\WebsiteBundle\Listener;
 
 use Austral\EntityBundle\Entity\EntityInterface;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -21,6 +22,7 @@ use Doctrine\ORM\Events;
  * @author Matthieu Beurel <matthieu@austral.dev>
  * @final
  */
+#[AsDoctrineListener(event: 'postLoad', connection: 'default')]
 class DoctrineListener implements EventSubscriber
 {
 
