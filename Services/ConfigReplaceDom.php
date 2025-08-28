@@ -221,7 +221,7 @@ Class ConfigReplaceDom
           list($linkKey, $id) = $this->decodeInternalLink($linkKeyAndId);
 
           /** @var UrlParameterInterface $urlParameter */
-          if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id))
+          if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id, $this->domainsManagement->getCurrentLanguage()))
           {
             if(!$urlParameter->getPathLast())
             {
