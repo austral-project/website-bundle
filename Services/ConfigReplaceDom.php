@@ -220,33 +220,41 @@ Class ConfigReplaceDom
         {
           list($linkKey, $id) = $this->decodeInternalLink($linkKeyAndId);
 
-          /** @var UrlParameterInterface $urlParameter */
-          if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id, $this->domainsManagement->getCurrentLanguage()))
+          if($linkKey == "ROUTE")
           {
-            if(!$urlParameter->getPathLast())
-            {
-              $path = $this->australRouting->generate("austral_website_homepage", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
-            }
-            else
-            {
-              $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
-            }
-            $addScheme = false;
-            $currentDomain = $this->domainsManagement->getCurrentDomain();
-            if($currentDomain->getIsTranslate())
-            {
-              $currentDomain = $currentDomain->getMaster();
-            }
-            if($currentDomain->getId() !== $urlParameter->getDomainId())
-            {
-              $addScheme = true;
-            }
-            if($addScheme)
-            {
-              $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
-            }
-
+            $path = $this->australRouting->generate($id, null, array(), "current", $referenceType);
             $replaceValues[$value] = $path;
+          }
+          else
+          {
+            /** @var UrlParameterInterface $urlParameter */
+            if($urlParameter = $this->urlParameterManagement->getUrlParameterByObjectClassnameAndId($linkKey, $id, $this->domainsManagement->getCurrentLanguage()))
+            {
+              if(!$urlParameter->getPathLast())
+              {
+                $path = $this->australRouting->generate("austral_website_homepage", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
+              }
+              else
+              {
+                $path = $this->australRouting->generate("austral_website_page", $urlParameter, array(), $urlParameter->getDomainId(), $referenceType);
+              }
+              $addScheme = false;
+              $currentDomain = $this->domainsManagement->getCurrentDomain();
+              if($currentDomain->getIsTranslate())
+              {
+                $currentDomain = $currentDomain->getMaster();
+              }
+              if($currentDomain->getId() !== $urlParameter->getDomainId())
+              {
+                $addScheme = true;
+              }
+              if($addScheme)
+              {
+                $path = "//{$urlParameter->getDomain()->getDomain()}{$path}";
+              }
+
+              $replaceValues[$value] = $path;
+            }
           }
 
           if(!array_key_exists($value, $replaceValues))
