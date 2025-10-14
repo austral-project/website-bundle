@@ -17,6 +17,8 @@ services:
   austral.website.http.event_subscriber:
     class:        Austral\WebsiteBundle\EventSubscriber\HttpWebsiteEventSubscriber
     arguments:    [ "@service_container", "@austral.website.config", "@austral.http.domains.management", "@austral.tools.debug" ]
+    calls:
+      - [ setTwig, [ "@twig" ] ]
     tags:
       - { name: kernel.event_subscriber }
 

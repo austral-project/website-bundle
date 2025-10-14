@@ -355,7 +355,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
   {
     if($this->container->getParameter("kernel.environment") === "dev")
     {
-      return;
+      //return;
     }
     // You get the exception object from the received event
     $exception = $httpEvent->getKernelEvent()->getThrowable();
@@ -364,7 +364,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
     {
       return;
     }
-
     // Customize your response object to display the exception details
     $response = new Response();
     if ($exception instanceof HttpExceptionInterface) {
@@ -440,11 +439,11 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
             $session->getFlashBag()->clear();
           }
         }
-        $twigTemplate = $this->container->get('twig')->render($websiteHandler->getTemplateParameters()->getPath(), $twigParameters);
+        $twigTemplate = $this->twig->render($websiteHandler->getTemplateParameters()->getPath(), $twigParameters);
         $response->setContent($twigTemplate);
         $httpEvent->getKernelEvent()->setResponse($response);
       } catch(\Exception $e) {
-
+        dd($e);
       }
     }
   }
