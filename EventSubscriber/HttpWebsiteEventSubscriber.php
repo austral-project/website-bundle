@@ -355,7 +355,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
   {
     if($this->container->getParameter("kernel.environment") === "dev")
     {
-      //return;
+      return;
     }
     // You get the exception object from the received event
     $exception = $httpEvent->getKernelEvent()->getThrowable();
@@ -443,7 +443,6 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         $response->setContent($twigTemplate);
         $httpEvent->getKernelEvent()->setResponse($response);
       } catch(\Exception $e) {
-        dd($e);
       }
     }
   }
