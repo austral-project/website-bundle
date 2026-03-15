@@ -19,6 +19,7 @@ use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
 use Austral\HttpBundle\Handler\HttpHandler;
 use Austral\NotifyBundle\Mercure\Mercure;
+use Austral\WebsiteBundle\Entity\Interfaces\PageInterface;
 use Austral\WebsiteBundle\Entity\Traits\EntityTemplateTrait;
 use Austral\WebsiteBundle\Services\ConfigVariable;
 
@@ -352,8 +353,8 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
     if(!$this->templateParameters->hasParameter("robots"))
     {
       $this->templateParameters->addParameters("robots", array(
-        "index"           =>  $this->configVariable->getValueVariableByKey("site.index", false) && $this->urlParameter ? $this->urlParameter->getIsIndex() : false,
-        "follow"          =>  $this->configVariable->getValueVariableByKey("site.follow", false) && $this->urlParameter ? $this->urlParameter->getIsFollow() : false,
+        "index"           =>  $this->domainsManagement->getCurrentDomain(false)->getConfigKey("isIndex") && $this->urlParameter ? $this->urlParameter->getIsIndex() : false,
+        "follow"          =>  $this->domainsManagement->getCurrentDomain(false)->getConfigKey("isFollow") && $this->urlParameter ? $this->urlParameter->getIsFollow() : false,
         "status"          =>  $this->urlParameter ? $this->urlParameter->getStatus() : UrlParameterInterface::STATUS_DRAFT,
       ));
     }
@@ -375,8 +376,23 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
         $canonical = trim($canonical, "/");
         $canonical = $this->generateUrl("austral_website_page", array("slug" => $canonical), UrlGeneratorInterface::ABSOLUTE_URL);
       }
+
+      $titleSuffix = null;
+      if($this->urlParameter->getObject() instanceof PageInterface && $this->urlParameter->getObject()->getIsHomepage())
+      {
+        $titleSuffix = $this->domainsManagement->getCurrentDomain()->getConfigKey("seoTitleSuffixHomepage");
+      }
+      else
+      {
+        $titleSuffix = $this->domainsManagement->getCurrentDomain()->getConfigKey("seoTitleSuffixHomepage");
+      }
+      if($titleSuffix && !str_starts_with($titleSuffix, " "))
+      {
+        $titleSuffix = " " . $titleSuffix;
+      }
+      $title = $this->urlParameter && $this->urlParameter->getSeoTitle() ? $this->urlParameter->getSeoTitle() : ($page ? $page->__toString() : "");
       $this->templateParameters->addParameters("seo", array(
-        "title"           =>  $this->urlParameter && $this->urlParameter->getSeoTitle() ? $this->urlParameter->getSeoTitle() : ($page ? $page->__toString() : ""),
+        "title"           =>  $title.$titleSuffix,
         "description"     =>  $this->urlParameter && $this->urlParameter->getSeoDescription() ? $this->urlParameter->getSeoDescription() : ($page ? $page->__toString() : ""),
         "canonical"       =>  $canonical,
       ));
