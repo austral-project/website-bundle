@@ -34,6 +34,8 @@ fieldset:
   content_by_domain:                            "Contenu : %domainName%"
 
 fields:
+  pageName:
+    entitled:                                   Nom de la page
   australPictoClass:
     entitled:                                   Picto Austral
   parent:

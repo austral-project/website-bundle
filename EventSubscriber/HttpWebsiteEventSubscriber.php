@@ -177,9 +177,15 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
       }
       $this->domainsManagement->setFilterDomainId($domain->getId());
     }
+    $configVariable = $this->container->get("austral.website.config_variable");
+    $configVariable->addTextVariable("domain.name", $domain->getName());
+
 
     /** @var UrlParameterManagement $urlParameterManagement */
-    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")->setCurrentLanguage($domain->getCurrentLanguage())->initialize();
+    $urlParameterManagement = $this->container->get("austral.seo.url_parameter.management")
+      ->setCurrentLanguage($domain->getCurrentLanguage())
+      ->initialize()
+      ->hydrateObjects();
 
     /** @var HttpTemplateParametersInterface|TemplateParameters $templateParameters */
     $templateParameters = $this->container->get("austral.website.template");
@@ -232,6 +238,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
         }
       }
 
+      $urlParameter->setIsCurrent(true);
       $websiteHandler->setUrlParameter($urlParameter);
       if($currentPage = $urlParameter->getObject())
       {
