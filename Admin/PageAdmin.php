@@ -301,6 +301,7 @@ class PageAdmin extends Admin implements AdminModuleInterface
       ->end()
 
       ->addFieldset("fieldset.contentBlock")
+        ->setSortable(5)
         ->add(ContentBlockField::create("master", array(
           'restriction_container'   =>  $this->container->get('austral.content_block.config')->get("restriction_container"),
         )))
