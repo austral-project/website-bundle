@@ -21,6 +21,7 @@ use Austral\EntityFileBundle\Annotation as AustralFile;
 use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
+use Austral\EntityBundle\Annotation\AustralEntitySanitize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -73,6 +74,7 @@ abstract class ConfigValueByDomain extends Entity implements ConfigValueByDomain
   /**
    * @var string|null
    * @ORM\Column(name="content_text", type="text", nullable=true )
+   * @AustralEntitySanitize(config="html")
    */
   protected ?string $contentText = null;
 

@@ -23,6 +23,7 @@ use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateChildTrait;
 use Austral\EntityBundle\Entity\Entity;
 use Austral\EntityBundle\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
+use Austral\EntityBundle\Annotation\AustralEntitySanitize;
 
 use Austral\WebsiteBundle\Entity\Interfaces\PageTranslateInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -65,18 +66,21 @@ abstract class PageTranslate extends Entity implements PageTranslateInterface,
   /**
    * @var string|null
    * @ORM\Column(name="name", type="string", length=255, nullable=false )
+   * @AustralEntitySanitize(config="html")
    */
   protected ?string $name = null;
 
   /**
    * @var string|null
    * @ORM\Column(name="ref_h1", type="string", length=255, nullable=true)
+   * @AustralEntitySanitize(config="default")
    */
   protected ?string $refH1 = null;
 
   /**
    * @var string|null
    * @ORM\Column(name="summary", type="text", nullable=true )
+   * @AustralEntitySanitize(config="html")
    */
   protected ?string $summary = null;
   
