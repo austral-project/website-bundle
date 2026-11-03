@@ -378,13 +378,13 @@ abstract class WebsiteHandler extends HttpHandler implements WebsiteHandlerInter
       }
 
       $titleSuffix = null;
-      if($this->urlParameter->getObject() instanceof PageInterface && $this->urlParameter->getObject()->getIsHomepage())
+      if($this->urlParameter && $this->urlParameter->getObject() instanceof PageInterface && $this->urlParameter->getObject()->getIsHomepage())
       {
         $titleSuffix = $this->domainsManagement->getCurrentDomain()->getConfigKey("seoTitleSuffixHomepage");
       }
       else
       {
-        $titleSuffix = $this->domainsManagement->getCurrentDomain()->getConfigKey("seoTitleSuffixHomepage");
+        $titleSuffix = $this->domainsManagement->getCurrentDomain()->getConfigKey("seoTitleSuffix");
       }
       if($titleSuffix && !str_starts_with($titleSuffix, " "))
       {
