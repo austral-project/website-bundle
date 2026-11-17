@@ -10,10 +10,10 @@
  
 namespace Austral\WebsiteBundle\Entity\Traits;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
-use Austral\EntityBundle\Entity\Interfaces\TranslateChildInterface;
-use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\Contracts\Translate\TranslateChildInterface;
+use Austral\Contracts\Translate\TranslateMasterInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
 use Exception;
 

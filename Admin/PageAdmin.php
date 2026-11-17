@@ -24,7 +24,7 @@ use Austral\AdminBundle\Admin\AdminModuleInterface;
 use Austral\AdminBundle\Admin\Event\FormAdminEvent;
 use Austral\AdminBundle\Admin\Event\ListAdminEvent;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 
 use Austral\FormBundle\Field as Field;
 use Austral\FormBundle\Mapper\Fieldset;

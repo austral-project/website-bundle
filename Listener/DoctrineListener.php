@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\Listener;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;

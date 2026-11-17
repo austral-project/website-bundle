@@ -12,9 +12,9 @@ namespace Austral\WebsiteBundle\Entity;
 
 
 use Austral\EntityBundle\Entity\Entity;
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
-use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\Contracts\Translate\TranslateMasterInterface;
 use Austral\EntityTranslateBundle\Entity\Traits\EntityTranslateMasterTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\TrackingInterface;
 use Doctrine\Common\Collections\Collection;

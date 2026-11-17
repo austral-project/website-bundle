@@ -9,9 +9,9 @@
  */
 
 namespace Austral\WebsiteBundle\Services;
-use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\Contracts\File\FileInterface;
 use Austral\EntityFileBundle\File\Link\Generator;
-use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\Contracts\Translate\TranslateMasterInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\ToolsBundle\AustralTools;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
@@ -338,10 +338,10 @@ Class ConfigVariable
   protected function variablesExtends(array $variables): array
   {
     /*
-     * Exemple
+     * Example
         $variables[] = array(
-          "text"    =>  "Nombre d'abonné",
-          "key"   =>  "abonnes.number",
+          "text"    =>  "Number of subscribers",
+          "key"   =>  "subscribers.number",
           "value" =>  100
         );
      */

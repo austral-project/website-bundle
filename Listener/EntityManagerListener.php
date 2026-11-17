@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\Listener;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\Event\EntityManagerEvent;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\TreePageInterface;

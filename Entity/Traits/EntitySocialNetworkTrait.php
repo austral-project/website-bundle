@@ -10,7 +10,7 @@
  
 namespace Austral\WebsiteBundle\Entity\Traits;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Interfaces\SocialNetworkInterface;
 use Austral\EntityFileBundle\Annotation as AustralFile;
 

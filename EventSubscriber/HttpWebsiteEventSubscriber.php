@@ -12,7 +12,7 @@
 namespace Austral\WebsiteBundle\EventSubscriber;
 
 use Austral\ContentBlockBundle\Services\ContentBlockContainer;
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\ORM\AustralQueryBuilder;
 use Austral\EntityBundle\ORM\QueryConditionInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
@@ -78,7 +78,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    *
    * @return void
    */
-  public function onRequestInitialise(HttpEventInterface $httpEvent)
+  public function onRequestInitialise(HttpEventInterface $httpEvent): void
   {
     $currentLocal = null;
 
@@ -105,7 +105,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @return void
    * @throws NonUniqueResultException
    */
-  public function onRequest(HttpEventInterface $httpEvent)
+  public function onRequest(HttpEventInterface $httpEvent): void
   {
     /** @var AttributeBagInterface $requestAttributes */
     $requestAttributes = $httpEvent->getKernelEvent()->getRequest()->attributes;
@@ -306,7 +306,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    *
    * @return void
    */
-  public function onController(HttpEventInterface $httpEvent)
+  public function onController(HttpEventInterface $httpEvent): void
   {
 
   }
@@ -316,7 +316,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    *
    * @return void
    */
-  public function onResponse(HttpEventInterface $httpEvent)
+  public function onResponse(HttpEventInterface $httpEvent): void
   {
     if($httpEvent->getHandler() && ($urlRedirect = $httpEvent->getHandler()->getRedirectUrl()))
     {
@@ -358,7 +358,7 @@ class HttpWebsiteEventSubscriber extends HttpEventSubscriber
    * @return void
    * @throws NonUniqueResultException
    */
-  public function onException(HttpEventInterface $httpEvent)
+  public function onException(HttpEventInterface $httpEvent): void
   {
     if($this->container->getParameter("kernel.environment") === "dev")
     {

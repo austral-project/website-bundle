@@ -10,7 +10,7 @@
  
 namespace Austral\WebsiteBundle\Entity\Traits;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

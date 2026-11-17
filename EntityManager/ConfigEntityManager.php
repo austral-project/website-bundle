@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\EntityManager;
 
-use Austral\EntityBundle\Entity\Interfaces\TranslateMasterInterface;
+use Austral\Contracts\Translate\TranslateMasterInterface;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigInterface;
 use Austral\WebsiteBundle\Repository\ConfigRepository;
 

@@ -13,7 +13,7 @@ namespace Austral\WebsiteBundle\Handler;
 use App\Entity\Austral\ContentBlockBundle\Component;
 use App\Entity\Austral\ContentBlockBundle\Guideline;
 use Austral\ContentBlockBundle\Event\GuidelineEvent;
-use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\Contracts\File\FileInterface;
 use Austral\HttpBundle\Services\DomainsManagement;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\SeoBundle\Services\UrlParameterManagement;
@@ -28,7 +28,7 @@ use Austral\ContentBlockBundle\Entity\Interfaces\LibraryInterface;
 use Austral\ContentBlockBundle\Entity\Traits\EntityComponentsTrait;
 use Austral\ContentBlockBundle\Event\ContentBlockEvent;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 
 use Austral\WebsiteBundle\Handler\Interfaces\WebsiteHandlerInterface;
 use Symfony\Component\HttpFoundation\Response;

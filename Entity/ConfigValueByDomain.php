@@ -10,7 +10,7 @@
 
 namespace Austral\WebsiteBundle\Entity;
 
-use Austral\EntityBundle\Entity\Interfaces\FileInterface;
+use Austral\Contracts\File\FileInterface;
 use Austral\EntityFileBundle\Entity\Traits\EntityFileTrait;
 use Austral\HttpBundle\Entity\Traits\FilterByDomainTrait;
 use Austral\WebsiteBundle\Entity\Interfaces\ConfigTranslateInterface;
@@ -19,9 +19,9 @@ use Austral\WebsiteBundle\Entity\Interfaces\ConfigValueByDomainInterface;
 use Austral\EntityFileBundle\Annotation as AustralFile;
 
 use Austral\EntityBundle\Entity\Entity;
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Traits\EntityTimestampableTrait;
-use Austral\EntityBundle\Annotation\AustralEntitySanitize;
+use Austral\EntityBundle\Attribute\AustralEntitySanitize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -74,8 +74,8 @@ abstract class ConfigValueByDomain extends Entity implements ConfigValueByDomain
   /**
    * @var string|null
    * @ORM\Column(name="content_text", type="text", nullable=true )
-   * @AustralEntitySanitize(config="html")
    */
+  #[AustralEntitySanitize("html")]
   protected ?string $contentText = null;
 
   /**

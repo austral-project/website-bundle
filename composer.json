@@ -1,37 +1,44 @@
 {
-  "name":                                       "austral/website-bundle",
-  "type":                                       "symfony-bundle",
-  "description":                                "Austral website generate",
-  "keywords":                                   ["Austral", "Website"],
-  "license":                                    "MIT",
-  "homepage":                                   "https://austral.dev",
-  "authors": [
-    {
-      "name":                                 "Matthieu Beurel",
-      "email":                                "matthieu@austral.dev",
-      "role":                                 "Developer"
-    }
-  ],
-  "require": {
-    "php":                                    "^8.0 || ^8.1 || ^8.2",
-
-    "austral/tools-bundle":                     "^3.1",
-    "austral/http-bundle":                      "^3.1",
-    "austral/seo-bundle":                       "^3.1",
-    "austral/entity-translate-bundle":          "^3.1",
-    "austral/content-block-bundle":             "^3.1",
-    "austral/entity-file-bundle":               "^3.1",
-
-    "symfony/config":                           "^5.3 || ^5.4 || ^6.4",
-    "martin-georgiev/postgresql-for-doctrine":  "^1.2"
-  },
-  "require-dev": {
-  },
-  "config": {
-    "sort-packages":                            true
-  },
-  "autoload": {
-    "psr-4": { "Austral\\WebsiteBundle\\": "" }
-  },
-  "minimum-stability":                          "dev"
+    "name": "austral/website-bundle",
+    "type": "symfony-bundle",
+    "description": "Austral website generate",
+    "keywords": [
+        "Austral",
+        "Website"
+    ],
+    "license": "MIT",
+    "homepage": "https://austral.dev",
+    "authors": [
+        {
+            "name": "Matthieu Beurel",
+            "email": "matthieu@austral.dev",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.2 <9.0",
+        "austral/contracts": "^4.0",
+        "austral/tools-bundle": "^4.0",
+        "austral/http-bundle": "^4.0",
+        "austral/seo-bundle": "^4.0",
+        "austral/entity-translate-bundle": "^4.0",
+        "austral/content-block-bundle": "^4.0",
+        "austral/entity-file-bundle": "^4.0",
+        "symfony/config": "^7.4"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-symfony": "^2.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Austral\\WebsiteBundle\\": ""
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

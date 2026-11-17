@@ -10,7 +10,7 @@
  
 namespace Austral\WebsiteBundle\Handler\Interfaces;
 
-use Austral\EntityBundle\Entity\EntityInterface;
+use Austral\Contracts\Entity\EntityInterface;
 use Austral\EntityBundle\Entity\Interfaces\SeoInterface;
 use Austral\SeoBundle\Entity\Interfaces\UrlParameterInterface;
 use Austral\NotifyBundle\Mercure\Mercure;
